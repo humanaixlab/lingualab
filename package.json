@@ -1,0 +1,43 @@
+{
+  "name": "lingualab",
+  "version": "2.0.0-rc.1",
+  "private": true,
+  "description": "An AI workspace for exploring, analyzing, and learning from Arabic language data.",
+  "author": "Jawharah Saeed Alasmari",
+  "license": "MIT",
+  "keywords": [
+    "arabic",
+    "arabic-nlp",
+    "ai",
+    "research",
+    "education",
+    "corpus-linguistics",
+    "nextjs",
+    "codex"
+  ],
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint . --max-warnings=0",
+    "audit": "npm audit --audit-level=high",
+    "check": "npm run lint && npm run build && npm run audit"
+  },
+  "dependencies": {
+    "next": "16.2.10",
+    "openai": "^6.34.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "read-excel-file": "^9.3.1"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.1",
+    "eslint-config-next": "16.2.10"
+  },
+  "overrides": {
+    "postcss": "8.5.19"
+  }
+}
