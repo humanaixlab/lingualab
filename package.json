@@ -1,10 +1,8 @@
 {
   "name": "lingualab",
-  "version": "2.0.0-rc.1",
+  "version": "2.0.0",
   "private": true,
-  "description": "An AI workspace for exploring, analyzing, and learning from Arabic language data.",
-  "author": "Jawharah Saeed Alasmari",
-  "license": "MIT",
+  "description": "One AI workspace for everything you do with Arabic language.",
   "keywords": [
     "arabic",
     "arabic-nlp",
@@ -16,8 +14,9 @@
     "codex"
   ],
   "engines": {
-    "node": ">=20.9.0"
+    "node": "20.x"
   },
+  "packageManager": "npm@10.9.4",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
