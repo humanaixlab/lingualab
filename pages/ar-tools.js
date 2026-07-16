@@ -121,6 +121,54 @@ const sections = [
   },
 ];
 
+const recommendedPath = [
+  {
+    title: "Understand your dataset",
+    description:
+      "Use Workspace to inspect structure, language coverage, missing values, duplicates, and labels.",
+    links: [{ label: "Open Workspace", href: "/workspace" }],
+  },
+  {
+    title: "Design your study",
+    description:
+      "Use AI Research Copilot after dataset inspection, or open Research Advisor for broader research-planning guidance.",
+    links: [
+      { label: "Use Research Copilot", href: "/workspace" },
+      { label: "Research Advisor", href: "/research-advisor" },
+    ],
+  },
+  {
+    title: "Explore linguistic patterns",
+    description:
+      "Use frequency, concordance, and recurring-sequence tools to examine forms, context, and phrase-level patterns.",
+    links: [
+      { label: "Frequency", href: "/tools/frequency" },
+      { label: "Concordance", href: "/tools/concordance" },
+      { label: "N-grams", href: "/tools/ngrams" },
+    ],
+  },
+  {
+    title: "Run or prepare analysis",
+    description:
+      "Choose the analysis, code, spreadsheet, or notebook workflow that fits the evidence you need to produce.",
+    links: [
+      { label: "Analyze", href: "/tools/analyze" },
+      { label: "Code", href: "/tools/code" },
+      { label: "Excel", href: "/tools/excel" },
+      { label: "Colab", href: "/tools/colab" },
+    ],
+  },
+  {
+    title: "Review and report",
+    description:
+      "Interpret the findings cautiously, document limitations, and turn the completed analysis into a research-ready report.",
+    links: [
+      { label: "Interpret findings", href: "/tools/analyze" },
+      { label: "Research Report", href: "/research-report" },
+    ],
+  },
+];
+
 export default function ArabicToolsPage() {
   return (
     <main
@@ -243,6 +291,140 @@ export default function ArabicToolsPage() {
             workflow to move from data understanding to analysis, interpretation,
             and reporting.
           </p>
+        </section>
+
+        <section
+          aria-labelledby="recommended-research-path"
+          style={{
+            marginBottom: "28px",
+            padding: "28px",
+            border: "1px solid rgba(112, 91, 255, 0.2)",
+            borderRadius: "24px",
+            background:
+              "linear-gradient(145deg, rgba(255,255,255,0.94), rgba(242,240,255,0.94))",
+            boxShadow: "0 18px 50px rgba(45, 42, 96, 0.08)",
+          }}
+        >
+          <div style={{ maxWidth: "760px", marginBottom: "22px" }}>
+            <p
+              style={{
+                margin: "0 0 8px",
+                color: "#6258f5",
+                fontWeight: 800,
+                fontSize: "10px",
+                letterSpacing: "0.14em",
+              }}
+            >
+              GENERAL WORKFLOW GUIDANCE
+            </p>
+            <h2
+              id="recommended-research-path"
+              style={{
+                margin: 0,
+                fontSize: "clamp(25px, 3vw, 36px)",
+                letterSpacing: "-0.03em",
+              }}
+            >
+              Recommended Research Path
+            </h2>
+            <p
+              style={{
+                margin: "11px 0 0",
+                color: "#706c88",
+                fontSize: "14px",
+                lineHeight: 1.7,
+              }}
+            >
+              This sequence is general guidance for choosing tools, not personalized
+              AI advice. Adapt each step to your research question, data, and methods.
+            </p>
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))",
+              gap: "12px",
+            }}
+          >
+            {recommendedPath.map((step, index) => (
+              <article
+                key={step.title}
+                style={{
+                  minHeight: "220px",
+                  padding: "19px",
+                  display: "flex",
+                  flexDirection: "column",
+                  border: "1px solid rgba(73, 67, 137, 0.12)",
+                  borderRadius: "17px",
+                  background: "rgba(255, 255, 255, 0.92)",
+                }}
+              >
+                <span
+                  style={{
+                    width: "34px",
+                    height: "34px",
+                    display: "grid",
+                    placeItems: "center",
+                    borderRadius: "11px",
+                    color: "#ffffff",
+                    background: "linear-gradient(135deg, #705bff, #416fe9)",
+                    fontSize: "11px",
+                    fontWeight: 900,
+                  }}
+                >
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <h3
+                  style={{
+                    margin: "17px 0 8px",
+                    fontSize: "17px",
+                    lineHeight: 1.25,
+                    letterSpacing: "-0.02em",
+                  }}
+                >
+                  {step.title}
+                </h3>
+                <p
+                  style={{
+                    margin: 0,
+                    color: "#716d86",
+                    fontSize: "12px",
+                    lineHeight: 1.65,
+                  }}
+                >
+                  {step.description}
+                </p>
+                <div
+                  style={{
+                    marginTop: "auto",
+                    paddingTop: "17px",
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: "7px",
+                  }}
+                >
+                  {step.links.map((link) => (
+                    <Link
+                      key={`${step.title}-${link.label}`}
+                      href={link.href}
+                      style={{
+                        padding: "7px 9px",
+                        borderRadius: "999px",
+                        color: "#4c43ce",
+                        background: "#efedff",
+                        fontSize: "10px",
+                        fontWeight: 800,
+                        textDecoration: "none",
+                      }}
+                    >
+                      {link.label} ↗
+                    </Link>
+                  ))}
+                </div>
+              </article>
+            ))}
+          </div>
         </section>
 
         <div style={{ display: "grid", gap: "24px" }}>

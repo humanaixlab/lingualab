@@ -389,6 +389,97 @@ function buildAdvisorContext(dataset) {
   };
 }
 
+function buildPotentialOutcomes(dataset, rows, textColumn, labelColumn) {
+  if (!dataset) return [];
+
+  const labelCounts = labelColumn
+    ? rows.reduce((counts, row) => {
+        const text = String(row[textColumn] ?? "").trim();
+        const label = String(row[labelColumn] ?? "").trim();
+        if (text && label) counts[label] = (counts[label] || 0) + 1;
+        return counts;
+      }, {})
+    : {};
+  const classSizes = Object.values(labelCounts);
+  const classCount = classSizes.length;
+  const labeledRecords = classSizes.reduce((sum, count) => sum + count, 0);
+  const minimumClassSize = classSizes.length ? Math.min(...classSizes) : 0;
+  const maximumClassSize = classSizes.length ? Math.max(...classSizes) : 0;
+  const smallDataset = dataset.rows < 100;
+  const classificationFeasible = Boolean(
+    textColumn && labelColumn && classCount >= 2 && labeledRecords >= 6 && minimumClassSize >= 3
+  );
+  const balancedEnough = classCount >= 2 && maximumClassSize < minimumClassSize * 2;
+  const arabicCoverage = dataset.arabicRatio >= 0.5;
+  const dataQualityConcern = dataset.missingPercent > 0 || dataset.duplicateCount > 0;
+  const corpusRecommended = !labelColumn || /corpus|qualitative/i.test(dataset.recommendation.type);
+  const selected = [];
+
+  function add(title, reason) {
+    if (selected.length < 4 && !selected.some((item) => item.title === title)) {
+      selected.push({ title, reason });
+    }
+  }
+
+  if (dataQualityConcern) {
+    const issues = [
+      dataset.missingPercent > 0 ? `${dataset.missingPercent.toFixed(1)}% missing cells` : "",
+      dataset.duplicateCount > 0 ? `${dataset.duplicateCount} possible duplicate texts` : "",
+    ].filter(Boolean).join(" and ");
+    add("Data-quality and cleaning protocol", `The current profile identifies ${issues} that should be handled systematically.`);
+  }
+
+  if (classificationFeasible && arabicCoverage) {
+    add("Reproducible Arabic NLP baseline", `The selected columns provide ${labeledRecords} Arabic-text records across ${classCount} classes for a transparent exploratory baseline.`);
+  }
+
+  if (corpusRecommended && textColumn) {
+    add("Corpus exploration report", "A text column is available for documenting frequencies, concordance evidence, and recurring linguistic patterns.");
+  }
+
+  if (smallDataset || !classificationFeasible) {
+    add("Pilot research study", `${dataset.rows} records support an initial investigation, while conclusions should remain exploratory.`);
+  }
+
+  if (labelColumn && (minimumClassSize < 5 || !balancedEnough)) {
+    add("Annotation guideline", "The current class representation supports documenting label definitions and reviewing annotation consistency.");
+  }
+
+  if (smallDataset || (labelColumn && !classificationFeasible)) {
+    add("Follow-up dataset expansion plan", "The current sample can identify collection and annotation priorities before larger-scale validation.");
+  }
+
+  if (classificationFeasible && !smallDataset && balancedEnough && minimumClassSize >= 10) {
+    add("Comparative experiment", `The ${classCount} sufficiently represented classes support a controlled comparison between transparent analysis methods.`);
+  }
+
+  if (selected.length < 3) {
+    add("Classroom research project", "The available workflow can demonstrate research design, analysis, evaluation, and responsible interpretation.");
+  }
+
+  if (selected.length < 3 && (classificationFeasible || (textColumn && dataset.rows >= 30))) {
+    add("Conference poster or technical demonstration", "The bounded workflow could communicate a preliminary method and its limitations as a technical demonstration.");
+  }
+
+  if (selected.length < 3) {
+    add("Follow-up dataset expansion plan", "The current profile can guide the next round of data collection and validation planning.");
+  }
+
+  return selected;
+}
+
+const OUTCOME_ICONS = {
+  "Pilot research study": "📄",
+  "Reproducible Arabic NLP baseline": "📊",
+  "Follow-up dataset expansion plan": "🗂",
+  "Classroom research project": "🏫",
+  "Data-quality and cleaning protocol": "🧹",
+  "Annotation guideline": "📚",
+  "Comparative experiment": "📈",
+  "Conference poster or technical demonstration": "🎤",
+  "Corpus exploration report": "📖",
+};
+
 export default function WorkspacePage() {
   const inputRef = useRef(null);
   const [dragActive, setDragActive] = useState(false);
@@ -419,6 +510,11 @@ export default function WorkspacePage() {
     if (notes.length === 0) notes.push("The dataset is structurally ready for the recommended next step.");
     return notes;
   }, [result]);
+
+  const potentialOutcomes = useMemo(
+    () => buildPotentialOutcomes(result, datasetRows, selectedTextColumn, selectedLabelColumn),
+    [result, datasetRows, selectedTextColumn, selectedLabelColumn]
+  );
 
   function resetWorkspace() {
     setDragActive(false);
@@ -811,6 +907,21 @@ export default function WorkspacePage() {
                   <section><h4>Risks</h4><ul>{studyDesign.risks.map((item) => <li key={`${item.category}-${item.risk}`}><strong>{item.severity}: {item.risk}</strong> — {item.mitigation}</li>)}</ul></section>
                   {studyDesign.notSupported.length > 0 && <section><h4>Not supported by the current metadata</h4><ul>{studyDesign.notSupported.map((item) => <li key={item}>{item}</li>)}</ul></section>}
                   <div className={styles.nextAction}><span>Immediate Next Step</span><strong>{studyDesign.immediateNextAction.action}</strong><p>{studyDesign.immediateNextAction.reason}</p></div>
+                  <section className={styles.potentialOutcomes}>
+                    <p className={styles.outcomeEyebrow}>Deterministic Research Outcomes</p>
+                    <h4 className={styles.outcomeHeading}>What could this research become?</h4>
+                    <p className={styles.outcomeCaption}>Selected from verified dataset characteristics using deterministic rules.<br />No AI-generated outcomes.</p>
+                    <div className={styles.outcomeGrid}>
+                      {potentialOutcomes.map((outcome) => (
+                        <article key={outcome.title}>
+                          <span className={styles.outcomeIcon} aria-hidden="true">{OUTCOME_ICONS[outcome.title]}</span>
+                          <strong>{outcome.title}</strong>
+                          <p>{outcome.reason}</p>
+                        </article>
+                      ))}
+                    </div>
+                    <p className={styles.outcomeDisclaimer}>These are possible research outputs, not guaranteed results. Final suitability depends on study quality, validation, and researcher judgment.</p>
+                  </section>
                 </article>
               )}
             </div>
