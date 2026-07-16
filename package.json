@@ -1,0 +1,42 @@
+{
+  "name": "lingualab",
+  "version": "2.0.0",
+  "private": true,
+  "description": "One AI workspace for everything you do with Arabic language.",
+  "keywords": [
+    "arabic",
+    "arabic-nlp",
+    "ai",
+    "research",
+    "education",
+    "corpus-linguistics",
+    "nextjs",
+    "codex"
+  ],
+  "engines": {
+    "node": "22.x"
+  },
+  "packageManager": "pnpm@10.15.1",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint . --max-warnings=0",
+    "audit": "npm audit --audit-level=high",
+    "check": "npm run lint && npm run build && npm run audit"
+  },
+  "dependencies": {
+    "next": "16.2.10",
+    "openai": "^6.34.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "read-excel-file": "^9.3.1"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.1",
+    "eslint-config-next": "16.2.10"
+  },
+  "overrides": {
+    "postcss": "8.5.19"
+  }
+}

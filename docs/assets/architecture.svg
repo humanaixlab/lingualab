@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420" role="img" aria-labelledby="title desc">
+<title id="title">LinguaLab architecture</title><desc id="desc">Browser-based dataset workflow with optional server-side OpenAI endpoints.</desc>
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#6d50e6"/><stop offset="1" stop-color="#3679ec"/></linearGradient><filter id="s"><feDropShadow dx="0" dy="8" stdDeviation="12" flood-opacity=".12"/></filter></defs>
+<rect width="1200" height="420" rx="30" fill="#f6f8fd"/>
+<text x="60" y="60" font-family="Arial, sans-serif" font-size="30" font-weight="700" fill="#10203a">LinguaLab architecture</text>
+<text x="60" y="92" font-family="Arial, sans-serif" font-size="16" fill="#60708a">Privacy-first browser workflow with optional server-side AI assistance</text>
+<g filter="url(#s)"><rect x="60" y="145" width="210" height="150" rx="20" fill="white"/><rect x="330" y="145" width="250" height="150" rx="20" fill="white"/><rect x="640" y="145" width="220" height="150" rx="20" fill="white"/><rect x="920" y="145" width="220" height="150" rx="20" fill="white"/></g>
+<rect x="60" y="145" width="210" height="10" rx="5" fill="url(#g)"/><rect x="330" y="145" width="250" height="10" rx="5" fill="url(#g)"/><rect x="640" y="145" width="220" height="10" rx="5" fill="url(#g)"/><rect x="920" y="145" width="220" height="10" rx="5" fill="url(#g)"/>
+<g font-family="Arial, sans-serif" fill="#10203a"><text x="85" y="195" font-size="21" font-weight="700">Dataset input</text><text x="85" y="228" font-size="15" fill="#60708a">CSV · TSV · XLSX</text><text x="85" y="255" font-size="15" fill="#60708a">Parsed in browser</text>
+<text x="355" y="195" font-size="21" font-weight="700">Guided workspace</text><text x="355" y="228" font-size="15" fill="#60708a">Understand · Analyze</text><text x="355" y="255" font-size="15" fill="#60708a">Classify or explore</text>
+<text x="665" y="195" font-size="21" font-weight="700">Insights &amp; report</text><text x="665" y="228" font-size="15" fill="#60708a">Result interpretation</text><text x="665" y="255" font-size="15" fill="#60708a">Downloadable HTML</text>
+<text x="945" y="195" font-size="21" font-weight="700">Optional AI APIs</text><text x="945" y="228" font-size="15" fill="#60708a">Server-side OpenAI key</text><text x="945" y="255" font-size="15" fill="#60708a">Explicit text only</text></g>
+<g stroke="#6d50e6" stroke-width="4" fill="none" stroke-linecap="round"><path d="M280 220h38"/><path d="M590 220h38"/><path d="M870 220h38"/></g><g fill="#6d50e6"><path d="M318 220l-12-8v16z"/><path d="M628 220l-12-8v16z"/><path d="M908 220l-12-8v16z"/></g>
+<rect x="60" y="335" width="1080" height="42" rx="12" fill="#e9eefb"/><text x="600" y="362" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#44536b">Uploaded datasets stay inside the browser workspace</text>
+</svg>
