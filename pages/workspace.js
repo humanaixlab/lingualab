@@ -403,6 +403,11 @@ export default function WorkspacePage() {
   const [selectedTextColumn, setSelectedTextColumn] = useState("");
   const [selectedLabelColumn, setSelectedLabelColumn] = useState("");
   const [reportReady, setReportReady] = useState(false);
+  const [copilotOpen, setCopilotOpen] = useState(false);
+  const [researchGoal, setResearchGoal] = useState("");
+  const [copilotStatus, setCopilotStatus] = useState("idle");
+  const [copilotError, setCopilotError] = useState("");
+  const [studyDesign, setStudyDesign] = useState(null);
 
   const qualityNotes = useMemo(() => {
     if (!result) return [];
@@ -428,6 +433,11 @@ export default function WorkspacePage() {
     setSelectedTextColumn("");
     setSelectedLabelColumn("");
     setReportReady(false);
+    setCopilotOpen(false);
+    setResearchGoal("");
+    setCopilotStatus("idle");
+    setCopilotError("");
+    setStudyDesign(null);
     if (inputRef.current) inputRef.current.value = "";
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -463,6 +473,11 @@ export default function WorkspacePage() {
     setWorkflowStatus("configure");
     setWorkflowResult(null);
     setReportReady(false);
+    setCopilotOpen(false);
+    setResearchGoal("");
+    setCopilotStatus("idle");
+    setCopilotError("");
+    setStudyDesign(null);
 
     try {
       const extension = file.name.split(".").pop().toLowerCase();
@@ -518,6 +533,62 @@ export default function WorkspacePage() {
       sessionStorage.setItem("lingualab-advisor-context", JSON.stringify(buildAdvisorContext(result)));
     }
     window.location.href = "/research-advisor?from=workspace";
+  }
+
+  async function designMyStudy() {
+    if (!result || copilotStatus === "loading") return;
+
+    setCopilotStatus("loading");
+    setCopilotError("");
+    setStudyDesign(null);
+
+    const selectedLabelDistribution = selectedLabelColumn
+      ? Object.entries(datasetRows.reduce((counts, row) => {
+          const label = String(row[selectedLabelColumn] ?? "").trim();
+          if (label) counts[label] = (counts[label] || 0) + 1;
+          return counts;
+        }, {})).sort((a, b) => b[1] - a[1])
+      : [];
+
+    const payload = {
+      rowCount: result.rows,
+      columnCount: result.columns,
+      columnNames: result.headers.slice(0, 20),
+      selectedTextColumn: selectedTextColumn || null,
+      selectedLabelColumn: selectedLabelColumn || null,
+      arabicPercentage: Number((result.arabicRatio * 100).toFixed(1)),
+      missingPercentage: Number(result.missingPercent.toFixed(1)),
+      duplicateCount: result.duplicateCount,
+      classCount: selectedLabelDistribution.length,
+      labelDistribution: selectedLabelDistribution.slice(0, 10).map(([label, count]) => ({ label, count })),
+      recommendedWorkflow: result.recommendation.type,
+      researchGoal: researchGoal.trim(),
+    };
+
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 65000);
+
+    try {
+      const response = await fetch("/api/research-copilot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      });
+      const data = await response.json();
+
+      if (!response.ok) throw new Error(data.error || "AI Research Copilot could not design this study.");
+
+      setStudyDesign(data.design);
+      setCopilotStatus("success");
+    } catch (requestError) {
+      setCopilotError(requestError.name === "AbortError"
+        ? "The study design request timed out. Please try again."
+        : requestError.message || "AI Research Copilot could not design this study.");
+      setCopilotStatus("error");
+    } finally {
+      window.clearTimeout(timeoutId);
+    }
   }
 
   function runWorkflow() {
@@ -687,12 +758,64 @@ export default function WorkspacePage() {
                   <div className={styles.recommendationActions}>
                     <button type="button" onClick={openWorkflow}>{result.labelColumn ? "Build guided workflow" : "Explore this corpus"} →</button>
                     <button type="button" className={styles.advisorButton} onClick={openResearchAdvisor}>Ask Research Advisor ✦</button>
+                    <button type="button" className={styles.copilotButton} onClick={() => setCopilotOpen(true)}>Design My Study ✦</button>
                   </div>
                 </div>
               </div>
             )}
           </aside>
         </section>
+
+        {result && copilotOpen && (
+          <section className={styles.copilotPanel} aria-labelledby="research-copilot-title">
+            <div className={styles.copilotHeader}>
+              <div>
+                <p className={styles.eyebrow}>AI Research Copilot</p>
+                <h2 id="research-copilot-title">Design My Study</h2>
+                <p>Turn the dataset profile into a focused, defensible research blueprint.</p>
+              </div>
+              <button type="button" onClick={() => setCopilotOpen(false)} aria-label="Close AI Research Copilot">×</button>
+            </div>
+
+            <div className={styles.copilotInput}>
+              <label htmlFor="copilot-research-goal">Research goal <span>Optional</span></label>
+              <textarea
+                id="copilot-research-goal"
+                value={researchGoal}
+                maxLength={1000}
+                onChange={(event) => setResearchGoal(event.target.value)}
+                placeholder="For example: Compare sentiment patterns across product categories."
+              />
+              <p className={styles.privacyNotice}><span aria-hidden="true">ⓘ</span><span><strong>Privacy first</strong>LinguaLab sends only dataset structure and quality statistics. Your file, rows, previews, and text remain in your browser.</span></p>
+              <button type="button" className={styles.generateButton} onClick={designMyStudy} disabled={copilotStatus === "loading"}>
+                {copilotStatus === "loading" ? "Designing your study…" : "✨ Generate AI Study Design"}
+              </button>
+            </div>
+
+            <div className={styles.copilotOutput} aria-live="polite">
+              {copilotStatus === "idle" && <p className={styles.copilotEmpty}>GPT-5.6 generates a defensible research blueprint using metadata only — never your raw dataset.</p>}
+              {copilotStatus === "loading" && <p className={styles.copilotEmpty}>GPT-5.6 is evaluating feasibility, methodology, validation, and research risks…</p>}
+              {copilotStatus === "error" && <div className={styles.copilotError} role="alert"><strong>Study design unavailable</strong><p>{copilotError}</p></div>}
+              {copilotStatus === "success" && studyDesign && (
+                <article className={styles.studyDesign} dir="ltr">
+                  <div className={styles.evidenceBanner}><strong>Based on metadata only:</strong><span>• {result.rows.toLocaleString()} records</span><span>• {studyDesign.studyDesign.type === "supervised_classification" ? `${new Set(datasetRows.map((row) => String(row[selectedLabelColumn] ?? "").trim()).filter(Boolean)).size} classes` : "No label classes"}</span><span>• {Math.round(result.arabicRatio * 100)}% Arabic coverage</span><span>• {result.missingPercent.toFixed(1)}% missing</span></div>
+                  <div className={styles.studyTitle}><span>AI Research Blueprint</span><h3>{studyDesign.studyTitle}</h3><p>{studyDesign.feasibility.summary}</p></div>
+                  <section><h4>Research question</h4><strong>{studyDesign.researchQuestion.primary}</strong><p>{studyDesign.researchQuestion.rationale}</p></section>
+                  <div className={styles.studyGrid}>
+                    <section><h4>Study design</h4><strong>{studyDesign.studyDesign.type.replaceAll("_", " ")}</strong><p>{studyDesign.studyDesign.description}</p></section>
+                    <section><h4>Baseline</h4><strong>{studyDesign.baseline.method}</strong><p>{studyDesign.baseline.why}</p></section>
+                    <section><h4>Evaluation</h4><strong>{studyDesign.evaluationPlan.primaryMetrics.join(" · ")}</strong><p>{studyDesign.evaluationPlan.validationMethod}</p></section>
+                    <section><h4>Preprocessing</h4><ul>{studyDesign.preprocessingPlan.map((item) => <li key={item.step}><strong>{item.step}</strong> — {item.reason}</li>)}</ul></section>
+                  </div>
+                  <section><h4>Experiment steps</h4><ol>{studyDesign.experimentSteps.map((item) => <li key={item.order}><strong>{item.title}</strong><span>{item.action}</span></li>)}</ol></section>
+                  <section><h4>Risks</h4><ul>{studyDesign.risks.map((item) => <li key={`${item.category}-${item.risk}`}><strong>{item.severity}: {item.risk}</strong> — {item.mitigation}</li>)}</ul></section>
+                  {studyDesign.notSupported.length > 0 && <section><h4>Not supported by the current metadata</h4><ul>{studyDesign.notSupported.map((item) => <li key={item}>{item}</li>)}</ul></section>}
+                  <div className={styles.nextAction}><span>Immediate Next Step</span><strong>{studyDesign.immediateNextAction.action}</strong><p>{studyDesign.immediateNextAction.reason}</p></div>
+                </article>
+              )}
+            </div>
+          </section>
+        )}
 
         {result && workflowOpen && (
           <section className={styles.workflowSection} id="guided-workflow">
@@ -760,4 +883,3 @@ export default function WorkspacePage() {
     </>
   );
 }
-
