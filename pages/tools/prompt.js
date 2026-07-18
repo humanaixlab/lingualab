@@ -2,231 +2,333 @@ import { useState } from "react";
 import Layout from "../../components/Layout";
 
 export default function PromptTool() {
-  const [taskType, setTaskType] = useState("تحليل نص");
+  const [taskType, setTaskType] = useState("Text analysis");
   const [topic, setTopic] = useState("");
   const [audience, setAudience] = useState("");
-  const [style, setStyle] = useState("أكاديمي");
+  const [style, setStyle] = useState("Academic");
   const [generatedPrompt, setGeneratedPrompt] = useState("");
+  const [copied, setCopied] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const generatePrompt = () => {
-    const prompt = `أنت مساعد ذكي متخصص في ${taskType}. 
-الموضوع هو: ${topic || "لم يتم تحديد الموضوع بعد"}.
-الفئة المستهدفة: ${audience || "لم يتم تحديد الفئة بعد"}.
-نمط الكتابة المطلوب: ${style}.
-أعطني مخرجات واضحة ومنظمة ومناسبة للمهمة، مع مراعاة الدقة والوضوح وإمكانية التطبيق العملي.`;
+  const generatePrompt = async () => {
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 65000);
 
-    setGeneratedPrompt(prompt);
+    setLoading(true);
+    setError("");
+    setGeneratedPrompt("");
+    setCopied(false);
+
+    try {
+      const response = await fetch("/api/prompt-ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ taskType, topic, audience, style }),
+        signal: controller.signal,
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.error || "Prompt generation failed.");
+      }
+
+      if (!data?.result) {
+        throw new Error("GPT-5.6 did not return a usable prompt.");
+      }
+
+      setGeneratedPrompt(data.result);
+    } catch (requestError) {
+      setError(
+        requestError?.name === "AbortError"
+          ? "Prompt generation timed out. Please try again."
+          : requestError?.message || "Prompt generation failed. Please try again."
+      );
+    } finally {
+      window.clearTimeout(timeout);
+      setLoading(false);
+    }
   };
 
   const clearAll = () => {
-    setTaskType("تحليل نص");
+    setTaskType("Text analysis");
     setTopic("");
     setAudience("");
-    setStyle("أكاديمي");
+    setStyle("Academic");
     setGeneratedPrompt("");
+    setCopied(false);
+    setError("");
   };
 
   const copyPrompt = async () => {
     if (!generatedPrompt) return;
-    await navigator.clipboard.writeText(generatedPrompt);
-    alert("تم نسخ الأمر.");
+
+    try {
+      await navigator.clipboard.writeText(generatedPrompt);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch (error) {
+      console.error("Failed to copy prompt:", error);
+    }
   };
 
   return (
-    <Layout title="أداة توليد الأوامر">
-      <p style={{ color: "#4b5563", lineHeight: "1.8", marginBottom: "20px" }}>
-        تساعدك هذه الأداة على إنشاء أوامر جاهزة ومنظمة بحسب نوع المهمة
-        والموضوع والفئة المستهدفة.
-      </p>
+    <Layout title="Prompt Builder">
+      <div style={{ direction: "ltr" }}>
+        <p style={styles.intro}>
+          Build a clear, structured prompt based on your task, topic, target
+          audience, and preferred writing style.
+        </p>
 
-      <div
-        style={{
-          backgroundColor: "#ffffff",
-          borderRadius: "18px",
-          border: "1px solid #e5e7eb",
-          boxShadow: "0 8px 24px rgba(0,0,0,0.05)",
-          padding: "22px",
-          marginBottom: "22px",
-        }}
-      >
-        <div style={{ marginBottom: "16px" }}>
-          <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold" }}>
-            نوع المهمة
-          </label>
-          <select
-            value={taskType}
-            onChange={(e) => setTaskType(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "12px",
-              borderRadius: "12px",
-              border: "1px solid #d1d5db",
-              backgroundColor: "#f9fafb",
-            }}
-          >
-            <option>تحليل نص</option>
-            <option>تلخيص</option>
-            <option>شرح مبسط</option>
-            <option>كتابة أكاديمية</option>
-            <option>تصنيف بيانات</option>
-            <option>إنشاء نشاط تعليمي</option>
-          </select>
-        </div>
-
-        <div style={{ marginBottom: "16px" }}>
-          <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold" }}>
-            الموضوع
-          </label>
-          <input
-            type="text"
-            value={topic}
-            onChange={(e) => setTopic(e.target.value)}
-            placeholder="مثال: تحليل المشاعر في النصوص العربية"
-            style={{
-              width: "100%",
-              padding: "12px",
-              borderRadius: "12px",
-              border: "1px solid #d1d5db",
-              backgroundColor: "#f9fafb",
-              boxSizing: "border-box",
-            }}
-          />
-        </div>
-
-        <div style={{ marginBottom: "16px" }}>
-          <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold" }}>
-            الفئة المستهدفة
-          </label>
-          <input
-            type="text"
-            value={audience}
-            onChange={(e) => setAudience(e.target.value)}
-            placeholder="مثال: طالبات المستوى السادس"
-            style={{
-              width: "100%",
-              padding: "12px",
-              borderRadius: "12px",
-              border: "1px solid #d1d5db",
-              backgroundColor: "#f9fafb",
-              boxSizing: "border-box",
-            }}
-          />
-        </div>
-
-        <div style={{ marginBottom: "16px" }}>
-          <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold" }}>
-            نمط الكتابة
-          </label>
-          <select
-            value={style}
-            onChange={(e) => setStyle(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "12px",
-              borderRadius: "12px",
-              border: "1px solid #d1d5db",
-              backgroundColor: "#f9fafb",
-            }}
-          >
-            <option>أكاديمي</option>
-            <option>مبسط</option>
-            <option>رسمي</option>
-            <option>إبداعي</option>
-          </select>
-        </div>
-
-        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-          <button
-            onClick={generatePrompt}
-            style={{
-              padding: "10px 16px",
-              borderRadius: "12px",
-              border: "none",
-              backgroundColor: "#ec4899",
-              color: "#fff",
-              cursor: "pointer",
-              fontWeight: "bold",
-            }}
-          >
-            توليد الأمر
-          </button>
-
-          <button
-            onClick={clearAll}
-            style={{
-              padding: "10px 16px",
-              borderRadius: "12px",
-              border: "none",
-              backgroundColor: "#ef4444",
-              color: "#fff",
-              cursor: "pointer",
-              fontWeight: "bold",
-            }}
-          >
-            مسح
-          </button>
-        </div>
-      </div>
-
-      {generatedPrompt && (
-        <div
-          style={{
-            backgroundColor: "#ffffff",
-            borderRadius: "18px",
-            border: "1px solid #e5e7eb",
-            boxShadow: "0 8px 24px rgba(0,0,0,0.05)",
-            padding: "22px",
-          }}
-        >
-          <h3 style={{ marginTop: 0, color: "#111827" }}> <h3>الأمر الناتج</h3></h3>
-
-          <div
-            style={{
-              backgroundColor: "#f8fafc",
-              border: "1px solid #e5e7eb",
-              borderRadius: "14px",
-              padding: "16px",
-              whiteSpace: "pre-wrap",
-              lineHeight: "1.9",
-              color: "#374151",
-              marginBottom: "14px",
-            }}
-          >
-            {generatedPrompt}
+        <div style={styles.formCard}>
+          <div style={styles.field}>
+            <label style={styles.label}>Task type</label>
+            <select
+              value={taskType}
+              onChange={(event) => setTaskType(event.target.value)}
+              style={styles.control}
+            >
+              <option>Text analysis</option>
+              <option>Summarization</option>
+              <option>Simplified explanation</option>
+              <option>Academic writing</option>
+              <option>Data classification</option>
+              <option>Learning activity design</option>
+            </select>
           </div>
 
-          <button
-            onClick={copyPrompt}
-            style={{
-              padding: "10px 16px",
-              borderRadius: "12px",
-              border: "none",
-              backgroundColor: "#3b82f6",
-              color: "#fff",
-              cursor: "pointer",
-              fontWeight: "bold",
-            }}
-          >
-            نسخ الأمر
-          </button>
-        </div>
-      )}
+          <div style={styles.field}>
+            <label style={styles.label}>Topic</label>
+            <input
+              type="text"
+              value={topic}
+              onChange={(event) => setTopic(event.target.value)}
+              placeholder="Example: Sentiment analysis in Arabic reviews"
+              style={styles.control}
+            />
+          </div>
 
-      <div
-        style={{
-          marginTop: "28px",
-          backgroundColor: "#f8fafc",
-          border: "1px solid #e5e7eb",
-          borderRadius: "14px",
-          padding: "18px",
-        }}
-      >
-        <h3 style={{ marginBottom: "10px" }}>كيف تستفيدين من الأداة؟</h3>
-        <p style={{ color: "#4b5563", lineHeight: "1.8", margin: 0 }}>
-          استخدمي هذه الصفحة لبناء برومبتات جاهزة للشرح، التحليل، التلخيص،
-          والأنشطة التعليمية، ثم انسخي النص واستخدميه في أدوات الذكاء الاصطناعي.
-        </p>
+          <div style={styles.field}>
+            <label style={styles.label}>Target audience</label>
+            <input
+              type="text"
+              value={audience}
+              onChange={(event) => setAudience(event.target.value)}
+              placeholder="Example: Undergraduate researchers"
+              style={styles.control}
+            />
+          </div>
+
+          <div style={styles.field}>
+            <label style={styles.label}>Writing style</label>
+            <select
+              value={style}
+              onChange={(event) => setStyle(event.target.value)}
+              style={styles.control}
+            >
+              <option>Academic</option>
+              <option>Simple</option>
+              <option>Formal</option>
+              <option>Creative</option>
+            </select>
+          </div>
+
+          <div style={styles.actions}>
+            {error && (
+              <p role="alert" style={styles.error}>
+                {error}
+              </p>
+            )}
+            <button
+              type="button"
+              onClick={generatePrompt}
+              style={{
+                ...styles.primaryButton,
+                opacity: loading ? 0.7 : 1,
+                cursor: loading ? "not-allowed" : "pointer",
+              }}
+              disabled={loading}
+            >
+              {loading ? "Generating with GPT-5.6..." : "Generate prompt with GPT-5.6"}
+            </button>
+
+            <button
+              type="button"
+              onClick={clearAll}
+              style={styles.secondaryButton}
+              disabled={loading}
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+
+        {generatedPrompt && (
+          <div style={styles.outputCard}>
+            <div style={styles.outputHeader}>
+              <div>
+                <p style={styles.miniLabel}>GENERATED OUTPUT</p>
+                <h3 style={styles.outputTitle}>Your prompt</h3>
+              </div>
+
+              <button
+                type="button"
+                onClick={copyPrompt}
+                style={styles.copyButton}
+              >
+                {copied ? "Copied" : "Copy prompt"}
+              </button>
+            </div>
+
+            <div style={styles.promptBox}>{generatedPrompt}</div>
+          </div>
+        )}
+
+        <div style={styles.guideCard}>
+          <p style={styles.miniLabel}>HOW TO USE THIS TOOL</p>
+          <h3 style={styles.guideTitle}>Create a stronger starting prompt.</h3>
+          <p style={styles.guideText}>
+            Choose a task, describe the topic and audience, then generate a
+            reusable prompt for analysis, explanation, summarization, academic
+            writing, or learning activities.
+          </p>
+        </div>
       </div>
     </Layout>
   );
 }
+
+const styles = {
+  intro: {
+    color: "#667085",
+    lineHeight: "1.8",
+    marginBottom: "24px",
+    maxWidth: "760px",
+  },
+  formCard: {
+    backgroundColor: "#ffffff",
+    borderRadius: "22px",
+    border: "1px solid #e4e7ec",
+    boxShadow: "0 12px 34px rgba(15, 23, 42, 0.06)",
+    padding: "26px",
+    marginBottom: "24px",
+  },
+  field: {
+    marginBottom: "18px",
+  },
+  label: {
+    display: "block",
+    marginBottom: "8px",
+    fontWeight: "700",
+    color: "#1f2937",
+    fontSize: "14px",
+  },
+  control: {
+    width: "100%",
+    padding: "13px 14px",
+    borderRadius: "12px",
+    border: "1px solid #d0d5dd",
+    backgroundColor: "#f9fafb",
+    color: "#111827",
+    boxSizing: "border-box",
+    fontSize: "14px",
+    outline: "none",
+  },
+  actions: {
+    display: "flex",
+    gap: "10px",
+    flexWrap: "wrap",
+    marginTop: "6px",
+  },
+  error: {
+    flexBasis: "100%",
+    margin: "0 0 4px",
+    color: "#b42318",
+    lineHeight: "1.6",
+    fontSize: "14px",
+  },
+  primaryButton: {
+    padding: "11px 17px",
+    borderRadius: "12px",
+    border: "none",
+    backgroundColor: "#111827",
+    color: "#ffffff",
+    cursor: "pointer",
+    fontWeight: "800",
+  },
+  secondaryButton: {
+    padding: "11px 17px",
+    borderRadius: "12px",
+    border: "1px solid #d0d5dd",
+    backgroundColor: "#ffffff",
+    color: "#344054",
+    cursor: "pointer",
+    fontWeight: "700",
+  },
+  outputCard: {
+    backgroundColor: "#ffffff",
+    borderRadius: "22px",
+    border: "1px solid #e4e7ec",
+    boxShadow: "0 12px 34px rgba(15, 23, 42, 0.06)",
+    padding: "26px",
+    marginBottom: "24px",
+  },
+  outputHeader: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "18px",
+    flexWrap: "wrap",
+    marginBottom: "18px",
+  },
+  miniLabel: {
+    margin: "0 0 7px",
+    color: "#6366f1",
+    fontSize: "11px",
+    letterSpacing: "0.1em",
+    fontWeight: "800",
+  },
+  outputTitle: {
+    margin: 0,
+    color: "#111827",
+    fontSize: "24px",
+  },
+  promptBox: {
+    backgroundColor: "#f8fafc",
+    border: "1px solid #e4e7ec",
+    borderRadius: "14px",
+    padding: "18px",
+    whiteSpace: "pre-wrap",
+    lineHeight: "1.8",
+    color: "#344054",
+    fontSize: "14px",
+  },
+  copyButton: {
+    padding: "10px 15px",
+    borderRadius: "12px",
+    border: "none",
+    backgroundColor: "#4f46e5",
+    color: "#ffffff",
+    cursor: "pointer",
+    fontWeight: "800",
+  },
+  guideCard: {
+    marginTop: "26px",
+    background:
+      "linear-gradient(135deg, rgba(238,242,255,1) 0%, rgba(250,245,255,1) 100%)",
+    border: "1px solid #dddff7",
+    borderRadius: "20px",
+    padding: "22px",
+  },
+  guideTitle: {
+    margin: "0 0 10px",
+    color: "#111827",
+    fontSize: "21px",
+  },
+  guideText: {
+    color: "#667085",
+    lineHeight: "1.8",
+    margin: 0,
+  },
+};
+

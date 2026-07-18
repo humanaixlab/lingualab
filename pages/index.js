@@ -5,34 +5,38 @@ import styles from "../styles/Home.module.css";
 const goals = [
   {
     label: "Build",
-    title: "Create intelligent workflows",
+    title: "Build research-ready code",
     description:
-      "Turn an Arabic-language question into a guided analysis workflow without starting from a blank notebook.",
+      "Generate practical code for Arabic NLP, data analysis, and research tasks with explanations and setup guidance.",
     href: "/tools/code",
+    linkText: "Open AI Coding Assistant",
     icon: "01",
   },
   {
     label: "Analyze",
-    title: "Understand Arabic text",
+    title: "Explore Arabic research tools",
     description:
-      "Explore patterns, meaning, structure, frequency, context, and classification in one connected experience.",
+      "Access connected tools for frequency, concordance, n-grams, classification, and other Arabic text analysis tasks.",
     href: "/ar-tools",
+    linkText: "Open Research Hub",
     icon: "02",
   },
   {
     label: "Learn",
     title: "Learn by doing",
     description:
-      "Move from concepts to practical experiments with guided tools made for learners and researchers.",
+      "Move from concepts to practical experiments through a guided learning dashboard designed for students.",
     href: "/student-dashboard",
+    linkText: "Open Learning Dashboard",
     icon: "03",
   },
   {
     label: "Discover",
-    title: "Turn data into insight",
+    title: "Plan your analysis",
     description:
-      "Reveal useful findings, explain results clearly, and identify the strongest next step for your project.",
+      "Analyze Arabic text, interpret key results, and identify a clear next step for your research project.",
     href: "/tools/analyze",
+    linkText: "Open AI Analysis Planner",
     icon: "04",
   },
 ];
@@ -213,7 +217,7 @@ export default function HomePage() {
                 <h3>{goal.title}</h3>
                 <p>{goal.description}</p>
                 <span className={styles.cardLink}>
-                  Open workspace <ArrowIcon />
+                  {goal.linkText} <ArrowIcon />
                 </span>
               </Link>
             ))}
@@ -317,3 +321,4 @@ export default function HomePage() {
     </>
   );
 }
+

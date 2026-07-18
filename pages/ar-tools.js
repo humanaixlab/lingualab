@@ -263,7 +263,7 @@ export default function ArabicToolsPage() {
               letterSpacing: "0.16em",
             }}
           >
-            RESEARCH TOOLS
+            Research Hub
           </p>
 
           <h1
@@ -275,7 +275,7 @@ export default function ArabicToolsPage() {
               letterSpacing: "-0.04em",
             }}
           >
-            Choose the right tool for your research goal.
+            Choose the next step in your research workflow.
           </h1>
 
           <p
@@ -287,9 +287,8 @@ export default function ArabicToolsPage() {
               lineHeight: 1.8,
             }}
           >
-            Use each tool independently, or combine them inside the LinguaLab
-            workflow to move from data understanding to analysis, interpretation,
-            and reporting.
+            Navigate your research journey—from understanding your data to AI guidance,
+            linguistic analysis, interpretation, and publication-ready reporting.
           </p>
         </section>
 
@@ -335,8 +334,8 @@ export default function ArabicToolsPage() {
                 lineHeight: 1.7,
               }}
             >
-              This sequence is general guidance for choosing tools, not personalized
-              AI advice. Adapt each step to your research question, data, and methods.
+              This workflow illustrates a typical research journey. Choose the steps
+              that best match your research question, dataset, and methodological needs.
             </p>
           </div>
 
@@ -615,3 +614,4 @@ export default function ArabicToolsPage() {
     </main>
   );
 }
+
