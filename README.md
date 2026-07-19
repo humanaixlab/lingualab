@@ -1,12 +1,13 @@
 # LinguaLab
-
+🌐 Live Demo: https://lingualab-teal.vercel.app
 **Build. Analyze. Learn. Discover.**
+
 
 LinguaLab is an AI workspace for working with Arabic-language data. It turns a fragmented process—spreadsheets, notebooks, scripts, separate visualizations, and chat tools—into one guided path from dataset upload to interpretable results and a research-ready report.
 
 ![LinguaLab product preview](docs/assets/product-preview.png)
 
-> **Release status:** `2.0.0-rc.1` — production-ready release candidate awaiting public Vercel deployment and final browser QA.
+> **Release status:** `2.0.0` — Stable Build Week submission deployed to Vercel with production-ready AI features and public demonstration.
 
 ## Why LinguaLab
 
@@ -30,6 +31,17 @@ Upload → Understand → Choose a goal → Analyze → Interpret → Report
 - Download a self-contained HTML research report that can be printed to PDF.
 - Use optional server-side OpenAI endpoints for text and code assistance.
 
+  ## AI capabilities
+
+LinguaLab integrates GPT-5.6 through secure server-side OpenAI endpoints to support research workflows without exposing API keys.
+
+Current AI features include:
+
+- AI Research Copilot for study design and methodology suggestions.
+- AI Research Advisor for research planning and question refinement.
+- AI Code Assistant for programming support.
+- AI Prompt Builder for creating reusable research prompts.
+
 ## Privacy-first workspace
 
 The guided dataset workflow runs in the browser. Uploaded datasets are parsed and analyzed locally and are not sent to LinguaLab's application server.
@@ -46,10 +58,11 @@ Read the detailed architecture notes in [`docs/ARCHITECTURE.md`](docs/ARCHITECTU
 
 - Next.js 16 Pages Router
 - React 19
+- OpenAI Responses API powered by GPT-5.6
 - OpenAI JavaScript SDK
-- `read-excel-file` for modern XLSX parsing
+- read-excel-file for modern XLSX parsing
 - Browser-side JavaScript for dataset understanding, baseline analysis, insights, and report generation
-
+  
 ## Quick start
 
 ### Requirements
@@ -81,6 +94,7 @@ npm run dev
 ```
 
 Open `http://localhost:3000`.
+The production deployment is available on Vercel for public evaluation.
 
 ### Production verification
 
@@ -137,13 +151,12 @@ This reflects an iterative build process: requirements were explained, implement
 
 ## Roadmap
 
-### Before competition submission
+### Next planned improvements
 
-- Deploy the release candidate to Vercel.
-- Test the public URL on desktop and mobile.
-- Capture real screenshots from the deployed product.
-- Add repository and live-demo URLs to this README.
-- Record the 60–90 second demo story.
+- Add experiment persistence and comparison.
+- Expand Arabic preprocessing and evaluation options.
+- Improve accessibility and bilingual support.
+- Introduce reusable research workspaces.
 
 ### After the competition
 
@@ -178,5 +191,5 @@ Released under the [MIT License](LICENSE).
 
 ## Creator
 
-**Dr. Jawharah Saeed Alasmari**  
-Product vision, Arabic linguistics and computational-linguistics domain direction, iterative design, testing, and AI-assisted development.
+** Jawharah Alasmari**  
+Product vision, Arabic linguistics and computational-linguistics direction, UX design, evaluation methodology, testing, and AI-assisted product development using GPT-5.6 and Codex.
