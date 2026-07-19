@@ -1,7 +1,7 @@
 # LinguaLab
-🌐 Live Demo: https://lingualab-teal.vercel.app
 **Build. Analyze. Learn. Discover.**
-
+🌐 Live Demo: https://lingualab-teal.vercel.app
+An AI-powered research workspace created for OpenAI Build Week.
 
 LinguaLab is an AI workspace for working with Arabic-language data. It turns a fragmented process—spreadsheets, notebooks, scripts, separate visualizations, and chat tools—into one guided path from dataset upload to interpretable results and a research-ready report.
 
@@ -147,8 +147,7 @@ This reflects an iterative build process: requirements were explained, implement
 - The built-in classifier is an educational baseline, not a claim of state-of-the-art modeling.
 - Final model quality depends on dataset size, labels, balance, and language variation.
 - The downloaded report supports research exploration but does not replace scholarly validation.
-- Public-deployment browser and mobile QA remains part of the Vercel milestone.
-
+- Browser and mobile support will continue to be refined in future releases.
 ## Roadmap
 
 ### Next planned improvements
@@ -158,16 +157,9 @@ This reflects an iterative build process: requirements were explained, implement
 - Improve accessibility and bilingual support.
 - Introduce reusable research workspaces.
 
-### After the competition
-
-- Add experiment persistence and comparison.
-- Add stronger Arabic preprocessing and configurable evaluation.
-- Expand accessibility and bilingual interface support.
-- Introduce reusable research-project workspaces.
-
 ## Quality and security
 
-The release candidate currently passes:
+The current release passes:
 
 - ESLint with zero errors and warnings.
 - Next.js production build.
