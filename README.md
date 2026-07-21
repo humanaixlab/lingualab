@@ -3,7 +3,7 @@
 🌐 Live Demo: https://lingualab-teal.vercel.app
 An AI-powered research workspace created for OpenAI Build Week.
 
-LinguaLab is an AI workspace for working with Arabic-language data. It turns a fragmented process—spreadsheets, notebooks, scripts, separate visualizations, and chat tools—into one guided path from dataset upload to interpretable results and a research-ready report.
+LinguaLab is an AI-powered research platform for Arabic computational linguistics. It combines dataset understanding, integrated corpus analysis tools, GPT-5.6-powered research assistance, and research reporting into a single guided workflow. It turns a fragmented process—spreadsheets, notebooks, scripts, separate visualizations, and chat tools—into one guided path from dataset upload to interpretable results and a research-ready report.
 
 ![LinguaLab product preview](docs/assets/product-preview.png)
 
@@ -11,7 +11,7 @@ LinguaLab is an AI workspace for working with Arabic-language data. It turns a f
 
 ## Why LinguaLab
 
-Arabic researchers, learners, and educators often need several disconnected tools to understand a single dataset. LinguaLab starts with the user's goal rather than asking them to choose an NLP technique.
+LinguaLab combines integrated corpus analysis tools with AI-powered research assistance, helping researchers move from dataset exploration to research planning, interpretation, and research-ready reports within a single workflow
 
 The core competition workflow is:
 
@@ -20,6 +20,7 @@ Upload → Understand → Choose a goal → Analyze → Interpret → Report
 ```
 
 ## What works today
+Integrated corpus analysis tools for exploring Arabic-language datasets and supporting research-oriented analysis:
 
 - Upload and parse **CSV**, **TSV**, and modern **XLSX** files.
 - Detect likely text and label columns.
