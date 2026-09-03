@@ -1,14 +1,25 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import Layout from "../../components/Layout";
+import { createToolHandoff, readToolHandoff, codeTask } from "../../lib/tool-handoff";
 
 export default function CodeTool() {
   const [language, setLanguage] = useState("Python");
   const [task, setTask] = useState("");
   const [level, setLevel] = useState("Beginner");
   const [generatedCode, setGeneratedCode] = useState("");
+  const [generatedLanguage, setGeneratedLanguage] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
+  const router = useRouter();
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      const handoff = readToolHandoff("code", window.location.search);
+      if (handoff) setTask(codeTask(handoff));
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [router.asPath]);
 
   const generateCode = async () => {
     const cleanTask = task.trim();
@@ -49,6 +60,7 @@ export default function CodeTool() {
       }
 
       setGeneratedCode(data.result);
+      setGeneratedLanguage(language);
     } catch (requestError) {
       setError(
         requestError?.name === "AbortError"
@@ -187,6 +199,11 @@ export default function CodeTool() {
               </button>
             </div>
             <pre style={styles.output}>{generatedCode}</pre>
+            <button type="button" style={styles.secondaryButton} onClick={() => {
+              try {
+                window.location.href = createToolHandoff("code", "colab", { response: generatedCode, language: generatedLanguage });
+              } catch (transferError) { setError(transferError.message); }
+            }}>Continue to Google Colab →</button>
           </div>
         )}
       </div>

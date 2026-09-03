@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { useRef, useState } from "react";
 import Layout from "../../components/Layout";
+import { createToolHandoff } from "../../lib/tool-handoff";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const PREVIEW_ROW_LIMIT = 15;
@@ -83,8 +84,10 @@ export default function ExcelTool() {
   const [sheetSummary, setSheetSummary] = useState(null);
   const [status, setStatus] = useState("empty");
   const [error, setError] = useState("");
+  const [handoffError, setHandoffError] = useState("");
 
   const resetTool = () => {
+    setHandoffError("");
     workbookRef.current = null;
     parserRef.current = null;
     setFile(null);
@@ -99,6 +102,7 @@ export default function ExcelTool() {
 
   const parseFile = async (uploadedFile) => {
     if (!uploadedFile) return;
+    setHandoffError("");
 
     const extension = getExtension(uploadedFile.name);
     if (!SUPPORTED_EXTENSIONS.has(extension)) {
@@ -161,6 +165,7 @@ export default function ExcelTool() {
   };
 
   const handleSheetChange = (event) => {
+    setHandoffError("");
     const nextSheet = event.target.value;
     setSelectedSheet(nextSheet);
     setSheetSummary(summarizeSheet(workbookRef.current, nextSheet, parserRef.current));
@@ -297,6 +302,16 @@ export default function ExcelTool() {
                 <p style={styles.cardText}>Inspect language coverage, missing values, duplicates, labels, and recommended research workflows.</p>
               </div>
               <Link href="/workspace" style={styles.ctaButton}>Open Workspace →</Link>
+              <button type="button" style={styles.ctaButton} onClick={() => {
+                setHandoffError("");
+                try {
+                  window.location.href = createToolHandoff("excel", "code", {
+                    filename: file?.name || "", sheet: selectedSheet,
+                    headers: sheetSummary.headers, rowCount: sheetSummary.rowCount, columnCount: sheetSummary.columnCount,
+                  });
+                } catch (transferError) { setHandoffError(transferError.message); }
+              }}>Continue to Code Generator →</button>
+              {handoffError && <p role="alert">{handoffError}</p>}
             </section>
           </>
         )}

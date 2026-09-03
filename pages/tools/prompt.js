@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Layout from "../../components/Layout";
+import { createToolHandoff } from "../../lib/tool-handoff";
 
 export default function PromptTool() {
   const [taskType, setTaskType] = useState("Text analysis");
@@ -181,6 +182,11 @@ export default function PromptTool() {
             </div>
 
             <div style={styles.promptBox}>{generatedPrompt}</div>
+            <button type="button" style={styles.secondaryButton} onClick={() => {
+              try {
+                window.location.href = createToolHandoff("prompt", "code", { prompt: generatedPrompt });
+              } catch (transferError) { setError(transferError.message); }
+            }}>Continue to Code Generator →</button>
           </div>
         )}
 
@@ -331,4 +337,3 @@ const styles = {
     margin: 0,
   },
 };
-

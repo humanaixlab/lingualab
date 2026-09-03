@@ -1,4 +1,18 @@
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import { readToolHandoff } from "../../lib/tool-handoff";
+
 export default function ColabPage() {
+  const [handoff, setHandoff] = useState(null);
+  const [copyStatus, setCopyStatus] = useState("");
+  const router = useRouter();
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      setHandoff(readToolHandoff("colab", window.location.search));
+      setCopyStatus("");
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [router.asPath]);
   return (
     <div
       style={{
@@ -10,6 +24,31 @@ export default function ColabPage() {
       }}
     >
       <h1>Google Colab Workspace</h1>
+      {handoff && (
+        <section dir="ltr" style={{ background: "#fff", padding: "25px", borderRadius: "16px", marginBottom: "20px", textAlign: "left" }}>
+          <h2>Review your generated response</h2>
+          <p>Selected language: {handoff.payload.language}. This response may include explanations or non-Python code. Review it before copying anything into Colab. Nothing has been sent or executed.</p>
+          <pre style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>{handoff.payload.response}</pre>
+          <button type="button" onClick={async () => {
+            try {
+              await navigator.clipboard.writeText(handoff.payload.response);
+              setCopyStatus("Copied. Paste only the reviewed code into your notebook.");
+            } catch { setCopyStatus("Copy failed. Select and copy the response manually."); }
+          }}>Copy response</button>
+          <button type="button" onClick={() => {
+            setCopyStatus("");
+            try {
+              sessionStorage.removeItem("lingualab-tool-handoff:colab");
+            } catch {
+              setCopyStatus("Response cleared from this page, but the saved handoff could not be removed from this tab.");
+            } finally {
+              setHandoff(null);
+            }
+          }}>Clear transferred response</button>
+          <p role="status">{copyStatus}</p>
+        </section>
+      )}
+      {!handoff && copyStatus && <p role="status">{copyStatus}</p>}
 
       <p style={{ color: "#555", marginBottom: "30px" }}>
         بيئة جاهزة لتجربة الأكواد بدون تثبيت أي شيء على جهازك
