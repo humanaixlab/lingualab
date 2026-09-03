@@ -1,6 +1,8 @@
 import Head from "next/head";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/router";
+import { readResearchContext, analyzeContext } from "../../lib/research-context";
 import styles from "../../styles/Analyze.module.css";
 
 const DEFAULT_PLAN = {
@@ -34,17 +36,6 @@ const DEFAULT_PLAN = {
     },
   ],
 };
-
-function readDatasetContext() {
-  if (typeof window === "undefined") return null;
-
-  try {
-    const saved = sessionStorage.getItem("lingualab-advisor-context");
-    return saved ? JSON.parse(saved) : null;
-  } catch {
-    return null;
-  }
-}
 
 function buildPlan(context) {
   if (!context) return DEFAULT_PLAN;
@@ -99,7 +90,12 @@ export default function Analyzer() {
   const [interpretation, setInterpretation] = useState(null);
   const [loadingInterpretation, setLoadingInterpretation] = useState(false);
   const [interpretationError, setInterpretationError] = useState("");
-  const [context] = useState(readDatasetContext);
+  const [context, setContext] = useState(null);
+  const router = useRouter();
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => setContext(analyzeContext(readResearchContext(window.location.search))));
+    return () => window.cancelAnimationFrame(frame);
+  }, [router.asPath]);
 
   const plan = useMemo(() => buildPlan(context), [context]);
 

@@ -1,6 +1,8 @@
 import Head from "next/head";
 import Link from "next/link";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/router";
+import { readResearchContext, hubCopilotMetadata } from "../lib/research-context";
 import styles from "../styles/Workspace.module.css";
 
 const TEXT_HINTS = [
@@ -500,6 +502,17 @@ export default function WorkspacePage() {
   const [copilotStatus, setCopilotStatus] = useState("idle");
   const [copilotError, setCopilotError] = useState("");
   const [studyDesign, setStudyDesign] = useState(null);
+  const [hubCopilotContext, setHubCopilotContext] = useState(null);
+  const router = useRouter();
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      const query = new URLSearchParams(window.location.search);
+      const context = query.get("copilot") === "1" ? readResearchContext(window.location.search) : null;
+      setHubCopilotContext(context?.copilotMetadata ? context : null);
+      if (context?.copilotMetadata) setCopilotOpen(true);
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [router.asPath]);
 
   const qualityNotes = useMemo(() => {
     if (!result) return [];
@@ -518,6 +531,7 @@ export default function WorkspacePage() {
   );
 
   function resetWorkspace() {
+    setHubCopilotContext(null);
     sessionStorage.removeItem("lingualab-advisor-context");
     setWorkflowError("");
     setDragActive(false);
@@ -558,6 +572,7 @@ export default function WorkspacePage() {
 
   async function processFile(file) {
     if (!file) return;
+    setHubCopilotContext(null);
     sessionStorage.removeItem("lingualab-advisor-context");
     setWorkflowError("");
     if (file.size > MAX_FILE_SIZE) {
@@ -637,8 +652,28 @@ export default function WorkspacePage() {
     window.location.href = `/research-advisor?from=workspace&handoffId=${encodeURIComponent(handoffId)}`;
   }
 
+  function openResearchHub(event) {
+    if (!result) return;
+    event.preventDefault();
+    try {
+      const handoffId = window.crypto.randomUUID();
+      const copilotMetadata = hubCopilotMetadata(result, datasetRows, selectedTextColumn, selectedLabelColumn);
+      sessionStorage.setItem("lingualab-advisor-context", JSON.stringify({ ...buildAdvisorContext(result), handoffId, copilotMetadata }));
+      window.location.href = `/ar-tools?from=workspace&handoffId=${encodeURIComponent(handoffId)}`;
+    } catch {
+      window.location.href = "/ar-tools";
+    }
+  }
+
   async function designMyStudy() {
-    if (!result || copilotStatus === "loading") return;
+    if ((!result && !hubCopilotContext) || copilotStatus === "loading") return;
+    const currentHubContext = !result ? readResearchContext(window.location.search) : null;
+    if (!result && (!currentHubContext?.copilotMetadata || currentHubContext.handoffId !== hubCopilotContext.handoffId)) {
+      setStudyDesign(null);
+      setCopilotStatus("error");
+      setCopilotError("Dataset context has expired or changed. Open Research Copilot again from your current Workspace dataset.");
+      return;
+    }
 
     setCopilotStatus("loading");
     setCopilotError("");
@@ -652,7 +687,7 @@ export default function WorkspacePage() {
         }, {})).sort((a, b) => b[1] - a[1])
       : [];
 
-    const payload = {
+    const payload = result ? {
       rowCount: result.rows,
       columnCount: result.columns,
       columnNames: result.headers.slice(0, 20),
@@ -665,7 +700,7 @@ export default function WorkspacePage() {
       labelDistribution: selectedLabelDistribution.slice(0, 10).map(([label, count]) => ({ label, count })),
       recommendedWorkflow: result.recommendation.type,
       researchGoal: researchGoal.trim(),
-    };
+    } : { ...currentHubContext.copilotMetadata, researchGoal: researchGoal.trim() };
 
     const controller = new AbortController();
     const timeoutId = window.setTimeout(() => controller.abort(), 65000);
@@ -740,7 +775,7 @@ export default function WorkspacePage() {
           <Link href="/" className={styles.brand}><span>L</span>LinguaLab</Link>
           <div className={styles.navActions}>
             <Link href="/workspace">Workspace</Link>
-            <Link href="/ar-tools">Research Tools</Link>
+            <Link href="/ar-tools" onClick={openResearchHub}>Research Tools</Link>
             <Link href="/research-advisor">Research Advisor</Link>
           </div>
         </nav>
@@ -869,13 +904,14 @@ export default function WorkspacePage() {
           </aside>
         </section>
 
-        {result && copilotOpen && (
+        {(result || hubCopilotContext) && copilotOpen && (
           <section className={styles.copilotPanel} aria-labelledby="research-copilot-title">
             <div className={styles.copilotHeader}>
               <div>
                 <p className={styles.eyebrow}>AI Research Copilot</p>
                 <h2 id="research-copilot-title">Design My Study</h2>
                 <p>Turn the dataset profile into a focused, defensible research blueprint.</p>
+                {!result && <p>Dataset metadata: {hubCopilotContext.fileName} · {hubCopilotContext.rows.toLocaleString()} records. The dataset itself has not been restored.</p>}
               </div>
               <button type="button" onClick={() => setCopilotOpen(false)} aria-label="Close AI Research Copilot">×</button>
             </div>
@@ -901,7 +937,7 @@ export default function WorkspacePage() {
               {copilotStatus === "error" && <div className={styles.copilotError} role="alert"><strong>Study design unavailable</strong><p>{copilotError}</p></div>}
               {copilotStatus === "success" && studyDesign && (
                 <article className={styles.studyDesign} dir="ltr">
-                  <div className={styles.evidenceBanner}><strong>Based on metadata only:</strong><span>• {result.rows.toLocaleString()} records</span><span>• {studyDesign.studyDesign.type === "supervised_classification" ? `${new Set(datasetRows.map((row) => String(row[selectedLabelColumn] ?? "").trim()).filter(Boolean)).size} classes` : "No label classes"}</span><span>• {Math.round(result.arabicRatio * 100)}% Arabic coverage</span><span>• {result.missingPercent.toFixed(1)}% missing</span></div>
+                  <div className={styles.evidenceBanner}><strong>Based on metadata only:</strong><span>• {(result ? result.rows : hubCopilotContext.rows).toLocaleString()} records</span><span>• {studyDesign.studyDesign.type === "supervised_classification" ? `${result ? new Set(datasetRows.map((row) => String(row[selectedLabelColumn] ?? "").trim()).filter(Boolean)).size : hubCopilotContext.copilotMetadata.classCount} classes` : "No label classes"}</span><span>• {result ? Math.round(result.arabicRatio * 100) : hubCopilotContext.arabicPercent}% Arabic coverage</span><span>• {(result ? result.missingPercent : hubCopilotContext.missingPercent).toFixed(1)}% missing</span></div>
                   <div className={styles.studyTitle}><span>AI Research Blueprint</span><h3>{studyDesign.studyTitle}</h3><p>{studyDesign.feasibility.summary}</p></div>
                   <section><h4>Research question</h4><strong>{studyDesign.researchQuestion.primary}</strong><p>{studyDesign.researchQuestion.rationale}</p></section>
                   <div className={styles.studyGrid}>
@@ -914,7 +950,7 @@ export default function WorkspacePage() {
                   <section><h4>Risks</h4><ul>{studyDesign.risks.map((item) => <li key={`${item.category}-${item.risk}`}><strong>{item.severity}: {item.risk}</strong> — {item.mitigation}</li>)}</ul></section>
                   {studyDesign.notSupported.length > 0 && <section><h4>Not supported by the current metadata</h4><ul>{studyDesign.notSupported.map((item) => <li key={item}>{item}</li>)}</ul></section>}
                   <div className={styles.nextAction}><span>Immediate Next Step</span><strong>{studyDesign.immediateNextAction.action}</strong><p>{studyDesign.immediateNextAction.reason}</p></div>
-                  <section className={styles.potentialOutcomes}>
+                  {result && <section className={styles.potentialOutcomes}>
                     <p className={styles.outcomeEyebrow}>Deterministic Research Outcomes</p>
                     <h4 className={styles.outcomeHeading}>What could this research become?</h4>
                     <p className={styles.outcomeCaption}>Selected from verified dataset characteristics using deterministic rules.<br />No AI-generated outcomes.</p>
@@ -928,7 +964,7 @@ export default function WorkspacePage() {
                       ))}
                     </div>
                     <p className={styles.outcomeDisclaimer}>These are possible research outputs, not guaranteed results. Final suitability depends on study quality, validation, and researcher judgment.</p>
-                  </section>
+                  </section>}
                 </article>
               )}
             </div>

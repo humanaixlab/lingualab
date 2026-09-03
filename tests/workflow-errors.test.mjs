@@ -38,6 +38,7 @@ function workspace() {
       return [state[index], (value) => { state[index] = typeof value === "function" ? value(state[index]) : value; }];
     },
     useRef: () => ({ current: null }),
+    useEffect: () => {},
     useMemo: (calculate) => calculate(),
   };
   const exports = {};
@@ -45,6 +46,8 @@ function workspace() {
     exports,
     require(name) {
       if (name === "react") return hooks;
+      if (name === "next/router") return { useRouter: () => ({ asPath: "/workspace" }) };
+      if (name === "../lib/research-context") return {};
       if (name === "next/head") return () => null;
       if (name === "next/link") return function MockLink({ children, ...props }) { return React.createElement("a", props, children); };
       if (name.endsWith(".css")) return {};

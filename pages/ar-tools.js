@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import { readResearchContext, researchContextHref, RESEARCH_CONTEXT_TTL_MS } from "../lib/research-context";
 
 const sections = [
   {
@@ -170,6 +173,28 @@ const recommendedPath = [
 ];
 
 export default function ArabicToolsPage() {
+  const router = useRouter();
+  const [context, setContext] = useState(null);
+  useEffect(() => {
+    let expiryTimer;
+    const refresh = () => {
+      window.clearTimeout(expiryTimer);
+      const current = readResearchContext(window.location.search);
+      setContext(current);
+      if (current) expiryTimer = window.setTimeout(refresh, Math.max(1, Date.parse(current.createdAt) + RESEARCH_CONTEXT_TTL_MS - Date.now()));
+    };
+    const frame = window.requestAnimationFrame(refresh);
+    window.addEventListener("pageshow", refresh);
+    window.addEventListener("focus", refresh);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(expiryTimer);
+      window.removeEventListener("pageshow", refresh);
+      window.removeEventListener("focus", refresh);
+    };
+  }, [router.asPath]);
+  const contextHref = (href) => researchContextHref(href, context);
+
   return (
     <main
       style={{
@@ -240,7 +265,7 @@ export default function ArabicToolsPage() {
               Workspace
             </Link>
             <Link
-              href="/research-advisor"
+              href={contextHref("/research-advisor")}
               style={{
                 color: "#17152f",
                 textDecoration: "none",
@@ -291,6 +316,12 @@ export default function ArabicToolsPage() {
             linguistic analysis, interpretation, and publication-ready reporting.
           </p>
         </section>
+
+        {context && (
+          <p role="status" style={{ margin: "0 0 20px", padding: "12px 16px", border: "1px solid rgba(112, 91, 255, 0.2)", borderRadius: "12px", background: "#efedff", color: "#4c43ce", fontSize: "13px" }}>
+            Current dataset: {context.fileName} · {context.rows.toLocaleString()} records
+          </p>
+        )}
 
         <section
           aria-labelledby="recommended-research-path"
@@ -406,7 +437,7 @@ export default function ArabicToolsPage() {
                   {step.links.map((link) => (
                     <Link
                       key={`${step.title}-${link.label}`}
-                      href={link.href}
+                      href={contextHref(context && link.label === "Use Research Copilot" ? "/workspace?copilot=1" : link.href)}
                       style={{
                         padding: "7px 9px",
                         borderRadius: "999px",
@@ -494,7 +525,7 @@ export default function ArabicToolsPage() {
                 {section.tools.map((tool) => (
                   <Link
                     key={tool.title}
-                    href={tool.link}
+                    href={contextHref(tool.link)}
                     style={{
                       color: "inherit",
                       textDecoration: "none",
@@ -614,4 +645,3 @@ export default function ArabicToolsPage() {
     </main>
   );
 }
-
