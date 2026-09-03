@@ -41,7 +41,7 @@ function harness() {
     setDatasetContext(value) { state.context = value; },
     setForm(update) { state.form = update(state.form); },
   };
-  for (const name of reset.match(/set\w+(?=\()/g)) scope[name] = () => {};
+  for (const name of reset.match(/set\w+(?=\()/g)) scope[name] = (value) => { state[name] = value; };
   scope.setResult = (value) => { state.result = value; };
   vm.createContext(scope);
   vm.runInContext(builder + opener + reset + processFile, scope);
@@ -95,4 +95,47 @@ test("replacement clears Advisor context before reading the new file", async () 
     throw new Error("Stop after verifying replacement invalidation");
   } });
   assert.equal(h.stored(), null);
+});
+
+test("Workspace reset completes with both available and blocked storage", () => {
+  for (const blocked of [false, true]) {
+    const h = harness();
+    h.state.result = h.scope.result;
+    h.scope.inputRef.current = { value: "previous.csv" };
+    if (blocked) h.scope.sessionStorage.removeItem = () => { throw new Error("Storage blocked"); };
+    assert.doesNotThrow(() => h.scope.resetWorkspace());
+    assert.equal(h.state.result, null);
+    assert.equal(h.state.setHubCopilotContext, null);
+    assert.equal(h.state.setStatus, "idle");
+    assert.equal(h.state.setWorkflowError, "");
+    assert.equal(h.state.setWorkflowOpen, false);
+    assert.equal(h.state.setStudyDesign, null);
+    assert.equal(h.state.setDatasetRows.length, 0);
+    assert.equal(h.state.setPreview.length, 0);
+    assert.equal(h.scope.inputRef.current.value, "");
+    if (!blocked) assert.equal(h.stored(), null);
+  }
+});
+
+test("Workspace upload preserves validation and CSV parsing when storage is blocked", async () => {
+  for (const blocked of [false, true]) {
+    const h = harness();
+    vm.runInContext(section(workspace, "const TEXT_HINTS", "export default function WorkspacePage"), h.scope);
+    if (blocked) h.scope.sessionStorage.removeItem = () => { throw new Error("Storage blocked"); };
+    await h.scope.processFile({ name: "large.csv", size: h.scope.MAX_FILE_SIZE + 1, text() { assert.fail("Oversized files must not be read"); } });
+    assert.equal(h.state.setStatus, "error");
+    assert.match(h.state.setError, /smaller than 10 MB/);
+    await h.scope.processFile({ name: "invalid.pdf", size: 10 });
+    assert.equal(h.state.setStatus, "error");
+    assert.equal(h.state.setError, "Please upload a CSV, TSV, or XLSX file.");
+    await h.scope.processFile({ name: "current.csv", size: 100, text: async () => "text,label\nمرحبا بالعالم,A\nتجربة عربية,B" });
+    assert.equal(h.state.setStatus, "ready");
+    assert.equal(h.state.setError, "");
+    assert.equal(h.state.result.fileName, "current.csv");
+    assert.equal(h.state.result.rows, 2);
+    assert.equal(h.state.setDatasetRows[0].text, "مرحبا بالعالم");
+    assert.equal(h.state.setSelectedTextColumn, "text");
+    assert.equal(h.state.setSelectedLabelColumn, "label");
+    if (!blocked) assert.equal(h.stored(), null);
+  }
 });

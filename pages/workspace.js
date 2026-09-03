@@ -532,7 +532,9 @@ export default function WorkspacePage() {
 
   function resetWorkspace() {
     setHubCopilotContext(null);
-    sessionStorage.removeItem("lingualab-advisor-context");
+    try {
+      sessionStorage.removeItem("lingualab-advisor-context");
+    } catch { /* Storage cleanup must not block local reset. */ }
     setWorkflowError("");
     setDragActive(false);
     setStatus("idle");
@@ -573,7 +575,9 @@ export default function WorkspacePage() {
   async function processFile(file) {
     if (!file) return;
     setHubCopilotContext(null);
-    sessionStorage.removeItem("lingualab-advisor-context");
+    try {
+      sessionStorage.removeItem("lingualab-advisor-context");
+    } catch { /* Storage cleanup must not block local file processing. */ }
     setWorkflowError("");
     if (file.size > MAX_FILE_SIZE) {
       setStatus("error");
