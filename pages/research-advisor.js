@@ -68,10 +68,14 @@ export default function ResearchAdvisorPage() {
     let frameId;
 
     try {
+      const query = new URLSearchParams(window.location.search);
+      const handoffId = query.get("handoffId");
+      if (query.get("from") !== "workspace" || !handoffId) return undefined;
       const saved = sessionStorage.getItem("lingualab-advisor-context");
       if (!saved) return undefined;
 
       const context = JSON.parse(saved);
+      if (!context || context.handoffId !== handoffId) return undefined;
       frameId = window.requestAnimationFrame(() => {
         setDatasetContext(context);
         setForm((current) => ({

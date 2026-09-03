@@ -491,6 +491,7 @@ export default function WorkspacePage() {
   const [workflowOpen, setWorkflowOpen] = useState(false);
   const [workflowStatus, setWorkflowStatus] = useState("configure");
   const [workflowResult, setWorkflowResult] = useState(null);
+  const [workflowError, setWorkflowError] = useState("");
   const [selectedTextColumn, setSelectedTextColumn] = useState("");
   const [selectedLabelColumn, setSelectedLabelColumn] = useState("");
   const [reportReady, setReportReady] = useState(false);
@@ -517,6 +518,8 @@ export default function WorkspacePage() {
   );
 
   function resetWorkspace() {
+    sessionStorage.removeItem("lingualab-advisor-context");
+    setWorkflowError("");
     setDragActive(false);
     setStatus("idle");
     setError("");
@@ -555,6 +558,8 @@ export default function WorkspacePage() {
 
   async function processFile(file) {
     if (!file) return;
+    sessionStorage.removeItem("lingualab-advisor-context");
+    setWorkflowError("");
     if (file.size > MAX_FILE_SIZE) {
       setStatus("error");
       setError("Please use a file smaller than 10 MB for this browser-based prototype.");
@@ -625,10 +630,11 @@ export default function WorkspacePage() {
   }
 
   function openResearchAdvisor() {
-    if (typeof window !== "undefined" && result) {
-      sessionStorage.setItem("lingualab-advisor-context", JSON.stringify(buildAdvisorContext(result)));
-    }
-    window.location.href = "/research-advisor?from=workspace";
+    if (typeof window === "undefined" || !result) return;
+    const handoffId = window.crypto.randomUUID();
+    const context = { ...buildAdvisorContext(result), handoffId };
+    sessionStorage.setItem("lingualab-advisor-context", JSON.stringify(context));
+    window.location.href = `/research-advisor?from=workspace&handoffId=${encodeURIComponent(handoffId)}`;
   }
 
   async function designMyStudy() {
@@ -689,6 +695,7 @@ export default function WorkspacePage() {
 
   function runWorkflow() {
     if (!selectedTextColumn) return;
+    setWorkflowError("");
     setWorkflowStatus("running");
     setWorkflowResult(null);
     window.setTimeout(() => {
@@ -701,7 +708,7 @@ export default function WorkspacePage() {
         setReportReady(true);
       } catch (err) {
         setWorkflowStatus("configure");
-        setError(err.message || "The workflow could not be completed with this dataset.");
+        setWorkflowError(err.message || "The workflow could not be completed with this dataset.");
       }
     }, 650);
   }
@@ -953,6 +960,7 @@ export default function WorkspacePage() {
               </div>
 
               <div className={styles.outputCard} aria-live="polite">
+                {workflowError && <div className={styles.errorBox} role="alert">{workflowError}</div>}
                 {workflowStatus !== "complete" ? (
                   <div className={styles.outputEmpty}><div className={styles.aiOrb}>✦</div><h3>{workflowStatus === "running" ? "Building your results…" : "Your analysis will appear here."}</h3><p>{workflowStatus === "running" ? "Normalizing Arabic text, preparing the workflow, and calculating interpretable results." : "Review the detected columns, then run the guided workflow."}</p></div>
                 ) : workflowResult.mode === "classification" ? (
