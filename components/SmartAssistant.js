@@ -55,7 +55,7 @@ export default function SmartAssistant() {
         boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
         overflow: "hidden",
         direction,
-        fontFamily: "Arial, sans-serif",
+        fontFamily: "var(--font-ui)",
         zIndex: 9999,
       }}
     >
@@ -64,7 +64,8 @@ export default function SmartAssistant() {
           background: "#4f46e5",
           color: "#fff",
           padding: "12px",
-          fontWeight: "bold",
+          fontWeight: "600",
+          fontSize: "var(--text-card)",
           boxShadow: "0 4px 14px rgba(0,0,0,0.15)",
         }}
       >
@@ -88,6 +89,7 @@ export default function SmartAssistant() {
               marginBottom: "8px",
               borderRadius: "10px",
               lineHeight: "1.7",
+              fontSize: "var(--text-helper)",
               color: "#111827",
             }}
           >
@@ -109,7 +111,7 @@ export default function SmartAssistant() {
               border: "none",
               background: "#eef2ff",
               cursor: "pointer",
-              fontSize: "15px",
+              fontSize: "var(--text-button)",
             }}
           >
             {t(suggestion.key)}

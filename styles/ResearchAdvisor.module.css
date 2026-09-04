@@ -2,7 +2,7 @@
   min-height: 100vh;
   background: #f5f3ff;
   color: #17152b;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-ui);
 }
 
 .nav {
@@ -50,14 +50,14 @@
 .eyebrow, .step {
   margin: 0 0 10px;
   color: #5b4df5;
-  font-size: 12px;
+  font-size: var(--text-meta);
   font-weight: 800;
   letter-spacing: .1em;
   text-transform: uppercase;
 }
 
-.hero h1 { max-width: 800px; margin: 0; font-size: clamp(42px, 5.2vw, 72px); line-height: .98; letter-spacing: -.055em; }
-.lead { max-width: 720px; margin: 24px 0 0; color: #5f5974; font-size: 19px; line-height: 1.65; }
+.hero h1 { max-width: 800px; margin: 0; font-size: var(--text-hero); line-height: var(--leading-heading); letter-spacing: var(--tracking-heading); }
+.lead { max-width: 720px; margin: 24px 0 0; color: #5f5974; font-size: var(--text-body); line-height: var(--leading-body); }
 
 .principleCard {
   padding: 24px;
@@ -66,7 +66,7 @@
   background: rgba(255, 255, 255, .72);
   box-shadow: 0 18px 50px rgba(53, 43, 130, .08);
 }
-.principleCard span { display: block; margin-bottom: 9px; color: #766e91; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+.principleCard span { display: block; margin-bottom: 9px; color: #766e91; font-size: var(--text-meta); text-transform: uppercase; letter-spacing: var(--tracking-overline); }
 .principleCard strong { font-size: 18px; line-height: 1.45; }
 
 .workspace {
@@ -87,12 +87,12 @@
 .formCard { padding: 30px; }
 .resultCard { min-height: 690px; overflow: hidden; background: #17152b; color: white; }
 .cardHeading, .outputHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
-.cardHeading h2, .outputHeader h2 { margin: 0; font-size: 24px; letter-spacing: -.02em; }
-.privateBadge, .previewBadge { flex: 0 0 auto; border-radius: 999px; padding: 7px 10px; font-size: 11px; font-weight: 750; }
+.cardHeading h2, .outputHeader h2 { margin: 0; font-size: var(--text-section); line-height: var(--leading-heading); letter-spacing: var(--tracking-heading); }
+.privateBadge, .previewBadge { flex: 0 0 auto; border-radius: 999px; padding: 7px 10px; font-size: var(--text-meta); font-weight: 750; }
 .privateBadge { color: #4d438d; background: #efedff; }
 .previewBadge { color: #211c4a; background: #d9d3ff; }
 
-.formCard label { display: grid; gap: 8px; margin-top: 23px; color: #302c45; font-size: 13px; font-weight: 750; }
+.formCard label { display: grid; gap: 8px; margin-top: 23px; color: #302c45; font-size: var(--text-helper); font-weight: 750; }
 .formCard label span { color: #918aa4; font-weight: 500; }
 .formCard textarea, .formCard input, .formCard select {
   width: 100%;
@@ -112,7 +112,7 @@
 .formCard textarea:focus, .formCard input:focus, .formCard select:focus { border-color: #6d5ff5; box-shadow: 0 0 0 4px rgba(91, 77, 245, .1); }
 .twoColumns { display: grid; grid-template-columns: .8fr 1.2fr; gap: 14px; }
 
-.examples { margin-top: 19px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color: #777087; font-size: 12px; }
+.examples { margin-top: 19px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color: #777087; font-size: var(--text-meta); }
 .examples button { border: 1px solid #ddd8f2; border-radius: 999px; padding: 7px 11px; color: #514798; background: white; cursor: pointer; }
 .submitButton { width: 100%; margin-top: 22px; min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 10px; border: 0; border-radius: 15px; color: white; background: #5b4df5; font-weight: 800; cursor: pointer; }
 .submitButton:disabled { cursor: not-allowed; opacity: .5; }
@@ -124,7 +124,7 @@
 .emptyState h2 { max-width: 400px; margin: 0; font-size: 34px; line-height: 1.12; }
 .emptyState > p:not(.step) { max-width: 410px; color: #b9b5ca; line-height: 1.7; }
 .emptyChecklist { margin-top: 25px; display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
-.emptyChecklist span { padding: 12px; border: 1px solid #34304e; border-radius: 12px; color: #d4d0df; font-size: 12px; }
+.emptyChecklist span { padding: 12px; border: 1px solid #34304e; border-radius: 12px; color: #d4d0df; font-size: var(--text-meta); }
 
 .advisorOutput { padding: 32px; }
 .outputHeader { align-items: center; }
@@ -136,16 +136,16 @@
 .advisorOutput ol { margin: 0; padding-inline-start: 22px; color: #c5c1d1; line-height: 1.65; }
 .advisorOutput li + li { margin-top: 8px; }
 .methodBox { padding: 18px; border: 1px solid #494365; border-radius: 16px; background: #211e37; }
-.methodBox span, .nextAction span { color: #aaa0ff; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.methodBox span, .nextAction span { color: #aaa0ff; font-size: var(--text-meta); font-weight: 800; letter-spacing: var(--tracking-overline); text-transform: uppercase; }
 .methodBox p { margin: 8px 0 0; color: #ece9f6; line-height: 1.6; }
 .stepsList { display: grid; gap: 8px; }
 .stepsList div { display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: start; padding: 10px 0; border-top: 1px solid #312d48; }
-.stepsList span { color: #8f84ff; font-size: 11px; font-weight: 800; }
+.stepsList span { color: #8f84ff; font-size: var(--text-meta); font-weight: 800; }
 .stepsList p { margin: 0; color: #c5c1d1; line-height: 1.55; }
 .nextAction { padding: 18px; border-radius: 17px; display: flex; align-items: center; justify-content: space-between; gap: 16px; color: #17152b; background: #d9d3ff; }
 .nextAction strong { display: block; margin-top: 7px; line-height: 1.45; }
-.nextAction a { flex: 0 0 auto; padding: 10px 12px; border-radius: 11px; color: white; background: #17152b; text-decoration: none; font-size: 12px; font-weight: 750; }
-.caution { margin: 18px 0 0; color: #aaa6b8; font-size: 12px; line-height: 1.6; }
+.nextAction a { flex: 0 0 auto; padding: 10px 12px; border-radius: 11px; color: white; background: #17152b; text-decoration: none; font-size: var(--text-button); font-weight: 750; }
+.caution { margin: 18px 0 0; color: #aaa6b8; font-size: var(--text-meta); line-height: 1.6; }
 
 @media (max-width: 900px) {
   .hero, .workspace { grid-template-columns: 1fr; }
@@ -158,7 +158,7 @@
   .navActions > a:first-child { display: none; }
   .hero, .workspace { width: min(100% - 24px, 1180px); }
   .hero { margin-top: 24px; }
-  .hero h1 { font-size: 43px; }
+  .hero h1 { font-size: var(--text-hero); }
   .formCard, .advisorOutput, .emptyState { padding: 22px; }
   .twoColumns, .emptyChecklist { grid-template-columns: 1fr; }
   .cardHeading { display: block; }
@@ -168,7 +168,14 @@
 
 .contextBanner { margin-top: 20px; padding: 15px 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border: 1px solid #d8d2ff; border-radius: 16px; background: #f1efff; }
 .contextBanner div { min-width: 0; }
-.contextBanner span { display: block; color: #5b4df5; font-size: 10px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.contextBanner span { display: block; color: #5b4df5; font-size: var(--text-meta); font-weight: 850; letter-spacing: var(--tracking-overline); text-transform: uppercase; }
 .contextBanner strong { display: block; margin-top: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #211d3e; font-size: 14px; }
-.contextBanner small { display: block; margin-top: 3px; color: #6d6781; font-size: 11px; }
+.contextBanner small { display: block; margin-top: 3px; color: #6d6781; font-size: var(--text-meta); }
 .contextBanner button { flex: 0 0 auto; border: 1px solid #cec7f8; border-radius: 999px; padding: 7px 10px; background: white; color: #514798; font-weight: 750; cursor: pointer; }
+
+.brand,.navActions a,.navButton,.submitButton,.examples button,.nextAction a,.contextBanner button { font-weight: 600; }
+.navActions a,.navButton { font-size: var(--text-nav); }
+.eyebrow,.step,.principleCard span,.methodBox span,.nextAction span,.contextBanner span { font-weight: 500; line-height: var(--leading-helper); }
+.principleCard strong,.advisorOutput h3 { font-size: var(--text-card); font-weight: 600; line-height: 1.35; }
+.emptyState h2 { font-size: var(--text-section); font-weight: 700; line-height: var(--leading-heading); letter-spacing: var(--tracking-heading); }
+.formCard label,.summary,.methodBox p,.stepsList p,.emptyState>p:not(.step) { font-weight: 400; line-height: var(--leading-body); }

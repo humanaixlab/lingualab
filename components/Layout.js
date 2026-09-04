@@ -11,7 +11,7 @@ export default function Layout({ title, children }) {
         background:
           "radial-gradient(circle at top, #1e293b 0%, #0f172a 40%, #020617 100%)",
         padding: "40px 20px",
-        fontFamily: "system-ui, sans-serif",
+        fontFamily: "var(--font-ui)",
         color: "#fff",
       }}
     >
@@ -26,7 +26,7 @@ export default function Layout({ title, children }) {
               background: "rgba(255,255,255,0.05)",
               color: "#e2e8f0",
               cursor: "pointer",
-              fontSize: "13px",
+              fontSize: "var(--text-button)",
             }}
           >
             {t("common.backToAllTools")}
@@ -47,8 +47,10 @@ export default function Layout({ title, children }) {
           <h1
             style={{
               marginBottom: "10px",
-              fontSize: "32px",
-              fontWeight: "bold",
+              fontSize: "var(--text-page)",
+              lineHeight: "var(--leading-heading)",
+              letterSpacing: "var(--tracking-heading)",
+              fontWeight: "700",
               background: "linear-gradient(90deg, #22d3ee, #818cf8)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
@@ -61,7 +63,8 @@ export default function Layout({ title, children }) {
             style={{
               marginBottom: "25px",
               color: "#94a3b8",
-              fontSize: "14px",
+              fontSize: "var(--text-body)",
+              lineHeight: "var(--leading-body)",
             }}
           >
             {t("common.smartToolsDescription")}

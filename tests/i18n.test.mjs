@@ -22,6 +22,29 @@ function leafKeys(value, prefix = "") {
   return Object.entries(value).flatMap(([key, child]) => leafKeys(child, prefix ? `${prefix}.${key}` : key));
 }
 
+function declarationsFor(css, selector) {
+  const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = css.match(new RegExp(`${escaped}\\s*\\{([^}]+)\\}`));
+  assert.ok(match, `missing CSS rule: ${selector}`);
+  return Object.fromEntries(match[1].split(";").flatMap((declaration) => {
+    const separator = declaration.indexOf(":");
+    if (separator < 0) return [];
+    return [[declaration.slice(0, separator).trim(), declaration.slice(separator + 1).trim()]];
+  }));
+}
+
+function resolveCustomProperties(value, properties) {
+  let resolved = value;
+  for (let pass = 0; pass < 10 && resolved.includes("var("); pass += 1) {
+    resolved = resolved.replace(/var\((--[^)]+)\)/g, (_, name) => {
+      assert.ok(properties[name], `unresolved custom property: ${name}`);
+      return properties[name];
+    });
+  }
+  assert.doesNotMatch(resolved, /var\(/);
+  return resolved;
+}
+
 function analyzePlanner() {
   const page = source("pages/tools/analyze.js");
   const logic = page.slice(page.indexOf("const DEFAULT_PLAN"), page.indexOf("export default function Analyzer"));
@@ -182,4 +205,59 @@ test("dataset, user, and AI content keeps automatic direction", () => {
   assert.match(source("pages/tools/analyze.js"), /value=\{text\}[\s\S]*?dir="auto"/);
   assert.match(source("pages/research-advisor.js"), /className=\{styles\.summary\} dir="auto">\{advisor\.summary\}/);
   assert.match(source("pages/research-report.js"), /<p dir="auto">\{interpretationText\}<\/p>/);
+});
+
+test("core typography exposes one explicit bilingual semantic scale", () => {
+  const globals = source("stylesglobals.css");
+  for (const declaration of [
+    '--font-ui-en: var(--font-inter-loaded), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    '--font-ui-ar: var(--font-ibm-plex-arabic-loaded), "Noto Sans Arabic", Tahoma, Arial, sans-serif',
+    "--text-hero: 54px",
+    "--text-page: 36px",
+    "--text-section: 26px",
+    "--text-card: 19px",
+    "--text-body: 16px",
+    "--text-helper: 14px",
+    "--text-meta: 13px",
+    "--text-button: 15px",
+    "--text-nav: 15px",
+    "--text-input: 15px",
+  ]) assert.ok(globals.includes(declaration), `missing typography declaration: ${declaration}`);
+
+  assert.match(globals, /html\[lang="ar"\][\s\S]*?--text-hero: 56px;[\s\S]*?--text-page: 38px;[\s\S]*?--text-section: 28px;[\s\S]*?--text-card: 20px;[\s\S]*?--text-body: 17px;/);
+  assert.match(globals, /@media \(max-width: 640px\)[\s\S]*?--text-hero: 40px;[\s\S]*?--text-page: 30px;[\s\S]*?--text-section: 22px;[\s\S]*?--text-card: 18px;[\s\S]*?html\[lang="ar"\][\s\S]*?--text-hero: 42px;[\s\S]*?--text-page: 32px;[\s\S]*?--text-section: 24px;/);
+  assert.match(globals, /html\[lang="ar"\][\s\S]*?--tracking-heading: 0;[\s\S]*?--tracking-overline: 0;/);
+  assert.doesNotMatch(globals, /--type-(?:display|page-title|section-title|card-title|body|helper|caption|button)/);
+});
+
+test("Next self-hosts the intended bilingual fonts with only approved weights", () => {
+  const app = source("pages/_app.js");
+  assert.match(app, /import \{ IBM_Plex_Sans_Arabic, Inter \} from "next\/font\/google"/);
+  assert.match(app, /Inter\(\{[\s\S]*?subsets: \["latin"\][\s\S]*?weight: \["400", "500", "600", "700"\][\s\S]*?display: "swap"[\s\S]*?variable: "--font-inter-loaded"/);
+  assert.match(app, /IBM_Plex_Sans_Arabic\(\{[\s\S]*?subsets: \["arabic"\][\s\S]*?weight: \["400", "500", "600", "700"\][\s\S]*?display: "swap"[\s\S]*?variable: "--font-ibm-plex-arabic-loaded"/);
+  assert.match(app, /className=\{`\$\{inter\.variable\} \$\{ibmPlexSansArabic\.variable\} lingualabApp`\}/);
+});
+
+test("the app wrapper computes the correct active font for each UI language", () => {
+  const globals = source("stylesglobals.css");
+  const wrapper = declarationsFor(globals, ".lingualabApp");
+  const arabicWrapper = declarationsFor(globals, 'html[lang="ar"] .lingualabApp');
+  const loadedFonts = {
+    "--font-inter-loaded": '"Inter"',
+    "--font-ibm-plex-arabic-loaded": '"IBM Plex Sans Arabic"',
+  };
+
+  const effectiveFont = (language) => {
+    const properties = { ...loadedFonts };
+    for (const [name, value] of Object.entries(wrapper)) if (name.startsWith("--")) properties[name] = value;
+    if (language === "ar") {
+      for (const [name, value] of Object.entries(arabicWrapper)) if (name.startsWith("--")) properties[name] = value;
+    }
+    return resolveCustomProperties(wrapper["font-family"], properties);
+  };
+
+  assert.equal(effectiveFont("en").split(",")[0].trim(), '"Inter"');
+  assert.equal(effectiveFont("ar").split(",")[0].trim(), '"IBM Plex Sans Arabic"');
+  assert.doesNotMatch(effectiveFont("en"), /^"IBM Plex Sans Arabic"/);
+  assert.doesNotMatch(effectiveFont("ar"), /^"Inter"/);
 });

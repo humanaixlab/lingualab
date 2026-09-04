@@ -23,7 +23,7 @@ export default function LanguageSwitcher() {
           onClick={() => setLanguage(option)}
           style={{
             border: 0, borderRadius: "999px", padding: "7px 10px", cursor: "pointer",
-            fontWeight: 800, fontSize: "12px",
+            fontFamily: "var(--font-ui-en)", fontWeight: 600, fontSize: "14px",
             color: language === option ? "#fff" : "#4b5563",
             background: language === option ? "#4f46e5" : "transparent",
           }}

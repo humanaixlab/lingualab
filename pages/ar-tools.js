@@ -151,8 +151,7 @@ export default function ArabicToolsPage() {
         background:
           "radial-gradient(circle at top right, rgba(109, 91, 255, 0.12), transparent 34%), #f8f8ff",
         color: "#17152f",
-        fontFamily:
-          "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        fontFamily: "var(--font-ui)",
       }}
     >
       <div
@@ -180,7 +179,7 @@ export default function ArabicToolsPage() {
               gap: "12px",
               color: "#17152f",
               textDecoration: "none",
-              fontWeight: 800,
+              fontWeight: 600,
               fontSize: "18px",
             }}
           >
@@ -207,8 +206,8 @@ export default function ArabicToolsPage() {
               style={{
                 color: "#17152f",
                 textDecoration: "none",
-                fontWeight: 700,
-                fontSize: "14px",
+                fontWeight: 600,
+                fontSize: "var(--text-nav)",
               }}
             >
               {t("nav.openWorkspace")}
@@ -218,8 +217,8 @@ export default function ArabicToolsPage() {
               style={{
                 color: "#17152f",
                 textDecoration: "none",
-                fontWeight: 700,
-                fontSize: "14px",
+                fontWeight: 600,
+                fontSize: "var(--text-nav)",
               }}
             >
               {t("nav.researchAdvisor")}
@@ -232,9 +231,9 @@ export default function ArabicToolsPage() {
             style={{
               margin: "0 0 14px",
               color: "#6258f5",
-              fontWeight: 800,
-              fontSize: "12px",
-              letterSpacing: "0.16em",
+              fontWeight: 600,
+              fontSize: "var(--text-meta)",
+              letterSpacing: "var(--tracking-overline)",
             }}
           >
             {t("hub.pageName")}
@@ -244,9 +243,9 @@ export default function ArabicToolsPage() {
             style={{
               margin: 0,
               maxWidth: "780px",
-              fontSize: "clamp(34px, 5vw, 56px)",
-              lineHeight: 1.05,
-              letterSpacing: "-0.04em",
+              fontSize: "var(--text-hero)",
+              lineHeight: "var(--leading-heading)",
+              letterSpacing: "var(--tracking-heading)",
             }}
           >
             {t("hub.heroTitle")}
@@ -257,8 +256,8 @@ export default function ArabicToolsPage() {
               maxWidth: "760px",
               margin: "20px 0 0",
               color: "#706c88",
-              fontSize: "17px",
-              lineHeight: 1.8,
+              fontSize: "var(--text-body)",
+              lineHeight: "var(--leading-body)",
             }}
           >
             {t("hub.heroText")}
@@ -288,9 +287,9 @@ export default function ArabicToolsPage() {
               style={{
                 margin: "0 0 8px",
                 color: "#6258f5",
-                fontWeight: 800,
-                fontSize: "10px",
-                letterSpacing: "0.14em",
+                fontWeight: 600,
+                fontSize: "var(--text-meta)",
+                letterSpacing: "var(--tracking-overline)",
               }}
             >
               {t("hub.guidanceLabel")}
@@ -299,8 +298,9 @@ export default function ArabicToolsPage() {
               id="recommended-research-path"
               style={{
                 margin: 0,
-                fontSize: "clamp(25px, 3vw, 36px)",
-                letterSpacing: "-0.03em",
+                fontSize: "var(--text-section)",
+                lineHeight: "var(--leading-heading)",
+                letterSpacing: "var(--tracking-heading)",
               }}
             >
               {t("hub.pathTitle")}
@@ -309,8 +309,8 @@ export default function ArabicToolsPage() {
               style={{
                 margin: "11px 0 0",
                 color: "#706c88",
-                fontSize: "14px",
-                lineHeight: 1.7,
+                fontSize: "var(--text-body)",
+                lineHeight: "var(--leading-body)",
               }}
             >
               {t("hub.pathText")}
@@ -346,8 +346,8 @@ export default function ArabicToolsPage() {
                     borderRadius: "11px",
                     color: "#ffffff",
                     background: "linear-gradient(135deg, #705bff, #416fe9)",
-                    fontSize: "11px",
-                    fontWeight: 900,
+                    fontSize: "var(--text-meta)",
+                    fontWeight: 600,
                   }}
                 >
                   {String(index + 1).padStart(2, "0")}
@@ -355,9 +355,9 @@ export default function ArabicToolsPage() {
                 <h3
                   style={{
                     margin: "17px 0 8px",
-                    fontSize: "17px",
-                    lineHeight: 1.25,
-                    letterSpacing: "-0.02em",
+                    fontSize: "var(--text-card)",
+                    lineHeight: 1.3,
+                    letterSpacing: "var(--tracking-heading)",
                   }}
                 >
                   {t(`hub.stages.${step.key}.title`)}
@@ -366,7 +366,7 @@ export default function ArabicToolsPage() {
                   style={{
                     margin: 0,
                     color: "#716d86",
-                    fontSize: "12px",
+                    fontSize: "var(--text-helper)",
                     lineHeight: 1.65,
                   }}
                 >
@@ -390,8 +390,8 @@ export default function ArabicToolsPage() {
                         borderRadius: "999px",
                         color: "#4c43ce",
                         background: "#efedff",
-                        fontSize: "10px",
-                        fontWeight: 800,
+                        fontSize: "var(--text-button)",
+                        fontWeight: 600,
                         textDecoration: "none",
                       }}
                     >
@@ -410,13 +410,13 @@ export default function ArabicToolsPage() {
           style={{ scrollMarginTop: "24px" }}
         >
           <div style={{ maxWidth: "760px", margin: "42px 0 22px" }}>
-            <p style={{ margin: "0 0 8px", color: "#6258f5", fontWeight: 800, fontSize: "10px", letterSpacing: "0.14em" }}>
+            <p style={{ margin: "0 0 8px", color: "#6258f5", fontWeight: 600, fontSize: "var(--text-meta)", letterSpacing: "var(--tracking-overline)" }}>
               {t("hub.allToolsLabel")}
             </p>
-            <h2 id="all-tools-title" style={{ margin: 0, fontSize: "clamp(28px, 4vw, 42px)", letterSpacing: "-0.035em" }}>
+            <h2 id="all-tools-title" style={{ margin: 0, fontSize: "var(--text-page)", lineHeight: "var(--leading-heading)", letterSpacing: "var(--tracking-heading)" }}>
               {t("hub.allToolsTitle")}
             </h2>
-            <p style={{ margin: "12px 0 0", color: "#706c88", fontSize: "14px", lineHeight: 1.7 }}>
+            <p style={{ margin: "12px 0 0", color: "#706c88", fontSize: "var(--text-body)", lineHeight: "var(--leading-body)" }}>
               {t("hub.allToolsText")}
             </p>
           </div>
@@ -448,9 +448,9 @@ export default function ArabicToolsPage() {
                     style={{
                       margin: "0 0 8px",
                       color: "#6258f5",
-                      fontWeight: 800,
-                      fontSize: "10px",
-                      letterSpacing: "0.14em",
+                      fontWeight: 600,
+                      fontSize: "var(--text-meta)",
+                      letterSpacing: "var(--tracking-overline)",
                     }}
                   >
                     {t(`hub.sections.${section.key}.eyebrow`)}
@@ -458,8 +458,9 @@ export default function ArabicToolsPage() {
                   <h2
                     style={{
                       margin: 0,
-                      fontSize: "clamp(24px, 3vw, 34px)",
-                      letterSpacing: "-0.03em",
+                      fontSize: "var(--text-section)",
+                      lineHeight: "var(--leading-heading)",
+                      letterSpacing: "var(--tracking-heading)",
                     }}
                   >
                     {t(`hub.sections.${section.key}.title`)}
@@ -471,8 +472,8 @@ export default function ArabicToolsPage() {
                     maxWidth: "500px",
                     margin: 0,
                     color: "#77728f",
-                    lineHeight: 1.7,
-                    fontSize: "14px",
+                    lineHeight: "var(--leading-body)",
+                    fontSize: "var(--text-body)",
                   }}
                 >
                   {t(`hub.sections.${section.key}.description`)}
@@ -534,8 +535,8 @@ export default function ArabicToolsPage() {
                               borderRadius: "13px",
                               display: "grid",
                               placeItems: "center",
-                              fontWeight: 900,
-                              fontSize: "12px",
+                              fontWeight: 600,
+                              fontSize: "var(--text-meta)",
                               background: tool.featured
                                 ? "rgba(190, 181, 255, 0.2)"
                                 : "#efedff",
@@ -552,8 +553,8 @@ export default function ArabicToolsPage() {
                                 borderRadius: "999px",
                                 background: "rgba(190, 181, 255, 0.16)",
                                 color: "#d8d2ff",
-                                fontSize: "9px",
-                                fontWeight: 800,
+                                fontSize: "var(--text-meta)",
+                                fontWeight: 600,
                                 letterSpacing: "0.1em",
                                 textTransform: "uppercase",
                               }}
@@ -566,8 +567,9 @@ export default function ArabicToolsPage() {
                         <h3
                           style={{
                             margin: "0 0 10px",
-                            fontSize: "20px",
-                            letterSpacing: "-0.025em",
+                            fontSize: "var(--text-card)",
+                            lineHeight: 1.3,
+                            letterSpacing: "var(--tracking-heading)",
                           }}
                         >
                           {t(`hub.tools.${tool.key}.title`)}
@@ -578,7 +580,7 @@ export default function ArabicToolsPage() {
                             margin: 0,
                             color: tool.featured ? "#c9c5dd" : "#716d86",
                             lineHeight: 1.7,
-                            fontSize: "13px",
+                            fontSize: "var(--text-helper)",
                           }}
                         >
                             {t(`hub.tools.${tool.key}.description`)}
@@ -591,8 +593,8 @@ export default function ArabicToolsPage() {
                           alignItems: "center",
                           gap: "8px",
                           marginTop: "24px",
-                          fontWeight: 800,
-                          fontSize: "12px",
+                          fontWeight: 600,
+                          fontSize: "var(--text-button)",
                           color: tool.featured ? "#ffffff" : "#4c43ce",
                         }}
                       >

@@ -315,9 +315,7 @@ export default function ResearchReport() {
             radial-gradient(circle at 15% 10%, #ece9ff 0, transparent 34%),
             linear-gradient(135deg, #fbfbff 0%, #f5f5ff 100%);
           color: #17142f;
-          font-family:
-            Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-            "Segoe UI", sans-serif;
+          font-family: var(--font-ui);
         }
 
         :global(a) {
@@ -344,7 +342,7 @@ export default function ResearchReport() {
           align-items: center;
           gap: 12px;
           font-size: 20px;
-          font-weight: 850;
+          font-weight: 700;
         }
 
         .brandMark {
@@ -362,8 +360,8 @@ export default function ResearchReport() {
           display: flex;
           align-items: center;
           gap: 24px;
-          font-size: 14px;
-          font-weight: 750;
+          font-size: var(--text-nav);
+          font-weight: 600;
         }
 
         .exportButton {
@@ -390,25 +388,25 @@ export default function ResearchReport() {
         .sectionLabel {
           margin: 0 0 15px;
           color: #6351f4;
-          font-size: 12px;
-          font-weight: 900;
+          font-size: var(--text-meta);
+          font-weight: 500;
           letter-spacing: 0.14em;
         }
 
         .hero h1 {
           max-width: 850px;
           margin: 0;
-          font-size: clamp(48px, 6.2vw, 88px);
-          line-height: 0.97;
-          letter-spacing: -0.065em;
+          font-size: var(--text-hero);
+          line-height: var(--leading-heading);
+          letter-spacing: var(--tracking-heading);
         }
 
         .lead {
           max-width: 850px;
           margin: 28px 0 0;
           color: #6d6889;
-          font-size: 19px;
-          line-height: 1.7;
+          font-size: var(--text-body);
+          line-height: var(--leading-body);
         }
 
         .principleCard {
@@ -423,13 +421,13 @@ export default function ResearchReport() {
           display: block;
           margin-bottom: 16px;
           color: #9089ad;
-          font-size: 11px;
+          font-size: var(--text-meta);
           letter-spacing: 0.13em;
         }
 
         .principleCard strong {
-          font-size: 17px;
-          line-height: 1.5;
+          font-size: var(--text-body);
+          line-height: var(--leading-body);
         }
 
         .emptyCard,
@@ -454,14 +452,15 @@ export default function ResearchReport() {
 
         .emptyCard h2 {
           margin: 20px 0 10px;
-          font-size: 38px;
+          font-size: var(--text-page);
+          line-height: var(--leading-heading);
         }
 
         .emptyCard p {
           max-width: 660px;
           color: #c5c0dc;
-          font-size: 17px;
-          line-height: 1.7;
+          font-size: var(--text-body);
+          line-height: var(--leading-body);
         }
 
         .spark {
@@ -476,7 +475,8 @@ export default function ResearchReport() {
           gap: 9px;
           border-radius: 999px;
           padding: 14px 20px;
-          font-weight: 850;
+          font-size: var(--text-button);
+          font-weight: 600;
         }
 
         .primaryLink {
@@ -508,8 +508,9 @@ export default function ResearchReport() {
 
         .reportHeader h2 {
           margin: 0;
-          font-size: 46px;
-          letter-spacing: -0.04em;
+          font-size: var(--text-page);
+          line-height: var(--leading-heading);
+          letter-spacing: var(--tracking-heading);
         }
 
         .reportMeta {
@@ -527,7 +528,7 @@ export default function ResearchReport() {
 
         .reportMeta span {
           color: #aaa4c7;
-          font-size: 12px;
+          font-size: var(--text-meta);
           margin-bottom: 8px;
         }
 
@@ -538,15 +539,16 @@ export default function ResearchReport() {
         .reportSection h3,
         .draftSection h3 {
           margin: 0 0 20px;
-          font-size: 29px;
-          letter-spacing: -0.025em;
+          font-size: var(--text-section);
+          line-height: var(--leading-heading);
+          letter-spacing: var(--tracking-heading);
         }
 
         .reportSection p,
         .draftSection p {
           color: #d8d4e8;
-          font-size: 16px;
-          line-height: 1.75;
+          font-size: var(--text-body);
+          line-height: var(--leading-body);
         }
 
         .stats {
@@ -571,13 +573,13 @@ export default function ResearchReport() {
         .stat span {
           margin-bottom: 9px;
           color: #aaa4c7;
-          font-size: 12px;
+          font-size: var(--text-meta);
           text-transform: uppercase;
           letter-spacing: 0.08em;
         }
 
         .stat strong {
-          font-size: 30px;
+          font-size: var(--text-section);
         }
 
         .keywordBlock {
@@ -586,7 +588,8 @@ export default function ResearchReport() {
 
         .keywordBlock h4 {
           margin: 0 0 14px;
-          font-size: 19px;
+          font-size: var(--text-card);
+          font-weight: 600;
         }
 
         .keywordList {
@@ -635,14 +638,15 @@ export default function ResearchReport() {
           border-radius: 0 20px 20px 0;
           background: white;
           color: #24203d;
-          font-size: 18px;
-          line-height: 1.8;
+          font-size: var(--text-body);
+          line-height: var(--leading-body);
           box-shadow: 0 15px 45px rgba(75, 59, 160, 0.09);
         }
 
         .draftSection .draftNote {
           color: #716b8c;
-          font-size: 13px;
+          font-size: var(--text-meta);
+          line-height: var(--leading-helper);
         }
 
         .sourceDetails {
@@ -652,7 +656,8 @@ export default function ResearchReport() {
 
         .sourceDetails summary {
           cursor: pointer;
-          font-weight: 800;
+          font-size: var(--text-card);
+          font-weight: 600;
         }
 
         .sourceDetails p {
@@ -677,7 +682,7 @@ export default function ResearchReport() {
         .reportFooter div span,
         .reportFooter p {
           color: #aaa4c7;
-          font-size: 12px;
+          font-size: var(--text-meta);
         }
 
         .reportFooter p {

@@ -229,7 +229,7 @@ const styles = {
     background:
       "linear-gradient(180deg, #f7f9ff 0%, #ffffff 48%, #f6f8fc 100%)",
     color: "#111827",
-    fontFamily: "Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
+    fontFamily: "var(--font-ui)",
     direction: "inherit",
   },
   container: {
@@ -252,7 +252,7 @@ const styles = {
     color: "#111827",
     textDecoration: "none",
     fontSize: "18px",
-    fontWeight: "800",
+    fontWeight: "600",
   },
   brandMark: {
     width: "34px",
@@ -272,7 +272,7 @@ const styles = {
   navLink: {
     color: "#667085",
     textDecoration: "none",
-    fontSize: "14px",
+    fontSize: "var(--text-nav)",
     fontWeight: "600",
   },
   backLink: {
@@ -281,8 +281,8 @@ const styles = {
     border: "1px solid #dfe3ea",
     borderRadius: "999px",
     padding: "10px 16px",
-    fontSize: "13px",
-    fontWeight: "700",
+    fontSize: "var(--text-nav)",
+    fontWeight: "600",
     background: "#ffffff",
   },
   hero: {
@@ -295,22 +295,22 @@ const styles = {
   eyebrow: {
     margin: "0 0 12px",
     color: "#6366f1",
-    fontSize: "12px",
-    letterSpacing: "0.13em",
-    fontWeight: "800",
+    fontSize: "var(--text-meta)",
+    letterSpacing: "var(--tracking-overline)",
+    fontWeight: "600",
   },
   heroTitle: {
     margin: 0,
-    fontSize: "clamp(42px, 7vw, 76px)",
-    lineHeight: "1",
-    letterSpacing: "-0.055em",
+    fontSize: "var(--text-hero)",
+    lineHeight: "var(--leading-heading)",
+    letterSpacing: "var(--tracking-heading)",
   },
   heroLead: {
     maxWidth: "710px",
     margin: "24px 0 0",
     color: "#5f6878",
-    fontSize: "18px",
-    lineHeight: "1.75",
+    fontSize: "var(--text-body)",
+    lineHeight: "var(--leading-body)",
   },
   progressCard: {
     background: "#111827",
@@ -328,9 +328,9 @@ const styles = {
   miniLabel: {
     margin: "0 0 8px",
     color: "#aeb7c6",
-    fontSize: "11px",
-    letterSpacing: "0.11em",
-    fontWeight: "800",
+    fontSize: "var(--text-meta)",
+    letterSpacing: "var(--tracking-overline)",
+    fontWeight: "600",
   },
   progressValue: {
     fontSize: "48px",
@@ -339,7 +339,7 @@ const styles = {
   progressCount: {
     color: "#d1d5db",
     fontSize: "13px",
-    fontWeight: "700",
+    fontWeight: "600",
   },
   progressTrack: {
     height: "10px",
@@ -367,7 +367,7 @@ const styles = {
     background: "transparent",
     color: "#ffffff",
     cursor: "pointer",
-    fontWeight: "700",
+    fontWeight: "600",
   },
   section: {
     padding: "54px 0",
@@ -381,13 +381,15 @@ const styles = {
   },
   sectionTitle: {
     margin: 0,
-    fontSize: "clamp(30px, 5vw, 48px)",
-    letterSpacing: "-0.04em",
+    fontSize: "var(--text-page)",
+    lineHeight: "var(--leading-heading)",
+    letterSpacing: "var(--tracking-heading)",
   },
   sectionText: {
     margin: 0,
     color: "#6b7280",
-    lineHeight: "1.75",
+    fontSize: "var(--text-body)",
+    lineHeight: "var(--leading-body)",
   },
   grid: {
     display: "grid",
@@ -413,26 +415,28 @@ const styles = {
   pathNumber: {
     color: "#98a2b3",
     fontSize: "13px",
-    fontWeight: "800",
+    fontWeight: "600",
   },
   pathLabel: {
     padding: "7px 10px",
     borderRadius: "999px",
     background: "#f1f3ff",
     color: "#4f46e5",
-    fontSize: "10px",
-    letterSpacing: "0.08em",
-    fontWeight: "800",
+    fontSize: "var(--text-meta)",
+    letterSpacing: "var(--tracking-overline)",
+    fontWeight: "600",
   },
   cardTitle: {
     margin: "28px 0 12px",
-    fontSize: "25px",
-    letterSpacing: "-0.025em",
+    fontSize: "var(--text-card)",
+    lineHeight: "1.3",
+    letterSpacing: "var(--tracking-heading)",
   },
   cardDescription: {
     margin: 0,
     color: "#667085",
-    lineHeight: "1.75",
+    fontSize: "var(--text-body)",
+    lineHeight: "var(--leading-body)",
     flex: 1,
   },
   cardFooter: {
@@ -448,8 +452,8 @@ const styles = {
   primaryAction: {
     color: "#111827",
     textDecoration: "none",
-    fontSize: "14px",
-    fontWeight: "800",
+    fontSize: "var(--text-button)",
+    fontWeight: "600",
   },
   completeLabel: {
     display: "inline-flex",
@@ -457,7 +461,7 @@ const styles = {
     gap: "8px",
     color: "#667085",
     fontSize: "13px",
-    fontWeight: "700",
+    fontWeight: "600",
     cursor: "pointer",
   },
   aiSection: {
@@ -475,14 +479,16 @@ const styles = {
   },
   aiTitle: {
     margin: 0,
-    fontSize: "30px",
-    letterSpacing: "-0.035em",
+    fontSize: "var(--text-section)",
+    lineHeight: "var(--leading-heading)",
+    letterSpacing: "var(--tracking-heading)",
   },
   aiText: {
     maxWidth: "720px",
     margin: "12px 0 0",
     color: "#667085",
-    lineHeight: "1.7",
+    fontSize: "var(--text-body)",
+    lineHeight: "var(--leading-body)",
   },
   aiButton: {
     display: "inline-flex",
@@ -493,7 +499,7 @@ const styles = {
     background: "#111827",
     color: "#ffffff",
     textDecoration: "none",
-    fontSize: "14px",
-    fontWeight: "800",
+    fontSize: "var(--text-button)",
+    fontWeight: "600",
   },
 };

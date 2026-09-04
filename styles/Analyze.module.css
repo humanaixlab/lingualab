@@ -60,25 +60,25 @@
 .sectionLabel {
   margin: 0 0 17px;
   color: #634fff;
-  font-size: 12px;
+  font-size: var(--text-meta);
   font-weight: 900;
-  letter-spacing: 0.14em;
+  letter-spacing: var(--tracking-overline);
 }
 
 .hero h1 {
   max-width: 860px;
   margin: 0;
-  font-size: clamp(52px, 6.1vw, 92px);
-  line-height: 0.96;
-  letter-spacing: -0.065em;
+  font-size: var(--text-hero);
+  line-height: var(--leading-heading);
+  letter-spacing: var(--tracking-heading);
 }
 
 .lead {
   max-width: 790px;
   margin: 27px 0 0;
   color: #68647d;
-  font-size: 19px;
-  line-height: 1.65;
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
 }
 
 .heroNote {
@@ -93,7 +93,7 @@
   display: block;
   margin-bottom: 13px;
   color: #817b9b;
-  font-size: 11px;
+  font-size: var(--text-meta);
   letter-spacing: 0.11em;
 }
 
@@ -132,8 +132,9 @@
 .planner h2,
 .analysisSection h2 {
   margin: 0;
-  font-size: clamp(31px, 4vw, 52px);
-  letter-spacing: -0.045em;
+  font-size: var(--text-page);
+  line-height: var(--leading-heading);
+  letter-spacing: var(--tracking-heading);
 }
 
 .metrics {
@@ -154,7 +155,7 @@
   display: block;
   margin-bottom: 7px;
   color: #aaa5c0;
-  font-size: 11px;
+  font-size: var(--text-meta);
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -189,13 +190,13 @@
   color: #17142f;
   border-radius: 13px;
   background: #cfc8ff;
-  font-size: 12px;
+  font-size: var(--text-meta);
   font-weight: 900;
 }
 
 .stepStatus {
   color: #a99cff;
-  font-size: 11px;
+  font-size: var(--text-meta);
   font-weight: 850;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -203,7 +204,7 @@
 
 .step h3 {
   margin: 13px 0 12px;
-  font-size: 24px;
+  font-size: var(--text-card);
   letter-spacing: -0.03em;
 }
 
@@ -447,6 +448,18 @@
   box-shadow: 0 12px 28px rgba(23, 20, 47, 0.2);
 }
 
+.brand,
+.navLinks,
+.primaryButton,
+.secondaryButton,
+.interpreterButton { font-weight: 600; }
+.navLinks { font-size: var(--text-nav); }
+.eyebrow,.sectionLabel,.heroNote span,.metrics span,.statGrid span,.stepStatus { font-weight: 500; line-height: var(--leading-helper); }
+.heroNote strong,.step h3,.emptyState h3,.resultCard h3 { font-size: var(--text-card); font-weight: 600; line-height: 1.35; }
+.step p,.plannerFooter p,.analysisIntro>p:last-child,.emptyState p,.interpreterCopy p:last-child { font-size: var(--text-body); font-weight: 400; line-height: var(--leading-body); }
+.inputCard label { font-size: var(--text-helper); font-weight: 500; }
+.interpreterCopy h2 { font-size: var(--text-section); font-weight: 700; line-height: var(--leading-heading); letter-spacing: var(--tracking-heading); }
+
 @media (max-width: 900px) {
   .hero,
   .analysisGrid {
@@ -489,7 +502,7 @@
   }
 
   .hero h1 {
-    font-size: 49px;
+    font-size: var(--text-hero);
   }
 
   .plannerHeader,
