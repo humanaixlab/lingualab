@@ -6,7 +6,7 @@ export default function POS() {
 
   return (
     <div style={{ padding: 40, direction: "rtl" }}>
-      <Link href="/ar-tools#all-tools">← الرجوع إلى جميع الأدوات</Link>
+      <Link href="/tools/analyze">← الرجوع إلى جميع الأدوات</Link>
       <h1>تحليل POS (تجريبي)</h1>
 
       <textarea

@@ -40,7 +40,7 @@ export default function NgramsTool() {
   };
 
   return (
-    <Layout title="أداة الثنائيات والثلاثيات">
+    <Layout title="أداة الثنائيات والثلاثيات" backHref="/tools/analyze">
       <p style={{ color: "#4b5563", lineHeight: "1.8", marginBottom: "20px" }}>
         تعرض هذه الأداة التراكيب المتجاورة الأكثر تكرارًا في النص، وتساعد على
         اكتشاف الأنماط اللغوية والعبارات الشائعة.

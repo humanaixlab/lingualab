@@ -37,7 +37,7 @@ export default function ConcordanceTool() {
   };
 
   return (
-    <Layout title="أداة سياقات الكلمة">
+    <Layout title="أداة سياقات الكلمة" backHref="/tools/analyze">
       <p style={{ color: "#4b5563", lineHeight: "1.8", marginBottom: "20px" }}>
         تعرض هذه الأداة الكلمة أو العبارة داخل الجمل التي وردت فيها، مما يساعد
         على فهم معناها واستعمالها في السياق.

@@ -24,19 +24,15 @@ test("Home exposes exactly the four canonical intent destinations", () => {
   assert.match(home, /href="\/ar-tools#all-tools"/);
 });
 
-test("All Tools is the secondary directory and every tool back link targets it", () => {
+test("All Tools is the secondary directory and non-analysis tool back links target it", () => {
   const hub = source("pages/ar-tools.js");
   assert.match(hub, /id="all-tools"/);
   assert.match(hub, /aria-labelledby="all-tools-title"/);
   assert.match(hub, /hub\.allToolsLabel/);
   assert.ok(hub.indexOf("hub.pathTitle") < hub.indexOf('id="all-tools"'));
 
-  for (const path of [
-    "components/Layout.js",
-    "pages/tools/frequency.js",
-    "pages/tools/pos.js",
-    "pages/tools/colab.js",
-  ]) assert.match(source(path), /href="\/ar-tools#all-tools"/);
+  assert.match(source("components/Layout.js"), /backHref = "\/ar-tools#all-tools"/);
+  assert.match(source("pages/tools/colab.js"), /href="\/ar-tools#all-tools"/);
 
   for (const path of [
     "components/Layout.js",
@@ -47,6 +43,16 @@ test("All Tools is the secondary directory and every tool back link targets it",
     "pages/tools/pos.js",
     "pages/tools/colab.js",
   ]) assert.doesNotMatch(source(path), /href="\/tools"/);
+});
+
+test("corpus-analysis tools return to Analyze instead of the Research Interpreter section", () => {
+  for (const path of ["pages/tools/frequency.js", "pages/tools/pos.js"]) {
+    assert.match(source(path), /href="\/tools\/analyze"/);
+    assert.doesNotMatch(source(path), /href="\/ar-tools#all-tools"/);
+  }
+  for (const path of ["pages/tools/concordance.js", "pages/tools/ngrams.js"]) {
+    assert.match(source(path), /backHref="\/tools\/analyze"/);
+  }
 });
 
 test("Research Hub retains context-aware research destinations", () => {
@@ -95,6 +101,6 @@ test("Frequency, POS, and Colab remain renderable as standalone routes", async (
     vm.createContext(scope);
     vm.runInContext(code, scope);
     const html = renderToStaticMarkup(React.createElement(exports.default));
-    assert.match(html, /href="\/ar-tools#all-tools"/);
+    assert.match(html, name === "colab" ? /href="\/ar-tools#all-tools"/ : /href="\/tools\/analyze"/);
   }
 });

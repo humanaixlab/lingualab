@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { useLanguage } from "./LanguageProvider";
 
-export default function Layout({ title, children }) {
+export default function Layout({ title, children, backHref = "/ar-tools#all-tools" }) {
   const { direction, t } = useLanguage();
   return (
     <div
@@ -15,7 +15,7 @@ export default function Layout({ title, children }) {
       }}
     >
       <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
-        <Link href="/ar-tools#all-tools" style={{ textDecoration: "none" }}>
+        <Link href={backHref} style={{ textDecoration: "none" }}>
           <button
             style={{
               marginBottom: "20px",
