@@ -1,77 +1,61 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { useLanguage } from "../components/LanguageProvider";
 
 const learningPaths = [
   {
     id: "text-analysis",
-    label: "FOUNDATIONS",
-    title: "Text Analysis Basics",
-    description:
-      "Learn how to inspect Arabic text, identify useful patterns, and choose an appropriate analysis task.",
+    copyKey: "text",
     href: "/tools/analyze",
-    action: "Start text analysis",
     completed: false,
   },
   {
     id: "prompt-practice",
-    label: "AI LITERACY",
-    title: "Prompt Practice",
-    description:
-      "Practice writing clear instructions for AI tools and improve prompts through guided experimentation.",
+    copyKey: "prompt",
     href: "/tools/prompt",
-    action: "Practice prompting",
     completed: false,
   },
   {
     id: "code-learning",
-    label: "APPLIED NLP",
-    title: "Arabic NLP with Code",
-    description:
-      "Generate and study practical code for Arabic NLP, data preparation, and research-oriented analysis.",
+    copyKey: "code",
     href: "/tools/code",
-    action: "Open coding assistant",
     completed: false,
   },
   {
     id: "data-learning",
-    label: "RESEARCH DATA",
-    title: "Working with Research Data",
-    description:
-      "Explore structured datasets, understand columns and quality issues, and prepare data for analysis.",
+    copyKey: "data",
     href: "/tools/excel",
-    action: "Explore data tools",
     completed: false,
   },
 ];
 
-function ArrowIcon() {
-  return <span aria-hidden="true">↗</span>;
-}
-
 export default function LearningHubPage() {
+  const { t } = useLanguage();
   const [paths, setPaths] = useState(learningPaths);
 
   useEffect(() => {
+    let restoreTimer;
     const saved = localStorage.getItem("lingualab-learning-progress");
 
-    if (!saved) return;
+    if (!saved) return undefined;
 
     try {
       const parsed = JSON.parse(saved);
 
       if (Array.isArray(parsed)) {
-        setPaths(
+        restoreTimer = window.setTimeout(() => setPaths(
           learningPaths.map((path) => {
             const savedPath = parsed.find((item) => item.id === path.id);
             return savedPath
               ? { ...path, completed: Boolean(savedPath.completed) }
               : path;
           })
-        );
+        ), 0);
       }
     } catch (error) {
       console.error("Failed to load learning progress:", error);
     }
+    return () => window.clearTimeout(restoreTimer);
   }, []);
 
   useEffect(() => {
@@ -124,39 +108,38 @@ export default function LearningHubPage() {
 
           <div style={styles.navLinks}>
             <Link href="/workspace" style={styles.navLink}>
-              Workspace
+              {t("nav.openWorkspace")}
             </Link>
             <Link href="/ar-tools" style={styles.navLink}>
-              Research Hub
+              {t("nav.researchHub")}
             </Link>
             <Link href="/research-advisor" style={styles.navLink}>
-              Research Advisor
+              {t("nav.researchAdvisor")}
             </Link>
           </div>
 
           <Link href="/" style={styles.backLink}>
-            Back home
+            {t("learning.backHome")}
           </Link>
         </nav>
 
         <section style={styles.hero}>
           <div>
-            <p style={styles.eyebrow}>LEARN BY DOING</p>
-            <h1 style={styles.heroTitle}>Learning Hub</h1>
+            <p style={styles.eyebrow}>{t("learning.eyebrow")}</p>
+            <h1 style={styles.heroTitle}>{t("learning.title")}</h1>
             <p style={styles.heroLead}>
-              Build practical skills in Arabic NLP, AI prompting, research data,
-              and text analysis through guided hands-on activities.
+              {t("learning.lead")}
             </p>
           </div>
 
           <div style={styles.progressCard}>
             <div style={styles.progressTop}>
               <div>
-                <p style={styles.miniLabel}>SELF-GUIDED PROGRESS</p>
+                <p style={styles.miniLabel}>{t("learning.progressLabel")}</p>
                 <strong style={styles.progressValue}>{progress}%</strong>
               </div>
               <span style={styles.progressCount}>
-                {completedCount}/{paths.length} completed
+                {t("learning.completed", { done: completedCount, total: paths.length })}
               </span>
             </div>
 
@@ -170,12 +153,11 @@ export default function LearningHubPage() {
             </div>
 
             <p style={styles.progressNote}>
-              Progress is saved in this browser. Mark a path complete after you
-              finish its activity.
+              {t("learning.progressNote")}
             </p>
 
             <button type="button" onClick={resetProgress} style={styles.resetButton}>
-              Reset progress
+              {t("learning.reset")}
             </button>
           </div>
         </section>
@@ -183,12 +165,11 @@ export default function LearningHubPage() {
         <section style={styles.section}>
           <div style={styles.sectionHeading}>
             <div>
-              <p style={styles.eyebrow}>GUIDED LEARNING PATHS</p>
-              <h2 style={styles.sectionTitle}>Choose what you want to practice.</h2>
+              <p style={styles.eyebrow}>{t("learning.pathsLabel")}</p>
+              <h2 style={styles.sectionTitle}>{t("learning.pathsTitle")}</h2>
             </div>
             <p style={styles.sectionText}>
-              Each path connects directly to an active LinguaLab tool, so learning
-              happens through real tasks rather than isolated lessons.
+              {t("learning.pathsDescription")}
             </p>
           </div>
 
@@ -199,15 +180,15 @@ export default function LearningHubPage() {
                   <span style={styles.pathNumber}>
                     {String(index + 1).padStart(2, "0")}
                   </span>
-                  <span style={styles.pathLabel}>{path.label}</span>
+                  <span style={styles.pathLabel}>{t(`learning.paths.${path.copyKey}.label`)}</span>
                 </div>
 
-                <h3 style={styles.cardTitle}>{path.title}</h3>
-                <p style={styles.cardDescription}>{path.description}</p>
+                <h3 style={styles.cardTitle}>{t(`learning.paths.${path.copyKey}.title`)}</h3>
+                <p style={styles.cardDescription}>{t(`learning.paths.${path.copyKey}.description`)}</p>
 
                 <div style={styles.cardFooter}>
                   <Link href={path.href} style={styles.primaryAction}>
-                    {path.action} <ArrowIcon />
+                    {t(`learning.paths.${path.copyKey}.action`)}
                   </Link>
 
                   <label style={styles.completeLabel}>
@@ -216,7 +197,7 @@ export default function LearningHubPage() {
                       checked={path.completed}
                       onChange={() => togglePath(path.id)}
                     />
-                    <span>{path.completed ? "Completed" : "Mark complete"}</span>
+                    <span>{path.completed ? t("learning.complete") : t("learning.markComplete")}</span>
                   </label>
                 </div>
               </article>
@@ -226,16 +207,15 @@ export default function LearningHubPage() {
 
         <section style={styles.aiSection}>
           <div>
-            <p style={styles.eyebrow}>NEED DIRECTION?</p>
-            <h2 style={styles.aiTitle}>Ask the AI Research Advisor what to learn next.</h2>
+            <p style={styles.eyebrow}>{t("learning.optionalLabel")}</p>
+            <h2 style={styles.aiTitle}>{t("learning.optionalTitle")}</h2>
             <p style={styles.aiText}>
-              Describe your goal, research stage, or data, and receive a suggested
-              next step based on your project.
+              {t("learning.optionalText")}
             </p>
           </div>
 
           <Link href="/research-advisor" style={styles.aiButton}>
-            Open Research Advisor <ArrowIcon />
+            {t("learning.askAdvisor")}
           </Link>
         </section>
       </div>
@@ -250,7 +230,7 @@ const styles = {
       "linear-gradient(180deg, #f7f9ff 0%, #ffffff 48%, #f6f8fc 100%)",
     color: "#111827",
     fontFamily: "Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
-    direction: "ltr",
+    direction: "inherit",
   },
   container: {
     width: "min(1180px, calc(100% - 40px))",
@@ -517,4 +497,3 @@ const styles = {
     fontWeight: "800",
   },
 };
-

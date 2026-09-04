@@ -4,8 +4,11 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import { readResearchContext, analyzeContext } from "../../lib/research-context";
 import styles from "../../styles/Analyze.module.css";
+import { useLanguage } from "../../components/LanguageProvider";
 
 const DEFAULT_PLAN = {
+  variant: "default",
+  eyebrowVariant: "default",
   eyebrow: "AI ANALYSIS PLANNER",
   title: "A clear path from data to evidence.",
   summary:
@@ -46,6 +49,8 @@ function buildPlan(context) {
 
   return {
     ...DEFAULT_PLAN,
+    variant: hasLabels ? "labeled" : "corpus",
+    eyebrowVariant: hasArabic ? "labeled" : "default",
     title: hasLabels
       ? "Start with the strongest testable signal."
       : "Explore the corpus before choosing a model.",
@@ -85,6 +90,7 @@ function buildPlan(context) {
 }
 
 export default function Analyzer() {
+  const { language, t } = useLanguage();
   const [text, setText] = useState("");
   const [result, setResult] = useState(null);
   const [interpretation, setInterpretation] = useState(null);
@@ -98,6 +104,13 @@ export default function Analyzer() {
   }, [router.asPath]);
 
   const plan = useMemo(() => buildPlan(context), [context]);
+  const planVariant = plan.variant;
+  const planText = (field) => t(`analyze.plans.${field === "eyebrow" ? (plan.eyebrowVariant || planVariant) : planVariant}.${field}`);
+  const stepText = (index, part) => {
+    const translated = t(`analyze.plans.${planVariant}.s${index + 1}`);
+    const fallback = t(`analyze.plans.default.s${index + 1}`);
+    return (Array.isArray(translated) ? translated : fallback)[part];
+  };
 
   const analyzeText = () => {
     setInterpretation(null);
@@ -243,39 +256,36 @@ const interpretResults = async () => {
   return (
     <>
       <Head>
-        <title>AI Analysis Planner | LinguaLab</title>
+        <title>{t("analyze.pageTitle")}</title>
         <meta
           name="description"
-          content="Plan and run a focused Arabic-language analysis workflow with LinguaLab."
+          content={t("analyze.meta")}
         />
       </Head>
 
       <main className={styles.page}>
-        <nav className={styles.nav} aria-label="Primary navigation">
+        <nav className={styles.nav} aria-label={t("analyze.primaryNav")}>
           <Link href="/" className={styles.brand}>
             <span className={styles.brandMark}>L</span>
             <span>LinguaLab</span>
           </Link>
 
           <div className={styles.navLinks}>
-            <Link href="/workspace">Workspace</Link>
-            <Link href="/research-advisor">Research Advisor</Link>
+            <Link href="/workspace">{t("nav.workspace")}</Link>
+            <Link href="/research-advisor">{t("nav.researchAdvisor")}</Link>
           </div>
         </nav>
 
         <section className={styles.hero}>
           <div className={styles.heroCopy}>
-            <p className={styles.eyebrow}>{plan.eyebrow}</p>
-            <h1>{plan.title}</h1>
-            <p className={styles.lead}>{plan.summary}</p>
+            <p className={styles.eyebrow}>{planText("eyebrow")}</p>
+            <h1>{planText("title")}</h1>
+            <p className={styles.lead}>{planText("summary")}</p>
           </div>
 
           <div className={styles.heroNote}>
-            <span>RESEARCH PRINCIPLE</span>
-            <strong>
-              Choose the next analysis because it answers the question—not
-              because the tool exists.
-            </strong>
+            <span>{t("analyze.principleLabel")}</span>
+            <strong>{t("analyze.principle")}</strong>
           </div>
         </section>
 
@@ -286,20 +296,20 @@ const interpretResults = async () => {
           <div className={styles.plannerHeader}>
             <div>
               <p className={styles.sectionLabel}>
-                RECOMMENDED WORKFLOW
+                {t("analyze.workflowLabel")}
               </p>
-              <h2 id="planner-title">Your analysis plan</h2>
+              <h2 id="planner-title">{t("analyze.planTitle")}</h2>
             </div>
 
             <div className={styles.metrics}>
               <div>
-                <span>Confidence</span>
+                <span>{t("analyze.confidence")}</span>
                 <strong>{plan.confidence}%</strong>
               </div>
 
               <div>
-                <span>Estimated time</span>
-                <strong>{plan.estimatedTime}</strong>
+                <span>{t("analyze.estimatedTime")}</span>
+                <strong>{t("analyze.minutes")}</strong>
               </div>
             </div>
           </div>
@@ -313,10 +323,10 @@ const interpretResults = async () => {
 
                 <div>
                   <span className={styles.stepStatus}>
-                    {step.status}
+                    {stepText(Number(step.number) - 1, 2)}
                   </span>
-                  <h3>{step.title}</h3>
-                  <p>{step.description}</p>
+                  <h3>{stepText(Number(step.number) - 1, 0)}</h3>
+                  <p>{stepText(Number(step.number) - 1, 1)}</p>
                 </div>
               </article>
             ))}
@@ -324,8 +334,7 @@ const interpretResults = async () => {
 
           <div className={styles.plannerFooter}>
             <p>
-              The planner guides the sequence. You remain in control of
-              the interpretation and research claim.
+              {t("analyze.plannerNote")}
             </p>
 
             <button
@@ -333,7 +342,7 @@ const interpretResults = async () => {
               onClick={startWorkflow}
               className={styles.primaryButton}
             >
-              Start recommended workflow
+              {t("analyze.start")}
               <span aria-hidden="true">↘</span>
             </button>
           </div>
@@ -345,22 +354,20 @@ const interpretResults = async () => {
         >
           <div className={styles.analysisIntro}>
             <p className={styles.sectionLabel}>
-              01 · TEXT PROFILE
+              {t("analyze.quickLabel")}
             </p>
-            <h2>Run a quick text analysis</h2>
-            <p>
-              Paste a sample to establish its size and most frequent
-              words before moving to deeper analysis.
-            </p>
+            <h2>{t("analyze.quickTitle")}</h2>
+            <p>{t("analyze.quickText")}</p>
           </div>
 
           <div className={styles.analysisGrid}>
             <div className={styles.inputCard}>
-              <label htmlFor="analysis-text">Text sample</label>
+              <label htmlFor="analysis-text">{t("analyze.sample")}</label>
 
               <textarea
                 id="analysis-text"
-                placeholder="Paste Arabic or English text here..."
+                placeholder={t("analyze.placeholder")}
+                dir="auto"
                 value={text}
                 onChange={(event) => setText(event.target.value)}
               />
@@ -371,7 +378,7 @@ const interpretResults = async () => {
                 className={styles.secondaryButton}
                 disabled={!text.trim()}
               >
-                Analyze text
+                {t("analyze.run")}
               </button>
             </div>
 
@@ -382,43 +389,40 @@ const interpretResults = async () => {
               {!result ? (
                 <div className={styles.emptyState}>
                   <span>✦</span>
-                  <h3>Your first evidence appears here.</h3>
-                  <p>
-                    Run the text profile to reveal counts and
-                    recurring language signals.
-                  </p>
+                  <h3>{t("analyze.emptyTitle")}</h3>
+                  <p>{t("analyze.emptyText")}</p>
                 </div>
               ) : (
                 <>
                   <p className={styles.sectionLabel}>
-                    ANALYSIS COMPLETE
+                    {t("analyze.complete")}
                   </p>
 
                   <div className={styles.statGrid}>
                     <div>
-                      <span>Words</span>
-                      <strong>{result.wordCount}</strong>
+                      <span>{t("analyze.words")}</span>
+                      <strong>{result.wordCount.toLocaleString(language)}</strong>
                     </div>
 
                     <div>
-                      <span>Sentences</span>
-                      <strong>{result.sentenceCount}</strong>
+                      <span>{t("analyze.sentences")}</span>
+                      <strong>{result.sentenceCount.toLocaleString(language)}</strong>
                     </div>
                   </div>
 
-                  <h3>Most frequent words</h3>
+                  <h3>{t("analyze.frequent")}</h3>
 
                   {result.topWords.length ? (
                     <ol className={styles.wordList}>
                       {result.topWords.map(([word, count]) => (
                         <li key={word}>
-                          <span>{word}</span>
+                          <span dir="auto">{word}</span>
                           <strong>{count}</strong>
                         </li>
                       ))}
                     </ol>
                   ) : (
-                    <p>No recurring words were found.</p>
+                    <p>{t("analyze.none")}</p>
                   )}
                 </>
               )}
@@ -439,17 +443,15 @@ const interpretResults = async () => {
 
               <div className={styles.interpreterCopy}>
                 <p className={styles.sectionLabel}>
-                  AI RESEARCH INTERPRETER
+                  {t("analyze.interpreterLabel")}
                 </p>
 
                 <h2 id="interpreter-title">
-                  Turn descriptive results into research meaning.
+                  {t("analyze.interpreterTitle")}
                 </h2>
 
                 <p>
-                  LinguaLab can interpret the pattern, identify
-                  methodological limits, recommend the next analysis,
-                  and draft a research-ready paragraph.
+                  {t("analyze.interpreterText")}
                 </p>
               </div>
 
@@ -460,8 +462,8 @@ const interpretResults = async () => {
                 disabled={loadingInterpretation}
               >
                 {loadingInterpretation
-                  ? "Interpreting..."
-                  : "Interpret results"}
+                  ? t("analyze.interpreting")
+                  : t("analyze.interpret")}
                 <span aria-hidden="true">✦</span>
               </button>
             </section>
@@ -474,10 +476,10 @@ const interpretResults = async () => {
               aria-live="assertive"
             >
               <p className={styles.sectionLabel}>
-                INTERPRETATION ERROR
+                {t("analyze.errorLabel")}
               </p>
-              <h3>LinguaLab could not interpret the results.</h3>
-              <p>{interpretationError}</p>
+              <h3>{t("analyze.errorTitle")}</h3>
+              <p dir="auto">{interpretationError}</p>
             </div>
           )}
 
@@ -488,57 +490,56 @@ const interpretResults = async () => {
               aria-live="polite"
             >
               <p className={styles.sectionLabel}>
-                AI RESEARCH INTERPRETATION
+                {t("analyze.resultLabel")}
               </p>
 
               <h2 id="interpretation-title">
-                What these findings may mean
+                {t("analyze.resultTitle")}
               </h2>
 
               {interpretation.mode === "preview" && (
                 <p>
-                  Preview mode is active. Add an OpenAI API key to
-                  generate a model-based interpretation.
+                  {t("analyze.preview")}
                 </p>
               )}
 
               <div>
-                <h3>Interpretation</h3>
-                <p>
+                <h3>{t("analyze.interpretation")}</h3>
+                <p dir="auto">
                   {interpretation.interpretation ||
-                    "No interpretation was returned."}
+                    t("analyze.noInterpretation")}
                 </p>
               </div>
 
               <div>
-                <h3>Methodological implications</h3>
-                <p>
+                <h3>{t("analyze.methodology")}</h3>
+                <p dir="auto">
                   {methodology ||
-                    "No methodological implications were returned."}
+                    t("analyze.noMethodology")}
                 </p>
               </div>
 
               <div>
-                <h3>Limitations</h3>
-                <p>
+                <h3>{t("analyze.limitations")}</h3>
+                <p dir="auto">
                   {interpretation.limitations ||
-                    "No limitations were returned."}
+                    t("analyze.noLimitations")}
                 </p>
               </div>
 
               <div>
-                <h3>Recommended next analysis</h3>
-                <p>
+                <h3>{t("analyze.next")}</h3>
+                <p dir="auto">
                   {nextStep ||
-                    "No next analysis was returned."}
+                    t("analyze.noNext")}
                 </p>
               </div>
 
               <div>
-                <h3>Research-ready paragraph</h3>
-                <p>
+                <h3>{t("analyze.draft")}</h3>
+                <p dir="auto">
                   {paperParagraph ||
-                    "No draft paragraph was returned."}
+                    t("analyze.noDraft")}
                 </p>
               </div>
             </section>

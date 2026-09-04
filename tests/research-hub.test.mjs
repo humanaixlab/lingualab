@@ -19,6 +19,12 @@ const { code } = await swc.transform(hubSource, {
 });
 const current = { source: "dataset-understanding", handoffId: "current-five", fileName: "current.csv", rows: 5, createdAt: new Date().toISOString() };
 const query = "?from=workspace&handoffId=current-five";
+const hubCopy = {
+  "nav.openWorkspace": "Open Workspace", "nav.researchAdvisor": "Research Advisor", "hub.pageName": "Research Hub", "hub.heroTitle": "Choose the next step in your research workflow.", "hub.heroText": "Research journey", "hub.currentDataset": "Current dataset: {filename} · {count} records", "hub.guidanceLabel": "GENERAL WORKFLOW GUIDANCE", "hub.pathTitle": "Recommended Research Path", "hub.pathText": "General path", "hub.allToolsLabel": "SECONDARY DIRECTORY", "hub.allToolsTitle": "All Tools", "hub.allToolsText": "Browse tools", "hub.featured": "Featured",
+};
+for (const [key, title] of Object.entries({ understand: "Understand your dataset", design: "Design your study", explore: "Explore linguistic patterns", run: "Run or prepare analysis", report: "Review and report" })) { hubCopy[`hub.stages.${key}.title`] = title; hubCopy[`hub.stages.${key}.description`] = "Description"; }
+for (const [key, label] of Object.entries({ workspace: "Open Workspace", copilot: "Use Research Copilot", advisor: "Research Advisor", frequency: "Frequency", concordance: "Concordance", ngrams: "N-grams", analyze: "Analyze", code: "Code", excel: "Excel", colab: "Colab", report: "Research Report" })) for (const stage of ["understand", "design", "explore", "run", "report"]) hubCopy[`hub.stages.${stage}.${key}`] = label;
+const testTranslate = (key, variables = {}) => String(hubCopy[key] || key).replace(/\{(\w+)\}/g, (_, name) => variables[name]);
 
 function harness(saved = null, search = "") {
   let context = null;
@@ -43,6 +49,7 @@ function harness(saved = null, search = "") {
       if (name === "next/router") return { useRouter: () => ({ asPath: "/ar-tools" + search }) };
       if (name === "next/link") return function MockLink({ children, ...props }) { return React.createElement("a", props, children); };
       if (name === "../lib/research-context") return { readResearchContext: scope.readResearchContext, researchContextHref: scope.researchContextHref, RESEARCH_CONTEXT_TTL_MS: 30 * 60 * 1000 };
+      if (name === "../components/LanguageProvider") return { useLanguage: () => ({ language: "en", direction: "ltr", t: testTranslate }) };
       return require(name);
     },
   };

@@ -2,121 +2,80 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { readResearchContext, researchContextHref, RESEARCH_CONTEXT_TTL_MS } from "../lib/research-context";
+import { useLanguage } from "../components/LanguageProvider";
 
 const sections = [
   {
-    eyebrow: "AI RESEARCH",
-    title: "AI Research",
-    description:
-      "Move from descriptive results to defensible interpretation, guidance, and reporting.",
+    key: "research",
     tools: [
       {
-        title: "AI Research Interpreter",
-        description:
-          "Turn descriptive findings into a research interpretation, methodological implications, limitations, and a next step.",
+        key: "interpreter",
         link: "/tools/analyze",
         featured: true,
-        badge: "Featured",
         icon: "✦",
       },
       {
-        title: "Research Advisor",
-        description:
-          "Get a focused analysis plan based on the research question rather than the available tools.",
+        key: "advisor",
         link: "/research-advisor",
         icon: "◎",
       },
       {
-        title: "Research Report",
-        description:
-          "Open the saved analysis as a structured, research-ready report.",
+        key: "report",
         link: "/research-report",
         icon: "↗",
       },
     ],
   },
   {
-    eyebrow: "CORPUS ANALYSIS",
-    title: "Corpus Analysis",
-    description:
-      "Explore recurring forms, context, and lexical patterns in Arabic text.",
+    key: "corpus",
     tools: [
       {
-        title: "Text Analysis",
-        description:
-          "Create a focused lexical profile before moving to deeper interpretation.",
-        link: "/tools/analyze",
-        icon: "01",
-      },
-      {
-        title: "Frequency Analysis",
-        description:
-          "Identify the most frequent lexical items in a text or dataset.",
+        key: "frequency",
         link: "/tools/frequency",
         icon: "02",
       },
       {
-        title: "Concordance",
-        description:
-          "Inspect words and expressions inside their surrounding context.",
+        key: "concordance",
         link: "/tools/concordance",
         icon: "03",
       },
       {
-        title: "N-grams",
-        description:
-          "Discover recurring multi-word sequences and phrase-level patterns.",
+        key: "ngrams",
         link: "/tools/ngrams",
         icon: "04",
       },
       {
-        title: "POS Analysis",
-        description:
-          "Explore initial part-of-speech patterns in the submitted text.",
+        key: "pos",
         link: "/tools/pos",
         icon: "05",
       },
     ],
   },
   {
-    eyebrow: "DATA & WORKFLOWS",
-    title: "Data and Computational Workflows",
-    description:
-      "Move from structured data to reproducible computational experiments.",
+    key: "workflows",
     tools: [
       {
-        title: "Excel Workflow",
-        description:
-          "Start from a structured spreadsheet and prepare columns for analysis.",
+        key: "excel",
         link: "/tools/excel",
         icon: "X",
       },
       {
-        title: "Code Generator",
-        description:
-          "Generate a clear starting point for the computational workflow you need.",
+        key: "code",
         link: "/tools/code",
         icon: "</>",
       },
       {
-        title: "Google Colab",
-        description:
-          "Continue the workflow in a cloud notebook for experimentation and reproducibility.",
+        key: "colab",
         link: "/tools/colab",
         icon: "C",
       },
     ],
   },
   {
-    eyebrow: "RESEARCH WRITING",
-    title: "Research Writing Support",
-    description:
-      "Create clearer prompts and more structured instructions for research tasks.",
+    key: "writing",
     tools: [
       {
-        title: "Prompt Helper",
-        description:
-          "Turn a research objective into a precise and structured prompt.",
+        key: "prompt",
         link: "/tools/prompt",
         icon: "P",
       },
@@ -126,53 +85,43 @@ const sections = [
 
 const recommendedPath = [
   {
-    title: "Understand your dataset",
-    description:
-      "Use Workspace to inspect structure, language coverage, missing values, duplicates, and labels.",
-    links: [{ label: "Open Workspace", href: "/workspace" }],
+    key: "understand",
+    links: [{ key: "workspace", href: "/workspace" }],
   },
   {
-    title: "Design your study",
-    description:
-      "Use AI Research Copilot after dataset inspection, or open Research Advisor for broader research-planning guidance.",
+    key: "design",
     links: [
-      { label: "Use Research Copilot", href: "/workspace" },
-      { label: "Research Advisor", href: "/research-advisor" },
+      { key: "copilot", href: "/workspace", copilot: true },
+      { key: "advisor", href: "/research-advisor" },
     ],
   },
   {
-    title: "Explore linguistic patterns",
-    description:
-      "Use frequency, concordance, and recurring-sequence tools to examine forms, context, and phrase-level patterns.",
+    key: "explore",
     links: [
-      { label: "Frequency", href: "/tools/frequency" },
-      { label: "Concordance", href: "/tools/concordance" },
-      { label: "N-grams", href: "/tools/ngrams" },
+      { key: "frequency", href: "/tools/frequency" },
+      { key: "concordance", href: "/tools/concordance" },
+      { key: "ngrams", href: "/tools/ngrams" },
     ],
   },
   {
-    title: "Run or prepare analysis",
-    description:
-      "Choose the analysis, code, spreadsheet, or notebook workflow that fits the evidence you need to produce.",
+    key: "run",
     links: [
-      { label: "Analyze", href: "/tools/analyze" },
-      { label: "Code", href: "/tools/code" },
-      { label: "Excel", href: "/tools/excel" },
-      { label: "Colab", href: "/tools/colab" },
+      { key: "analyze", href: "/tools/analyze" },
+      { key: "code", href: "/tools/code" },
+      { key: "excel", href: "/tools/excel" },
+      { key: "colab", href: "/tools/colab" },
     ],
   },
   {
-    title: "Review and report",
-    description:
-      "Interpret the findings cautiously, document limitations, and turn the completed analysis into a research-ready report.",
+    key: "report",
     links: [
-      { label: "Interpret findings", href: "/tools/analyze" },
-      { label: "Research Report", href: "/research-report" },
+      { key: "report", href: "/research-report" },
     ],
   },
 ];
 
 export default function ArabicToolsPage() {
+  const { language, t } = useLanguage();
   const router = useRouter();
   const [context, setContext] = useState(null);
   useEffect(() => {
@@ -224,7 +173,7 @@ export default function ArabicToolsPage() {
           }}
         >
           <Link
-            href="/workspace"
+            href="/"
             style={{
               display: "inline-flex",
               alignItems: "center",
@@ -262,7 +211,7 @@ export default function ArabicToolsPage() {
                 fontSize: "14px",
               }}
             >
-              Workspace
+              {t("nav.openWorkspace")}
             </Link>
             <Link
               href={contextHref("/research-advisor")}
@@ -273,7 +222,7 @@ export default function ArabicToolsPage() {
                 fontSize: "14px",
               }}
             >
-              Research Advisor
+              {t("nav.researchAdvisor")}
             </Link>
           </nav>
         </header>
@@ -288,7 +237,7 @@ export default function ArabicToolsPage() {
               letterSpacing: "0.16em",
             }}
           >
-            Research Hub
+            {t("hub.pageName")}
           </p>
 
           <h1
@@ -300,7 +249,7 @@ export default function ArabicToolsPage() {
               letterSpacing: "-0.04em",
             }}
           >
-            Choose the next step in your research workflow.
+            {t("hub.heroTitle")}
           </h1>
 
           <p
@@ -312,14 +261,13 @@ export default function ArabicToolsPage() {
               lineHeight: 1.8,
             }}
           >
-            Navigate your research journey—from understanding your data to AI guidance,
-            linguistic analysis, interpretation, and publication-ready reporting.
+            {t("hub.heroText")}
           </p>
         </section>
 
         {context && (
-          <p role="status" style={{ margin: "0 0 20px", padding: "12px 16px", border: "1px solid rgba(112, 91, 255, 0.2)", borderRadius: "12px", background: "#efedff", color: "#4c43ce", fontSize: "13px" }}>
-            Current dataset: {context.fileName} · {context.rows.toLocaleString()} records
+          <p role="status" dir="auto" style={{ margin: "0 0 20px", padding: "12px 16px", border: "1px solid rgba(112, 91, 255, 0.2)", borderRadius: "12px", background: "#efedff", color: "#4c43ce", fontSize: "13px" }}>
+            {t("hub.currentDataset", { filename: context.fileName, count: context.rows.toLocaleString(language) })}
           </p>
         )}
 
@@ -345,7 +293,7 @@ export default function ArabicToolsPage() {
                 letterSpacing: "0.14em",
               }}
             >
-              GENERAL WORKFLOW GUIDANCE
+              {t("hub.guidanceLabel")}
             </p>
             <h2
               id="recommended-research-path"
@@ -355,7 +303,7 @@ export default function ArabicToolsPage() {
                 letterSpacing: "-0.03em",
               }}
             >
-              Recommended Research Path
+              {t("hub.pathTitle")}
             </h2>
             <p
               style={{
@@ -365,8 +313,7 @@ export default function ArabicToolsPage() {
                 lineHeight: 1.7,
               }}
             >
-              This workflow illustrates a typical research journey. Choose the steps
-              that best match your research question, dataset, and methodological needs.
+              {t("hub.pathText")}
             </p>
           </div>
 
@@ -379,7 +326,7 @@ export default function ArabicToolsPage() {
           >
             {recommendedPath.map((step, index) => (
               <article
-                key={step.title}
+                key={step.key}
                 style={{
                   minHeight: "220px",
                   padding: "19px",
@@ -413,7 +360,7 @@ export default function ArabicToolsPage() {
                     letterSpacing: "-0.02em",
                   }}
                 >
-                  {step.title}
+                  {t(`hub.stages.${step.key}.title`)}
                 </h3>
                 <p
                   style={{
@@ -423,7 +370,7 @@ export default function ArabicToolsPage() {
                     lineHeight: 1.65,
                   }}
                 >
-                  {step.description}
+                  {t(`hub.stages.${step.key}.description`)}
                 </p>
                 <div
                   style={{
@@ -436,8 +383,8 @@ export default function ArabicToolsPage() {
                 >
                   {step.links.map((link) => (
                     <Link
-                      key={`${step.title}-${link.label}`}
-                      href={contextHref(context && link.label === "Use Research Copilot" ? "/workspace?copilot=1" : link.href)}
+                      key={`${step.key}-${link.key}`}
+                      href={contextHref(context && link.copilot ? "/workspace?copilot=1" : link.href)}
                       style={{
                         padding: "7px 9px",
                         borderRadius: "999px",
@@ -448,7 +395,7 @@ export default function ArabicToolsPage() {
                         textDecoration: "none",
                       }}
                     >
-                      {link.label} ↗
+                      {t(`hub.stages.${step.key}.${link.key}`)} ↗
                     </Link>
                   ))}
                 </div>
@@ -457,10 +404,27 @@ export default function ArabicToolsPage() {
           </div>
         </section>
 
-        <div style={{ display: "grid", gap: "24px" }}>
+        <section
+          id="all-tools"
+          aria-labelledby="all-tools-title"
+          style={{ scrollMarginTop: "24px" }}
+        >
+          <div style={{ maxWidth: "760px", margin: "42px 0 22px" }}>
+            <p style={{ margin: "0 0 8px", color: "#6258f5", fontWeight: 800, fontSize: "10px", letterSpacing: "0.14em" }}>
+              {t("hub.allToolsLabel")}
+            </p>
+            <h2 id="all-tools-title" style={{ margin: 0, fontSize: "clamp(28px, 4vw, 42px)", letterSpacing: "-0.035em" }}>
+              {t("hub.allToolsTitle")}
+            </h2>
+            <p style={{ margin: "12px 0 0", color: "#706c88", fontSize: "14px", lineHeight: 1.7 }}>
+              {t("hub.allToolsText")}
+            </p>
+          </div>
+
+          <div style={{ display: "grid", gap: "24px" }}>
           {sections.map((section) => (
             <section
-              key={section.eyebrow}
+              key={section.key}
               style={{
                 padding: "26px",
                 border: "1px solid rgba(73, 67, 137, 0.13)",
@@ -489,7 +453,7 @@ export default function ArabicToolsPage() {
                       letterSpacing: "0.14em",
                     }}
                   >
-                    {section.eyebrow}
+                    {t(`hub.sections.${section.key}.eyebrow`)}
                   </p>
                   <h2
                     style={{
@@ -498,7 +462,7 @@ export default function ArabicToolsPage() {
                       letterSpacing: "-0.03em",
                     }}
                   >
-                    {section.title}
+                    {t(`hub.sections.${section.key}.title`)}
                   </h2>
                 </div>
 
@@ -511,7 +475,7 @@ export default function ArabicToolsPage() {
                     fontSize: "14px",
                   }}
                 >
-                  {section.description}
+                  {t(`hub.sections.${section.key}.description`)}
                 </p>
               </div>
 
@@ -524,7 +488,7 @@ export default function ArabicToolsPage() {
               >
                 {section.tools.map((tool) => (
                   <Link
-                    key={tool.title}
+                    key={tool.key}
                     href={contextHref(tool.link)}
                     style={{
                       color: "inherit",
@@ -594,7 +558,7 @@ export default function ArabicToolsPage() {
                                 textTransform: "uppercase",
                               }}
                             >
-                              {tool.badge}
+                              {t("hub.featured")}
                             </span>
                           ) : null}
                         </div>
@@ -606,7 +570,7 @@ export default function ArabicToolsPage() {
                             letterSpacing: "-0.025em",
                           }}
                         >
-                          {tool.title}
+                          {t(`hub.tools.${tool.key}.title`)}
                         </h3>
 
                         <p
@@ -617,7 +581,7 @@ export default function ArabicToolsPage() {
                             fontSize: "13px",
                           }}
                         >
-                          {tool.description}
+                            {t(`hub.tools.${tool.key}.description`)}
                         </p>
                       </div>
 
@@ -640,7 +604,8 @@ export default function ArabicToolsPage() {
               </div>
             </section>
           ))}
-        </div>
+          </div>
+        </section>
       </div>
     </main>
   );

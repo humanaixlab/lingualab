@@ -1,7 +1,9 @@
 import Link from "next/link";
 import SmartAssistant from "./SmartAssistant";
+import { useLanguage } from "./LanguageProvider";
 
 export default function Layout({ title, children }) {
+  const { direction, t } = useLanguage();
   return (
     <div
       style={{
@@ -14,7 +16,7 @@ export default function Layout({ title, children }) {
       }}
     >
       <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
-        <Link href="/tools" style={{ textDecoration: "none" }}>
+        <Link href="/ar-tools#all-tools" style={{ textDecoration: "none" }}>
           <button
             style={{
               marginBottom: "20px",
@@ -27,7 +29,7 @@ export default function Layout({ title, children }) {
               fontSize: "13px",
             }}
           >
-            ← الرجوع إلى الأدوات
+            {t("common.backToAllTools")}
           </button>
         </Link>
 
@@ -38,8 +40,8 @@ export default function Layout({ title, children }) {
             padding: "30px",
             border: "1px solid rgba(255,255,255,0.08)",
             boxShadow: "0 20px 50px rgba(0,0,0,0.4)",
-            direction: "rtl",
-            textAlign: "right",
+            direction,
+            textAlign: "start",
           }}
         >
           <h1
@@ -62,7 +64,7 @@ export default function Layout({ title, children }) {
               fontSize: "14px",
             }}
           >
-            أدوات ذكية لتحليل اللغة العربية وتجربة تفاعلية متقدمة
+            {t("common.smartToolsDescription")}
           </p>
 
           <div

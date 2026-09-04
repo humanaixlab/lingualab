@@ -1,39 +1,41 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
+import { useLanguage } from "./LanguageProvider";
 
 const suggestions = [
-  "كيف أبدأ تحليل نص عربي؟",
-  "ما الفرق بين POS و N-grams؟",
-  "ما الأداة المناسبة لتحليل التكرار؟",
+  { id: "text", key: "assistant.textAnalysis" },
+  { id: "pos", key: "assistant.posDifference" },
+  { id: "frequency", key: "assistant.frequencyTool" },
 ];
 
 export default function SmartAssistant() {
   const router = useRouter();
+  const { direction, t } = useLanguage();
   const [messages, setMessages] = useState([
-    { role: "assistant", content: "مرحبًا 👋 أنا مساعد LinguaLab" },
+    { role: "assistant", key: "assistant.welcome" },
   ]);
 
-  const handleClick = (text) => {
+  const handleClick = (suggestion) => {
     let response = "";
     let route = null;
 
-    if (text.includes("تحليل نص")) {
-      response = "جاري توجيهك إلى أداة Analyze...";
+    if (suggestion.id === "text") {
+      response = "assistant.routingAnalyze";
       route = "/tools/analyze";
-    } else if (text.includes("POS")) {
-      response = "جاري توجيهك إلى أداة POS...";
+    } else if (suggestion.id === "pos") {
+      response = "assistant.routingPos";
       route = "/tools/pos";
-    } else if (text.includes("التكرار")) {
-      response = "جاري توجيهك إلى أداة Frequency...";
+    } else if (suggestion.id === "frequency") {
+      response = "assistant.routingFrequency";
       route = "/tools/frequency";
     } else {
-      response = "يمكنني مساعدتك في اختيار الأداة المناسبة ✨";
+      response = "assistant.fallback";
     }
 
     setMessages((prev) => [
       ...prev,
-      { role: "user", content: text },
-      { role: "assistant", content: response },
+      { role: "user", key: suggestion.key },
+      { role: "assistant", key: response },
     ]);
 
     if (route) {
@@ -52,7 +54,7 @@ export default function SmartAssistant() {
         borderRadius: "16px",
         boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
         overflow: "hidden",
-        direction: "rtl",
+        direction,
         fontFamily: "Arial, sans-serif",
         zIndex: 9999,
       }}
@@ -66,7 +68,7 @@ export default function SmartAssistant() {
           boxShadow: "0 4px 14px rgba(0,0,0,0.15)",
         }}
       >
-        مساعد LinguaLab
+        {t("assistant.title")}
       </div>
 
       <div
@@ -89,16 +91,16 @@ export default function SmartAssistant() {
               color: "#111827",
             }}
           >
-            {m.content}
+              {t(m.key)}
           </div>
         ))}
       </div>
 
       <div style={{ padding: "10px", background: "#fff" }}>
-        {suggestions.map((s) => (
+        {suggestions.map((suggestion) => (
           <button
-            key={s}
-            onClick={() => handleClick(s)}
+            key={suggestion.id}
+            onClick={() => handleClick(suggestion)}
             style={{
               width: "100%",
               marginBottom: "8px",
@@ -110,7 +112,7 @@ export default function SmartAssistant() {
               fontSize: "15px",
             }}
           >
-            {s}
+            {t(suggestion.key)}
           </button>
         ))}
       </div>

@@ -2,6 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/router";
+import { useLanguage } from "../components/LanguageProvider";
 import { readResearchContext, hubCopilotMetadata } from "../lib/research-context";
 import styles from "../styles/Workspace.module.css";
 
@@ -312,60 +313,63 @@ function escapeHtml(value) {
     .replace(/'/g, "&#039;");
 }
 
-function buildInsights(dataset, workflowResult, textColumn, labelColumn) {
+function buildInsights(dataset, workflowResult, textColumn, labelColumn, language, t) {
   if (!dataset || !workflowResult) return [];
   const insights = [];
-  insights.push(`${dataset.rows.toLocaleString()} records were analyzed across ${dataset.columns} columns.`);
-  if (dataset.arabicRatio >= 0.5) insights.push(`${Math.round(dataset.arabicRatio * 100)}% of the sampled text contains Arabic script.`);
-  if (dataset.missingPercent > 0) insights.push(`${dataset.missingPercent.toFixed(1)}% of all cells are missing and should be reviewed.`);
-  if (dataset.duplicateCount > 0) insights.push(`${dataset.duplicateCount} possible duplicate text records may affect the analysis.`);
+  insights.push(t("workspace.insights.records", { rows: dataset.rows.toLocaleString(language), columns: dataset.columns.toLocaleString(language) }));
+  if (dataset.arabicRatio >= 0.5) insights.push(t("workspace.insights.arabic", { percent: Math.round(dataset.arabicRatio * 100).toLocaleString(language) }));
+  if (dataset.missingPercent > 0) insights.push(t("workspace.insights.missing", { percent: dataset.missingPercent.toLocaleString(language, { maximumFractionDigits: 1 }) }));
+  if (dataset.duplicateCount > 0) insights.push(t("workspace.insights.duplicates", { count: dataset.duplicateCount.toLocaleString(language) }));
 
   if (workflowResult.mode === "classification") {
     const data = workflowResult.data;
-    insights.push(`The baseline model achieved ${Math.round(data.accuracy * 100)}% accuracy on ${data.testSize} held-out records.`);
-    if (data.testSize < 10) insights.push("The test set is very small, so the score should be treated as exploratory rather than conclusive.");
-    else if (data.accuracy >= 0.8) insights.push("The current labels are reasonably separable; error analysis and cross-validation are the strongest next steps.");
-    else insights.push("The baseline indicates a need to review class balance, ambiguous labels, and preprocessing choices.");
-    if (dataset.imbalance >= 2) insights.push("The class distribution is imbalanced, which may bias model performance toward the largest class.");
-    insights.push(`The workflow used “${textColumn}” as input and “${labelColumn}” as the target label.`);
+    insights.push(t("workspace.insights.accuracy", { percent: Math.round(data.accuracy * 100).toLocaleString(language), count: data.testSize.toLocaleString(language) }));
+    if (data.testSize < 10) insights.push(t("workspace.insights.tinyTest"));
+    else if (data.accuracy >= 0.8) insights.push(t("workspace.insights.separable"));
+    else insights.push(t("workspace.insights.review"));
+    if (dataset.imbalance >= 2) insights.push(t("workspace.insights.imbalanced"));
+    insights.push(t("workspace.insights.columnsUsed", { text: textColumn, label: labelColumn }));
   } else {
     const data = workflowResult.data;
-    insights.push(`${data.tokens.toLocaleString()} tokens and ${data.uniqueTokens.toLocaleString()} unique tokens were identified.`);
-    if (data.topWords[0]) insights.push(`The most frequent content word is “${data.topWords[0][0]}” (${data.topWords[0][1]} occurrences).`);
-    if (data.topBigrams[0]) insights.push(`The most frequent recurring phrase is “${data.topBigrams[0][0]}” (${data.topBigrams[0][1]} occurrences).`);
-    insights.push("The corpus is suitable for forming research questions and inspecting frequent patterns in context.");
+    insights.push(t("workspace.insights.tokens", { tokens: data.tokens.toLocaleString(language), unique: data.uniqueTokens.toLocaleString(language) }));
+    if (data.topWords[0]) insights.push(t("workspace.insights.topWord", { word: data.topWords[0][0], count: data.topWords[0][1].toLocaleString(language) }));
+    if (data.topBigrams[0]) insights.push(t("workspace.insights.topPhrase", { phrase: data.topBigrams[0][0], count: data.topBigrams[0][1].toLocaleString(language) }));
+    insights.push(t("workspace.insights.corpusReady"));
   }
   return insights;
 }
 
-function createReportHtml(dataset, workflowResult, textColumn, labelColumn) {
-  const generated = new Date().toLocaleString("en-GB", { dateStyle: "long", timeStyle: "short" });
-  const insights = buildInsights(dataset, workflowResult, textColumn, labelColumn);
-  const mode = workflowResult.mode === "classification" ? "Text classification" : "Corpus exploration";
+function createReportHtml(dataset, workflowResult, textColumn, labelColumn, language, t) {
+  const direction = language === "ar" ? "rtl" : "ltr";
+  const generated = new Date().toLocaleString(language === "ar" ? "ar-SA" : "en-GB", { dateStyle: "long", timeStyle: "short" });
+  const insights = buildInsights(dataset, workflowResult, textColumn, labelColumn, language, t);
+  const reportText = (key) => t(`workspace.reportHtml.${key}`);
+  const number = (value, options) => Number(value).toLocaleString(language, options);
+  const mode = reportText(workflowResult.mode === "classification" ? "classification" : "exploration");
   const resultRows = workflowResult.mode === "classification"
     ? `
-      <tr><th>Test accuracy</th><td>${Math.round(workflowResult.data.accuracy * 100)}%</td></tr>
-      <tr><th>Training records</th><td>${workflowResult.data.trainSize}</td></tr>
-      <tr><th>Testing records</th><td>${workflowResult.data.testSize}</td></tr>
-      <tr><th>Vocabulary size</th><td>${workflowResult.data.vocabularySize}</td></tr>`
+      <tr><th>${reportText("accuracy")}</th><td>${number(Math.round(workflowResult.data.accuracy * 100))}%</td></tr>
+      <tr><th>${reportText("training")}</th><td>${number(workflowResult.data.trainSize)}</td></tr>
+      <tr><th>${reportText("testing")}</th><td>${number(workflowResult.data.testSize)}</td></tr>
+      <tr><th>${reportText("vocabulary")}</th><td>${number(workflowResult.data.vocabularySize)}</td></tr>`
     : `
-      <tr><th>Documents</th><td>${workflowResult.data.documents}</td></tr>
-      <tr><th>Tokens</th><td>${workflowResult.data.tokens.toLocaleString()}</td></tr>
-      <tr><th>Unique tokens</th><td>${workflowResult.data.uniqueTokens.toLocaleString()}</td></tr>
-      <tr><th>Average document length</th><td>${workflowResult.data.averageLength.toFixed(1)} tokens</td></tr>`;
+      <tr><th>${reportText("documents")}</th><td>${number(workflowResult.data.documents)}</td></tr>
+      <tr><th>${reportText("tokens")}</th><td>${number(workflowResult.data.tokens)}</td></tr>
+      <tr><th>${reportText("uniqueTokens")}</th><td>${number(workflowResult.data.uniqueTokens)}</td></tr>
+      <tr><th>${reportText("averageLength")}</th><td>${number(workflowResult.data.averageLength, { maximumFractionDigits: 1 })} ${reportText("tokenUnit")}</td></tr>`;
   const topPatterns = workflowResult.mode === "classification"
-    ? `<p>The baseline used Arabic normalization, tokenization, and multinomial Naive Bayes. Results should be followed by error analysis and cross-validation before formal research claims are made.</p>`
-    : `<div class="patterns"><div><h3>Top words</h3><ol>${workflowResult.data.topWords.slice(0, 10).map(([word,count]) => `<li>${escapeHtml(word)} <span>${count}</span></li>`).join("")}</ol></div><div><h3>Recurring phrases</h3><ol>${workflowResult.data.topBigrams.slice(0, 8).map(([phrase,count]) => `<li>${escapeHtml(phrase)} <span>${count}</span></li>`).join("")}</ol></div></div>`;
+    ? `<p>${reportText("baseline")}</p>`
+    : `<div class="patterns"><div><h3>${reportText("topWords")}</h3><ol>${workflowResult.data.topWords.slice(0, 10).map(([word,count]) => `<li dir="auto">${escapeHtml(word)} <span>${number(count)}</span></li>`).join("")}</ol></div><div><h3>${reportText("phrases")}</h3><ol>${workflowResult.data.topBigrams.slice(0, 8).map(([phrase,count]) => `<li dir="auto">${escapeHtml(phrase)} <span>${number(count)}</span></li>`).join("")}</ol></div></div>`;
 
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>LinguaLab Research Report</title><style>
-  :root{font-family:Inter,Arial,sans-serif;color:#18253c;background:#f5f7fb}*{box-sizing:border-box}body{margin:0;padding:40px}.report{max-width:900px;margin:auto;background:white;border:1px solid #e4e8f0;border-radius:24px;padding:44px;box-shadow:0 20px 60px rgba(39,54,87,.10)}.brand{font-weight:900;color:#6151d8}.eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:11px;color:#7b8799;font-weight:800}.hero{padding-bottom:26px;border-bottom:1px solid #e4e8f0}.hero h1{font-size:42px;letter-spacing:-.04em;margin:10px 0}.hero p{color:#65738a;line-height:1.7}.meta{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:24px 0}.meta div{padding:14px;background:#f7f8fc;border-radius:14px}.meta span{display:block;font-size:10px;color:#8490a2}.meta strong{display:block;margin-top:5px;font-size:13px}section{margin-top:30px}h2{font-size:22px}table{width:100%;border-collapse:collapse}th,td{padding:12px;border-bottom:1px solid #e8ebf2;text-align:left;font-size:13px}th{width:36%;color:#67758a}ul{padding-left:20px;line-height:1.8;color:#46566e}.patterns{display:grid;grid-template-columns:1fr 1fr;gap:18px}.patterns>div{padding:18px;border:1px solid #e4e8f0;border-radius:16px}.patterns ol{padding-left:22px}.patterns li{padding:6px}.patterns span{float:right;font-weight:800}.note{padding:18px;border-radius:15px;background:#17243d;color:#dce3ef;line-height:1.7}.footer{margin-top:38px;padding-top:18px;border-top:1px solid #e4e8f0;color:#8a94a4;font-size:11px}@media print{body{padding:0;background:white}.report{box-shadow:none;border:0;border-radius:0;max-width:none}}@media(max-width:650px){body{padding:14px}.report{padding:24px}.meta,.patterns{grid-template-columns:1fr}.hero h1{font-size:31px}}
-  </style></head><body><main class="report"><div class="hero"><div class="brand">LinguaLab</div><p class="eyebrow">AI-assisted Arabic language research report</p><h1>${escapeHtml(dataset.fileName)}</h1><p>This report summarizes the dataset, workflow, results, interpretation, limitations, and recommended next steps generated from the completed LinguaLab analysis.</p></div>
-  <div class="meta"><div><span>Generated</span><strong>${escapeHtml(generated)}</strong></div><div><span>Workflow</span><strong>${mode}</strong></div><div><span>Text column</span><strong>${escapeHtml(textColumn)}</strong></div></div>
-  <section><h2>Dataset summary</h2><table><tr><th>Records</th><td>${dataset.rows.toLocaleString()}</td></tr><tr><th>Columns</th><td>${dataset.columns}</td></tr><tr><th>Arabic sample</th><td>${Math.round(dataset.arabicRatio * 100)}%</td></tr><tr><th>Missing cells</th><td>${dataset.missingPercent.toFixed(1)}%</td></tr><tr><th>Possible duplicate texts</th><td>${dataset.duplicateCount}</td></tr>${labelColumn ? `<tr><th>Target label</th><td>${escapeHtml(labelColumn)}</td></tr>` : ""}</table></section>
-  <section><h2>Method and results</h2><table><tr><th>Analysis mode</th><td>${mode}</td></tr>${resultRows}</table>${topPatterns}</section>
-  <section><h2>Key insights</h2><ul>${insights.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></section>
-  <section><h2>Limitations and next steps</h2><div class="note">${workflowResult.mode === "classification" ? "This is an interpretable baseline, not a final research model. Review misclassified examples, apply cross-validation, document annotation quality, and compare with stronger models before reporting definitive findings." : "Frequency does not equal importance. Inspect words and phrases in context, define a focused research question, and combine quantitative patterns with qualitative interpretation."}</div></section>
-  <div class="footer">Generated locally by LinguaLab. The uploaded dataset was not sent to a remote server by this prototype.</div></main></body></html>`;
+  return `<!doctype html><html lang="${language}" dir="${direction}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${reportText("title")}</title><style>
+  :root{font-family:Inter,Arial,sans-serif;color:#18253c;background:#f5f7fb}*{box-sizing:border-box}body{margin:0;padding:40px}.report{max-width:900px;margin:auto;background:white;border:1px solid #e4e8f0;border-radius:24px;padding:44px;box-shadow:0 20px 60px rgba(39,54,87,.10)}.brand{font-weight:900;color:#6151d8}.eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:11px;color:#7b8799;font-weight:800}.hero{padding-bottom:26px;border-bottom:1px solid #e4e8f0}.hero h1{font-size:42px;letter-spacing:-.04em;margin:10px 0}.hero p{color:#65738a;line-height:1.7}.meta{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:24px 0}.meta div{padding:14px;background:#f7f8fc;border-radius:14px}.meta span{display:block;font-size:10px;color:#8490a2}.meta strong{display:block;margin-top:5px;font-size:13px}section{margin-top:30px}h2{font-size:22px}table{width:100%;border-collapse:collapse}th,td{padding:12px;border-bottom:1px solid #e8ebf2;text-align:start;font-size:13px}th{width:36%;color:#67758a}ul{padding-inline-start:20px;line-height:1.8;color:#46566e}.patterns{display:grid;grid-template-columns:1fr 1fr;gap:18px}.patterns>div{padding:18px;border:1px solid #e4e8f0;border-radius:16px}.patterns ol{padding-inline-start:22px}.patterns li{padding:6px}.patterns span{float:inline-end;font-weight:800}.note{padding:18px;border-radius:15px;background:#17243d;color:#dce3ef;line-height:1.7}.footer{margin-top:38px;padding-top:18px;border-top:1px solid #e4e8f0;color:#8a94a4;font-size:11px}@media print{body{padding:0;background:white}.report{box-shadow:none;border:0;border-radius:0;max-width:none}}@media(max-width:650px){body{padding:14px}.report{padding:24px}.meta,.patterns{grid-template-columns:1fr}.hero h1{font-size:31px}}
+  </style></head><body><main class="report"><div class="hero"><div class="brand">LinguaLab</div><p class="eyebrow">${reportText("eyebrow")}</p><h1 dir="auto">${escapeHtml(dataset.fileName)}</h1><p>${reportText("intro")}</p></div>
+  <div class="meta"><div><span>${reportText("generated")}</span><strong>${escapeHtml(generated)}</strong></div><div><span>${reportText("workflow")}</span><strong>${mode}</strong></div><div><span>${reportText("textColumn")}</span><strong dir="auto">${escapeHtml(textColumn)}</strong></div></div>
+  <section><h2>${reportText("datasetSummary")}</h2><table><tr><th>${reportText("records")}</th><td>${number(dataset.rows)}</td></tr><tr><th>${reportText("columns")}</th><td>${number(dataset.columns)}</td></tr><tr><th>${reportText("arabicSample")}</th><td>${number(Math.round(dataset.arabicRatio * 100))}%</td></tr><tr><th>${reportText("missingCells")}</th><td>${number(dataset.missingPercent, { maximumFractionDigits: 1 })}%</td></tr><tr><th>${reportText("duplicates")}</th><td>${number(dataset.duplicateCount)}</td></tr>${labelColumn ? `<tr><th>${reportText("targetLabel")}</th><td dir="auto">${escapeHtml(labelColumn)}</td></tr>` : ""}</table></section>
+  <section><h2>${reportText("methodResults")}</h2><table><tr><th>${reportText("analysisMode")}</th><td>${mode}</td></tr>${resultRows}</table>${topPatterns}</section>
+  <section><h2>${reportText("insights")}</h2><ul>${insights.map((item) => `<li dir="auto">${escapeHtml(item)}</li>`).join("")}</ul></section>
+  <section><h2>${reportText("limitations")}</h2><div class="note">${reportText(workflowResult.mode === "classification" ? "classificationLimitations" : "corpusLimitations")}</div></section>
+  <div class="footer">${reportText("footer")}</div></main></body></html>`;
 }
 
 function buildAdvisorContext(dataset) {
@@ -417,9 +421,9 @@ function buildPotentialOutcomes(dataset, rows, textColumn, labelColumn) {
   const corpusRecommended = !labelColumn || /corpus|qualitative/i.test(dataset.recommendation.type);
   const selected = [];
 
-  function add(title, reason) {
+  function add(key, title, reason, variables = {}) {
     if (selected.length < 4 && !selected.some((item) => item.title === title)) {
-      selected.push({ title, reason });
+      selected.push({ key, title, reason, variables });
     }
   }
 
@@ -428,43 +432,43 @@ function buildPotentialOutcomes(dataset, rows, textColumn, labelColumn) {
       dataset.missingPercent > 0 ? `${dataset.missingPercent.toFixed(1)}% missing cells` : "",
       dataset.duplicateCount > 0 ? `${dataset.duplicateCount} possible duplicate texts` : "",
     ].filter(Boolean).join(" and ");
-    add("Data-quality and cleaning protocol", `The current profile identifies ${issues} that should be handled systematically.`);
+    add("quality", "Data-quality and cleaning protocol", `The current profile identifies ${issues} that should be handled systematically.`);
   }
 
   if (classificationFeasible && arabicCoverage) {
-    add("Reproducible Arabic NLP baseline", `The selected columns provide ${labeledRecords} Arabic-text records across ${classCount} classes for a transparent exploratory baseline.`);
+    add("baseline", "Reproducible Arabic NLP baseline", `The selected columns provide ${labeledRecords} Arabic-text records across ${classCount} classes for a transparent exploratory baseline.`, { records: labeledRecords, classes: classCount });
   }
 
   if (corpusRecommended && textColumn) {
-    add("Corpus exploration report", "A text column is available for documenting frequencies, concordance evidence, and recurring linguistic patterns.");
+    add("corpus", "Corpus exploration report", "A text column is available for documenting frequencies, concordance evidence, and recurring linguistic patterns.");
   }
 
   if (smallDataset || !classificationFeasible) {
-    add("Pilot research study", `${dataset.rows} records support an initial investigation, while conclusions should remain exploratory.`);
+    add("pilot", "Pilot research study", `${dataset.rows} records support an initial investigation, while conclusions should remain exploratory.`, { records: dataset.rows });
   }
 
   if (labelColumn && (minimumClassSize < 5 || !balancedEnough)) {
-    add("Annotation guideline", "The current class representation supports documenting label definitions and reviewing annotation consistency.");
+    add("annotation", "Annotation guideline", "The current class representation supports documenting label definitions and reviewing annotation consistency.");
   }
 
   if (smallDataset || (labelColumn && !classificationFeasible)) {
-    add("Follow-up dataset expansion plan", "The current sample can identify collection and annotation priorities before larger-scale validation.");
+    add("expansion", "Follow-up dataset expansion plan", "The current sample can identify collection and annotation priorities before larger-scale validation.");
   }
 
   if (classificationFeasible && !smallDataset && balancedEnough && minimumClassSize >= 10) {
-    add("Comparative experiment", `The ${classCount} sufficiently represented classes support a controlled comparison between transparent analysis methods.`);
+    add("comparison", "Comparative experiment", `The ${classCount} sufficiently represented classes support a controlled comparison between transparent analysis methods.`, { classes: classCount });
   }
 
   if (selected.length < 3) {
-    add("Classroom research project", "The available workflow can demonstrate research design, analysis, evaluation, and responsible interpretation.");
+    add("classroom", "Classroom research project", "The available workflow can demonstrate research design, analysis, evaluation, and responsible interpretation.");
   }
 
   if (selected.length < 3 && (classificationFeasible || (textColumn && dataset.rows >= 30))) {
-    add("Conference poster or technical demonstration", "The bounded workflow could communicate a preliminary method and its limitations as a technical demonstration.");
+    add("poster", "Conference poster or technical demonstration", "The bounded workflow could communicate a preliminary method and its limitations as a technical demonstration.");
   }
 
   if (selected.length < 3) {
-    add("Follow-up dataset expansion plan", "The current profile can guide the next round of data collection and validation planning.");
+    add("expansion", "Follow-up dataset expansion plan", "The current profile can guide the next round of data collection and validation planning.");
   }
 
   return selected;
@@ -483,6 +487,7 @@ const OUTCOME_ICONS = {
 };
 
 export default function WorkspacePage() {
+  const { language, t } = useLanguage();
   const inputRef = useRef(null);
   const [dragActive, setDragActive] = useState(false);
   const [status, setStatus] = useState("idle");
@@ -517,13 +522,20 @@ export default function WorkspacePage() {
   const qualityNotes = useMemo(() => {
     if (!result) return [];
     const notes = [];
-    if (result.missingPercent > 0) notes.push(`${result.missingPercent.toFixed(1)}% of cells are missing.`);
-    if (result.duplicateCount > 0) notes.push(`${result.duplicateCount} possible duplicate text records detected.`);
-    if (result.labelColumn && result.imbalance >= 2) notes.push("The label distribution may be imbalanced.");
-    if (!result.textColumn) notes.push("No clear text column was detected. Review column names before analysis.");
-    if (notes.length === 0) notes.push("The dataset is structurally ready for the recommended next step.");
+    if (result.missingPercent > 0) notes.push(t("workspaceDynamic.missingCells", { percent: result.missingPercent.toFixed(1) }));
+    if (result.duplicateCount > 0) notes.push(t("workspaceDynamic.duplicates", { count: result.duplicateCount }));
+    if (result.labelColumn && result.imbalance >= 2) notes.push(t("workspaceDynamic.imbalanced"));
+    if (!result.textColumn) notes.push(t("workspaceDynamic.noText"));
+    if (notes.length === 0) notes.push(t("workspaceDynamic.ready"));
     return notes;
-  }, [result]);
+  }, [result, t]);
+
+  const recommendationCopy = useMemo(() => {
+    if (!result) return null;
+    const key = result.recommendation.type === "Supervised classification" ? "classification" : result.recommendation.type === "Qualitative exploration" ? "qualitative" : "exploration";
+    const copy = t(`workspaceDynamic.recommendation.${key}`, { text: result.textColumn, label: result.labelColumn });
+    return { type: copy[0], title: copy[1], description: copy[2] };
+  }, [result, t]);
 
   const potentialOutcomes = useMemo(
     () => buildPotentialOutcomes(result, datasetRows, selectedTextColumn, selectedLabelColumn),
@@ -562,13 +574,13 @@ export default function WorkspacePage() {
     setStatus("reading");
     try {
       const response = await fetch("/sample-datasets/arabic_reviews_demo.csv");
-      if (!response.ok) throw new Error("The demo dataset could not be loaded.");
+      if (!response.ok) throw new Error(t("workspace.errors.demo"));
       const blob = await response.blob();
       const file = new File([blob], "arabic_reviews_demo.csv", { type: "text/csv" });
       await processFile(file);
     } catch (err) {
       setStatus("error");
-      setError(err.message || "The demo dataset could not be loaded.");
+      setError(err.message || t("workspace.errors.demo"));
     }
   }
 
@@ -581,7 +593,7 @@ export default function WorkspacePage() {
     setWorkflowError("");
     if (file.size > MAX_FILE_SIZE) {
       setStatus("error");
-      setError("Please use a file smaller than 10 MB for this browser-based prototype.");
+      setError(t("workspace.errors.size"));
       return;
     }
     setError("");
@@ -612,13 +624,13 @@ export default function WorkspacePage() {
         const matrix = await readSheet(file);
         parsed = rowsToObjects(matrix.map((row) => row.map(decodeExcelCell)));
       } else if (extension === "xls") {
-        throw new Error("Legacy .xls files are not supported securely. Please save the file as .xlsx or CSV and upload it again.");
+        throw new Error(t("workspace.errors.xls"));
       } else {
-        throw new Error("Please upload a CSV, TSV, or XLSX file.");
+        throw new Error(t("workspace.errors.type"));
       }
 
       if (!parsed.headers.length || !parsed.rows.length) {
-        throw new Error("The file does not contain a readable header row and data records.");
+        throw new Error(t("workspace.errors.empty"));
       }
 
       const analysis = analyzeDataset(file.name, parsed.headers, parsed.rows);
@@ -630,7 +642,7 @@ export default function WorkspacePage() {
       setStatus("ready");
     } catch (err) {
       setStatus("error");
-      setError(err.message || "LinguaLab could not read this file.");
+      setError(err.message || t("workspace.errors.read"));
     }
   }
 
@@ -747,14 +759,15 @@ export default function WorkspacePage() {
         setReportReady(true);
       } catch (err) {
         setWorkflowStatus("configure");
-        setWorkflowError(err.message || "The workflow could not be completed with this dataset.");
+        const knownError = err.message === "At least six labeled records are required to run the classification baseline." ? t("workspace.errors.six") : err.message === "Each label needs at least three examples for a meaningful baseline." ? t("workspace.errors.three") : err.message;
+        setWorkflowError(knownError || t("workspace.errors.workflow"));
       }
     }, 650);
   }
 
   function downloadResearchReport() {
     if (!result || !workflowResult) return;
-    const html = createReportHtml(result, workflowResult, selectedTextColumn, selectedLabelColumn);
+    const html = createReportHtml(result, workflowResult, selectedTextColumn, selectedLabelColumn, language, t);
     const blob = new Blob([html], { type: "text/html;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
@@ -770,32 +783,28 @@ export default function WorkspacePage() {
   return (
     <>
       <Head>
-        <title>New Workspace — LinguaLab</title>
-        <meta name="description" content="Upload and understand an Arabic language dataset in LinguaLab." />
+        <title>{t("workspace.pageTitle")}</title>
+        <meta name="description" content={t("workspaceDynamic.meta")} />
       </Head>
 
       <main className={styles.page}>
         <nav className={styles.nav}>
           <Link href="/" className={styles.brand}><span>L</span>LinguaLab</Link>
           <div className={styles.navActions}>
-            <Link href="/workspace">Workspace</Link>
-            <Link href="/ar-tools" onClick={openResearchHub}>Research Tools</Link>
-            <Link href="/research-advisor">Research Advisor</Link>
+            <Link href="/workspace">{t("nav.workspace")}</Link><Link href="/ar-tools" onClick={openResearchHub}>{t("nav.researchHub")}</Link><Link href="/research-advisor">{t("nav.researchAdvisor")}</Link>
           </div>
         </nav>
 
         <section className={styles.hero}>
-          <p className={styles.eyebrow}>Step 1 · Understand your data</p>
-          <h1>Start with your Arabic dataset.</h1>
-          <p>LinguaLab reads the structure locally, identifies likely text and label columns, checks data quality, and recommends a realistic next step.</p>
+          <p className={styles.eyebrow}>{t("workspace.step1")}</p><h1>{t("workspace.title")}</h1><p>{t("workspace.lead")}</p>
         </section>
 
-        <div className={styles.journeyBar} aria-label="Analysis progress">
-          <div className={styles.journeyActive}><span>1</span><strong>Understand</strong></div>
+        <div className={styles.journeyBar} aria-label={t("workspace.progress")}>
+          <div className={styles.journeyActive}><span>1</span><strong>{t("workspace.understand")}</strong></div>
           <i />
-          <div className={workflowOpen ? styles.journeyActive : ""}><span>2</span><strong>Analyze</strong></div>
+          <div className={workflowOpen ? styles.journeyActive : ""}><span>2</span><strong>{t("workspace.analyze")}</strong></div>
           <i />
-          <div className={workflowStatus === "complete" ? styles.journeyActive : ""}><span>3</span><strong>Report</strong></div>
+          <div className={workflowStatus === "complete" ? styles.journeyActive : ""}><span>3</span><strong>{t("workspace.report")}</strong></div>
         </div>
 
         <section className={styles.workspaceGrid}>
@@ -818,32 +827,29 @@ export default function WorkspacePage() {
                 hidden
               />
               <div className={styles.uploadIcon}>↥</div>
-              <h2>{status === "reading" ? "Reading your dataset…" : "Drop a dataset here"}</h2>
-              <p>or click to choose CSV, TSV, or XLSX</p>
-              <span>Your file is analyzed in your browser for this prototype.</span>
+              <h2>{status === "reading" ? t("workspace.reading") : t("workspace.drop")}</h2><p>{t("workspace.chooseHint")}</p><span>{t("workspace.local")}</span>
             </div>
 
             {error && <div className={styles.errorBox} role="alert">{error}</div>}
 
             {!result && status !== "reading" && (
               <div className={styles.exampleBox}>
-                <div><strong>Try it immediately</strong><span>Use our small Arabic reviews dataset, or choose your own file.</span></div>
+                <div><strong>{t("workspace.tryNow")}</strong><span>{t("workspace.tryText")}</span></div>
                 <div className={styles.exampleActions}>
-                  <button type="button" className={styles.demoButton} onClick={loadDemoDataset}>Try demo dataset</button>
-                  <button type="button" onClick={() => inputRef.current?.click()}>Choose file</button>
+                  <button type="button" className={styles.demoButton} onClick={loadDemoDataset}>{t("workspace.demo")}</button><button type="button" onClick={() => inputRef.current?.click()}>{t("workspace.choose")}</button>
                 </div>
               </div>
             )}
 
             {preview.length > 0 && result && (
               <div className={styles.previewTableWrap}>
-                <div className={styles.panelHeading}><span>Data preview</span><small>First {preview.length} rows</small></div>
+                <div className={styles.panelHeading}><span>{t("workspace.preview")}</span><small>{t("workspace.firstRows", { count: preview.length })}</small></div>
                 <div className={styles.tableScroller}>
                   <table>
-                    <thead><tr>{result.headers.slice(0, 5).map((header) => <th key={header}>{header}</th>)}</tr></thead>
+                    <thead><tr>{result.headers.slice(0, 5).map((header) => <th key={header} dir="auto">{header}</th>)}</tr></thead>
                     <tbody>
                       {preview.map((row, rowIndex) => (
-                        <tr key={rowIndex}>{result.headers.slice(0, 5).map((header) => <td key={header}>{String(row[header] ?? "").slice(0, 80)}</td>)}</tr>
+                        <tr key={rowIndex}>{result.headers.slice(0, 5).map((header) => <td key={header} dir="auto">{String(row[header] ?? "").slice(0, 80)}</td>)}</tr>
                       ))}
                     </tbody>
                   </table>
@@ -856,51 +862,45 @@ export default function WorkspacePage() {
             {!result ? (
               <div className={styles.emptyState}>
                 <div className={styles.aiOrb}>✦</div>
-                <p className={styles.eyebrow}>Dataset understanding</p>
-                <h2>Your findings will appear here.</h2>
-                <p>Upload a file to reveal its structure, Arabic-language content, data-quality signals, and recommended workflow.</p>
+                <p className={styles.eyebrow}>{t("workspace.understanding")}</p><h2>{t("workspace.findings")}</h2><p>{t("workspace.empty")}</p>
                 <div className={styles.placeholderList}><span /><span /><span /><span /></div>
               </div>
             ) : (
               <div className={styles.results}>
                 <div className={styles.resultHeader}>
                   <div className={styles.aiOrb}>✦</div>
-                  <div><p className={styles.eyebrow}>Dataset understood</p><h2>Here&apos;s what LinguaLab found.</h2></div>
+                  <div><p className={styles.eyebrow}>{t("workspace.understood")}</p><h2>{t("workspace.found")}</h2></div>
                 </div>
 
-                <div className={styles.fileLine}><span>{result.fileName}</span><strong>{result.rows.toLocaleString()} records</strong></div>
+                <div className={styles.fileLine}><span dir="auto">{result.fileName}</span><strong>{t("workspace.records", { count: result.rows.toLocaleString(language) })}</strong></div>
 
                 <div className={styles.metricGrid}>
-                  <article><span>Language</span><strong>{result.arabicRatio >= 0.5 ? "Arabic detected" : "Mixed / review"}</strong><small>{Math.round(result.arabicRatio * 100)}% Arabic sample</small></article>
-                  <article><span>Structure</span><strong>{result.columns} columns</strong><small>{result.rows.toLocaleString()} data rows</small></article>
-                  <article><span>Text column</span><strong>{result.textColumn || "Review needed"}</strong><small>Best detected input</small></article>
-                  <article><span>Label column</span><strong>{result.labelColumn || "Not detected"}</strong><small>{result.labelColumn ? "Classification possible" : "Explore first"}</small></article>
+                  <article><span>{t("workspace.language")}</span><strong>{t(result.arabicRatio >= 0.5 ? "workspace.arabic" : "workspace.mixed")}</strong><small>{t("workspace.arabicSample", { percent: Math.round(result.arabicRatio * 100) })}</small></article>
+                  <article><span>{t("workspace.structure")}</span><strong>{t("workspace.columns", { count: result.columns })}</strong><small>{t("workspace.dataRows", { count: result.rows.toLocaleString(language) })}</small></article>
+                  <article><span>{t("workspace.textColumn")}</span><strong dir="auto">{result.textColumn || t("workspace.review")}</strong><small>{t("workspace.bestInput")}</small></article>
+                  <article><span>{t("workspace.labelColumn")}</span><strong dir="auto">{result.labelColumn || t("workspace.notDetected")}</strong><small>{t(result.labelColumn ? "workspace.classification" : "workspace.exploreFirst")}</small></article>
                 </div>
 
                 <div className={styles.qualityBox}>
-                  <div className={styles.panelHeading}><span>Quality notes</span><small>{result.missingPercent.toFixed(1)}% missing</small></div>
+                  <div className={styles.panelHeading}><span>{t("workspace.quality")}</span><small>{t("workspace.missing", { percent: result.missingPercent.toFixed(1) })}</small></div>
                   <ul>{qualityNotes.map((note) => <li key={note}>{note}</li>)}</ul>
                 </div>
 
                 {result.labelDistribution.length > 0 && (
                   <div className={styles.distributionBox}>
-                    <div className={styles.panelHeading}><span>Label distribution</span><small>Top classes</small></div>
+                    <div className={styles.panelHeading}><span>{t("workspace.distribution")}</span><small>{t("workspace.topClasses")}</small></div>
                     {result.labelDistribution.map(([label, count]) => {
                       const max = result.labelDistribution[0][1];
-                      return <div className={styles.barRow} key={label}><span>{label}</span><div><i style={{ width: `${(count / max) * 100}%` }} /></div><strong>{count}</strong></div>;
+                      return <div className={styles.barRow} key={label}><span dir="auto">{label}</span><div><i style={{ width: `${(count / max) * 100}%` }} /></div><strong>{count}</strong></div>;
                     })}
                   </div>
                 )}
 
                 <div className={styles.recommendation}>
-                  <p className={styles.eyebrow}>Recommended next step</p>
-                  <span className={styles.workflowTag}>{result.recommendation.type}</span>
-                  <h3>{result.recommendation.title}</h3>
-                  <p>{result.recommendation.description}</p>
+                  <p className={styles.eyebrow}>{t("workspace.recommended")}</p>
+                  <span className={styles.workflowTag}>{recommendationCopy.type}</span><h3>{recommendationCopy.title}</h3><p>{recommendationCopy.description}</p>
                   <div className={styles.recommendationActions}>
-                    <button type="button" onClick={openWorkflow}>{result.labelColumn ? "Build guided workflow" : "Explore this corpus"} →</button>
-                    <button type="button" className={styles.advisorButton} onClick={openResearchAdvisor}>Ask Research Advisor ✦</button>
-                    <button type="button" className={styles.copilotButton} onClick={() => setCopilotOpen(true)}>Design My Study ✦</button>
+                    <button type="button" onClick={openWorkflow}>{t(result.labelColumn ? "workspace.build" : "workspace.explore")} →</button><button type="button" className={styles.advisorButton} onClick={openResearchAdvisor}>{t("workspace.askAdvisor")}</button><button type="button" className={styles.copilotButton} onClick={() => setCopilotOpen(true)}>{t("workspace.design")}</button>
                   </div>
                 </div>
               </div>
@@ -912,62 +912,50 @@ export default function WorkspacePage() {
           <section className={styles.copilotPanel} aria-labelledby="research-copilot-title">
             <div className={styles.copilotHeader}>
               <div>
-                <p className={styles.eyebrow}>AI Research Copilot</p>
-                <h2 id="research-copilot-title">Design My Study</h2>
-                <p>Turn the dataset profile into a focused, defensible research blueprint.</p>
-                {!result && <p>Dataset metadata: {hubCopilotContext.fileName} · {hubCopilotContext.rows.toLocaleString()} records. The dataset itself has not been restored.</p>}
+                <p className={styles.eyebrow}>{t("workspace.copilot")}</p><h2 id="research-copilot-title">{t("workspace.copilotTitle")}</h2><p>{t("workspace.copilotLead")}</p>
+                {!result && <p dir="auto">{t("workspace.contextOnly", { filename: hubCopilotContext.fileName, count: hubCopilotContext.rows.toLocaleString(language) })}</p>}
               </div>
-              <button type="button" onClick={() => setCopilotOpen(false)} aria-label="Close AI Research Copilot">×</button>
+              <button type="button" onClick={() => setCopilotOpen(false)} aria-label={t("workspace.close")}>×</button>
             </div>
 
             <div className={styles.copilotInput}>
-              <label htmlFor="copilot-research-goal">Research goal <span>Optional</span></label>
+              <label htmlFor="copilot-research-goal">{t("workspace.goal")} <span>{t("workspace.optional")}</span></label>
               <textarea
                 id="copilot-research-goal"
                 value={researchGoal}
                 maxLength={1000}
                 onChange={(event) => setResearchGoal(event.target.value)}
-                placeholder="For example: Compare sentiment patterns across product categories."
+                placeholder={t("workspace.goalPlaceholder")} dir="auto"
               />
-              <p className={styles.privacyNotice}><span aria-hidden="true">ⓘ</span><span><strong>Privacy first</strong>LinguaLab sends only dataset structure and quality statistics. Your file, rows, previews, and text remain in your browser.</span></p>
+              <p className={styles.privacyNotice}><span aria-hidden="true">ⓘ</span><span><strong>{t("workspace.privacy")}</strong>{t("workspace.privacyText")}</span></p>
               <button type="button" className={styles.generateButton} onClick={designMyStudy} disabled={copilotStatus === "loading"}>
-                {copilotStatus === "loading" ? "Designing your study…" : "✨ Generate AI Study Design"}
+                {copilotStatus === "loading" ? t("workspace.designing") : t("workspace.generate")}
               </button>
             </div>
 
             <div className={styles.copilotOutput} aria-live="polite">
-              {copilotStatus === "idle" && <p className={styles.copilotEmpty}>GPT-5.6 generates a defensible research blueprint using metadata only — never your raw dataset.</p>}
-              {copilotStatus === "loading" && <p className={styles.copilotEmpty}>GPT-5.6 is evaluating feasibility, methodology, validation, and research risks…</p>}
-              {copilotStatus === "error" && <div className={styles.copilotError} role="alert"><strong>Study design unavailable</strong><p>{copilotError}</p></div>}
+              {copilotStatus === "idle" && <p className={styles.copilotEmpty}>{t("workspace.idle")}</p>}{copilotStatus === "loading" && <p className={styles.copilotEmpty}>{t("workspace.loading")}</p>}{copilotStatus === "error" && <div className={styles.copilotError} role="alert"><strong>{t("workspace.unavailable")}</strong><p dir="auto">{copilotError}</p></div>}
               {copilotStatus === "success" && studyDesign && (
-                <article className={styles.studyDesign} dir="ltr">
-                  <div className={styles.evidenceBanner}><strong>Based on metadata only:</strong><span>• {(result ? result.rows : hubCopilotContext.rows).toLocaleString()} records</span><span>• {studyDesign.studyDesign.type === "supervised_classification" ? `${result ? new Set(datasetRows.map((row) => String(row[selectedLabelColumn] ?? "").trim()).filter(Boolean)).size : hubCopilotContext.copilotMetadata.classCount} classes` : "No label classes"}</span><span>• {result ? Math.round(result.arabicRatio * 100) : hubCopilotContext.arabicPercent}% Arabic coverage</span><span>• {(result ? result.missingPercent : hubCopilotContext.missingPercent).toFixed(1)}% missing</span></div>
-                  <div className={styles.studyTitle}><span>AI Research Blueprint</span><h3>{studyDesign.studyTitle}</h3><p>{studyDesign.feasibility.summary}</p></div>
-                  <section><h4>Research question</h4><strong>{studyDesign.researchQuestion.primary}</strong><p>{studyDesign.researchQuestion.rationale}</p></section>
+                <article className={styles.studyDesign} dir="auto">
+                  <div className={styles.evidenceBanner}><strong>{t("workspaceStudy.based")}</strong><span>• {t("workspaceStudy.records", { count: (result ? result.rows : hubCopilotContext.rows).toLocaleString(language) })}</span><span>• {studyDesign.studyDesign.type === "supervised_classification" ? t("workspaceStudy.classes", { count: result ? new Set(datasetRows.map((row) => String(row[selectedLabelColumn] ?? "").trim()).filter(Boolean)).size : hubCopilotContext.copilotMetadata.classCount }) : t("workspaceStudy.noClasses")}</span><span>• {t("workspaceStudy.arabic", { percent: result ? Math.round(result.arabicRatio * 100) : hubCopilotContext.arabicPercent })}</span><span>• {t("workspaceStudy.missing", { percent: (result ? result.missingPercent : hubCopilotContext.missingPercent).toFixed(1) })}</span></div>
+                  <div className={styles.studyTitle}><span>{t("workspaceStudy.blueprint")}</span><h3 dir="auto">{studyDesign.studyTitle}</h3><p dir="auto">{studyDesign.feasibility.summary}</p></div>
+                  <section><h4>{t("workspaceStudy.question")}</h4><strong dir="auto">{studyDesign.researchQuestion.primary}</strong><p dir="auto">{studyDesign.researchQuestion.rationale}</p></section>
                   <div className={styles.studyGrid}>
-                    <section><h4>Study design</h4><strong>{studyDesign.studyDesign.type.replaceAll("_", " ")}</strong><p>{studyDesign.studyDesign.description}</p></section>
-                    <section><h4>Baseline</h4><strong>{studyDesign.baseline.method}</strong><p>{studyDesign.baseline.why}</p></section>
-                    <section><h4>Evaluation</h4><strong>{studyDesign.evaluationPlan.primaryMetrics.join(" · ")}</strong><p>{studyDesign.evaluationPlan.validationMethod}</p></section>
-                    <section><h4>Preprocessing</h4><ul>{studyDesign.preprocessingPlan.map((item) => <li key={item.step}><strong>{item.step}</strong> — {item.reason}</li>)}</ul></section>
+                    <section><h4>{t("workspaceStudy.design")}</h4><strong dir="auto">{studyDesign.studyDesign.type.replaceAll("_", " ")}</strong><p dir="auto">{studyDesign.studyDesign.description}</p></section><section><h4>{t("workspaceStudy.baseline")}</h4><strong dir="auto">{studyDesign.baseline.method}</strong><p dir="auto">{studyDesign.baseline.why}</p></section><section><h4>{t("workspaceStudy.evaluation")}</h4><strong dir="auto">{studyDesign.evaluationPlan.primaryMetrics.join(" · ")}</strong><p dir="auto">{studyDesign.evaluationPlan.validationMethod}</p></section><section><h4>{t("workspaceStudy.preprocessing")}</h4><ul dir="auto">{studyDesign.preprocessingPlan.map((item) => <li key={item.step}><strong>{item.step}</strong> — {item.reason}</li>)}</ul></section>
                   </div>
-                  <section><h4>Experiment steps</h4><ol>{studyDesign.experimentSteps.map((item) => <li key={item.order}><strong>{item.title}</strong><span>{item.action}</span></li>)}</ol></section>
-                  <section><h4>Risks</h4><ul>{studyDesign.risks.map((item) => <li key={`${item.category}-${item.risk}`}><strong>{item.severity}: {item.risk}</strong> — {item.mitigation}</li>)}</ul></section>
-                  {studyDesign.notSupported.length > 0 && <section><h4>Not supported by the current metadata</h4><ul>{studyDesign.notSupported.map((item) => <li key={item}>{item}</li>)}</ul></section>}
-                  <div className={styles.nextAction}><span>Immediate Next Step</span><strong>{studyDesign.immediateNextAction.action}</strong><p>{studyDesign.immediateNextAction.reason}</p></div>
+                  <section><h4>{t("workspaceStudy.steps")}</h4><ol dir="auto">{studyDesign.experimentSteps.map((item) => <li key={item.order}><strong>{item.title}</strong><span>{item.action}</span></li>)}</ol></section><section><h4>{t("workspaceStudy.risks")}</h4><ul dir="auto">{studyDesign.risks.map((item) => <li key={`${item.category}-${item.risk}`}><strong>{item.severity}: {item.risk}</strong> — {item.mitigation}</li>)}</ul></section>
+                  {studyDesign.notSupported.length > 0 && <section><h4>{t("workspaceStudy.unsupported")}</h4><ul dir="auto">{studyDesign.notSupported.map((item) => <li key={item}>{item}</li>)}</ul></section>}<div className={styles.nextAction}><span>{t("workspaceStudy.next")}</span><strong dir="auto">{studyDesign.immediateNextAction.action}</strong><p dir="auto">{studyDesign.immediateNextAction.reason}</p></div>
                   {result && <section className={styles.potentialOutcomes}>
-                    <p className={styles.outcomeEyebrow}>Deterministic Research Outcomes</p>
-                    <h4 className={styles.outcomeHeading}>What could this research become?</h4>
-                    <p className={styles.outcomeCaption}>Selected from verified dataset characteristics using deterministic rules.<br />No AI-generated outcomes.</p>
+                    <p className={styles.outcomeEyebrow}>{t("workspaceStudy.outcomes")}</p><h4 className={styles.outcomeHeading}>{t("workspaceStudy.outcomesTitle")}</h4><p className={styles.outcomeCaption}>{t("workspaceStudy.outcomesText")}<br />{t("workspaceStudy.notAi")}</p>
                     <div className={styles.outcomeGrid}>
                       {potentialOutcomes.map((outcome) => (
                         <article key={outcome.title}>
                           <span className={styles.outcomeIcon} aria-hidden="true">{OUTCOME_ICONS[outcome.title]}</span>
-                          <strong>{outcome.title}</strong>
-                          <p>{outcome.reason}</p>
+                          <strong>{language === "en" ? outcome.title : t(`workspaceOutcomes.${outcome.key}`)[0]}</strong><p>{language === "en" ? outcome.reason : t(`workspaceOutcomes.${outcome.key}`, outcome.variables)[1]}</p>
                         </article>
                       ))}
                     </div>
-                    <p className={styles.outcomeDisclaimer}>These are possible research outputs, not guaranteed results. Final suitability depends on study quality, validation, and researcher judgment.</p>
+                    <p className={styles.outcomeDisclaimer}>{t("workspaceStudy.disclaimer")}</p>
                   </section>}
                 </article>
               )}
@@ -979,43 +967,39 @@ export default function WorkspacePage() {
           <section className={styles.workflowSection} id="guided-workflow">
             <div className={styles.workflowHeader}>
               <div>
-                <p className={styles.eyebrow}>Step 2 · Build and run</p>
-                <h2>{selectedLabelColumn ? "Configure a text-classification workflow." : "Configure a corpus-exploration workflow."}</h2>
-                <p>LinguaLab uses the columns it detected, but keeps you in control before analysis begins.</p>
+                <p className={styles.eyebrow}>{t("workspace.step2")}</p><h2>{t(selectedLabelColumn ? "workspace.configureClass" : "workspace.configureCorpus")}</h2><p>{t("workspace.control")}</p>
               </div>
               <div className={styles.progressSteps}><span className={styles.activeStep}>1</span><i /><span className={workflowStatus !== "configure" ? styles.activeStep : ""}>2</span><i /><span className={workflowStatus === "complete" ? styles.activeStep : ""}>3</span></div>
             </div>
 
             <div className={styles.workflowGrid}>
               <div className={styles.configCard}>
-                <div className={styles.panelHeading}><span>Workflow configuration</span><small>Editable</small></div>
-                <label>Text column<select value={selectedTextColumn} onChange={(event) => setSelectedTextColumn(event.target.value)}>{result.headers.map((header) => <option key={header} value={header}>{header}</option>)}</select></label>
-                <label>Target label (optional)<select value={selectedLabelColumn} onChange={(event) => setSelectedLabelColumn(event.target.value)}><option value="">No label — explore corpus</option>{result.headers.filter((header) => header !== selectedTextColumn).map((header) => <option key={header} value={header}>{header}</option>)}</select></label>
+                <div className={styles.panelHeading}><span>{t("workspace.configuration")}</span><small>{t("workspace.editable")}</small></div>
+                <label>{t("workspace.textColumn")}<select dir="auto" value={selectedTextColumn} onChange={(event) => setSelectedTextColumn(event.target.value)}>{result.headers.map((header) => <option key={header} value={header}>{header}</option>)}</select></label>
+                <label>{t("workspace.target")}<select dir="auto" value={selectedLabelColumn} onChange={(event) => setSelectedLabelColumn(event.target.value)}><option value="">{t("workspace.noLabel")}</option>{result.headers.filter((header) => header !== selectedTextColumn).map((header) => <option key={header} value={header}>{header}</option>)}</select></label>
                 <div className={styles.pipelinePreview}>
-                  <span>Pipeline</span>
-                  <div><b>Normalize Arabic</b><em>→</em><b>{selectedLabelColumn ? "Tokenize" : "Count patterns"}</b><em>→</em><b>{selectedLabelColumn ? "Naive Bayes baseline" : "Corpus insights"}</b></div>
+                  <span>{t("workspace.pipeline")}</span><div><b>{t("workspace.normalize")}</b><em>→</em><b>{t(selectedLabelColumn ? "workspace.tokenize" : "workspace.countPatterns")}</b><em>→</em><b>{t(selectedLabelColumn ? "workspace.naiveBayes" : "workspace.corpusInsights")}</b></div>
                 </div>
-                <button className={styles.runButton} type="button" onClick={runWorkflow} disabled={workflowStatus === "running"}>{workflowStatus === "running" ? "Running analysis…" : "Run workflow"}</button>
-                <small className={styles.localNote}>This prototype runs locally in your browser. No dataset upload is required.</small>
+                <button className={styles.runButton} type="button" onClick={runWorkflow} disabled={workflowStatus === "running"}>{t(workflowStatus === "running" ? "workspace.running" : "workspace.run")}</button><small className={styles.localNote}>{t("workspace.localRun")}</small>
               </div>
 
               <div className={styles.outputCard} aria-live="polite">
                 {workflowError && <div className={styles.errorBox} role="alert">{workflowError}</div>}
                 {workflowStatus !== "complete" ? (
-                  <div className={styles.outputEmpty}><div className={styles.aiOrb}>✦</div><h3>{workflowStatus === "running" ? "Building your results…" : "Your analysis will appear here."}</h3><p>{workflowStatus === "running" ? "Normalizing Arabic text, preparing the workflow, and calculating interpretable results." : "Review the detected columns, then run the guided workflow."}</p></div>
+                  <div className={styles.outputEmpty}><div className={styles.aiOrb}>✦</div><h3>{t(workflowStatus === "running" ? "workspace.building" : "workspace.outputEmpty")}</h3><p>{t(workflowStatus === "running" ? "workspace.buildingText" : "workspace.reviewColumns")}</p></div>
                 ) : workflowResult.mode === "classification" ? (
                   <div className={styles.workflowResults}>
-                    <p className={styles.eyebrow}>Baseline complete</p><h3>{Math.round(workflowResult.data.accuracy * 100)}% test accuracy</h3>
-                    <div className={styles.resultStats}><article><span>Training</span><strong>{workflowResult.data.trainSize}</strong></article><article><span>Testing</span><strong>{workflowResult.data.testSize}</strong></article><article><span>Vocabulary</span><strong>{workflowResult.data.vocabularySize}</strong></article></div>
-                    <div className={styles.matrixWrap}><div className={styles.panelHeading}><span>Confusion matrix</span><small>Actual × predicted</small></div><table><thead><tr><th></th>{workflowResult.data.labels.map((label)=><th key={label}>{label}</th>)}</tr></thead><tbody>{workflowResult.data.labels.map((label,rowIndex)=><tr key={label}><th>{label}</th>{workflowResult.data.confusion[rowIndex].map((value,colIndex)=><td key={workflowResult.data.labels[colIndex]}>{value}</td>)}</tr>)}</tbody></table></div>
-                    <div className={styles.interpretation}><strong>LinguaLab interpretation</strong><p>{workflowResult.data.testSize < 10 ? "This dataset is small, so the score is only a baseline signal. Add more labeled examples before drawing research conclusions." : workflowResult.data.accuracy >= .8 ? "The baseline separates the current labels well. The next useful step is error analysis and cross-validation." : "The baseline needs improvement. Review label balance, ambiguous examples, and text normalization before trying a more complex model."}</p></div>
+                    <p className={styles.eyebrow}>{t("workspace.baseline")}</p><h3>{t("workspace.accuracy", { percent: Math.round(workflowResult.data.accuracy * 100) })}</h3>
+                    <div className={styles.resultStats}><article><span>{t("workspace.training")}</span><strong>{workflowResult.data.trainSize}</strong></article><article><span>{t("workspace.testing")}</span><strong>{workflowResult.data.testSize}</strong></article><article><span>{t("workspace.vocabulary")}</span><strong>{workflowResult.data.vocabularySize}</strong></article></div>
+                    <div className={styles.matrixWrap}><div className={styles.panelHeading}><span>{t("workspace.matrix")}</span><small>{t("workspace.actualPredicted")}</small></div><table dir="auto"><thead><tr><th></th>{workflowResult.data.labels.map((label)=><th key={label}>{label}</th>)}</tr></thead><tbody>{workflowResult.data.labels.map((label,rowIndex)=><tr key={label}><th>{label}</th>{workflowResult.data.confusion[rowIndex].map((value,colIndex)=><td key={workflowResult.data.labels[colIndex]}>{value}</td>)}</tr>)}</tbody></table></div>
+                    <div className={styles.interpretation}><strong>{t("workspace.interpretation")}</strong><p>{t(workflowResult.data.testSize < 10 ? "workspace.smallScore" : workflowResult.data.accuracy >= .8 ? "workspace.strongScore" : "workspace.weakScore")}</p></div>
                   </div>
                 ) : (
                   <div className={styles.workflowResults}>
-                    <p className={styles.eyebrow}>Corpus explored</p><h3>{workflowResult.data.tokens.toLocaleString()} tokens analyzed</h3>
-                    <div className={styles.resultStats}><article><span>Documents</span><strong>{workflowResult.data.documents}</strong></article><article><span>Unique tokens</span><strong>{workflowResult.data.uniqueTokens}</strong></article><article><span>Avg. length</span><strong>{workflowResult.data.averageLength.toFixed(1)}</strong></article></div>
-                    <div className={styles.termGrid}><div><strong>Top words</strong>{workflowResult.data.topWords.slice(0,8).map(([word,count])=><span key={word}>{word}<em>{count}</em></span>)}</div><div><strong>Recurring phrases</strong>{workflowResult.data.topBigrams.slice(0,6).map(([phrase,count])=><span key={phrase}>{phrase}<em>{count}</em></span>)}</div></div>
-                    <div className={styles.interpretation}><strong>LinguaLab interpretation</strong><p>The corpus is ready for close exploration. Use the frequent words and recurring phrases to form a research question, then inspect them in context.</p></div>
+                    <p className={styles.eyebrow}>{t("workspace.corpusDone")}</p><h3>{t("workspace.tokens", { count: workflowResult.data.tokens.toLocaleString(language) })}</h3>
+                    <div className={styles.resultStats}><article><span>{t("workspace.documents")}</span><strong>{workflowResult.data.documents}</strong></article><article><span>{t("workspace.unique")}</span><strong>{workflowResult.data.uniqueTokens}</strong></article><article><span>{t("workspace.average")}</span><strong>{workflowResult.data.averageLength.toFixed(1)}</strong></article></div>
+                    <div className={styles.termGrid}><div><strong>{t("workspace.topWords")}</strong>{workflowResult.data.topWords.slice(0,8).map(([word,count])=><span key={word} dir="auto">{word}<em>{count}</em></span>)}</div><div><strong>{t("workspace.phrases")}</strong>{workflowResult.data.topBigrams.slice(0,6).map(([phrase,count])=><span key={phrase} dir="auto">{phrase}<em>{count}</em></span>)}</div></div>
+                    <div className={styles.interpretation}><strong>{t("workspace.interpretation")}</strong><p>{t("workspace.corpusInterpretation")}</p></div>
                   </div>
                 )}
               </div>
@@ -1024,14 +1008,11 @@ export default function WorkspacePage() {
             {workflowStatus === "complete" && workflowResult && reportReady && (
               <div className={styles.reportCard}>
                 <div>
-                  <p className={styles.eyebrow}>Step 3 · Interpret and report</p>
-                  <h3>Your research-ready report is prepared.</h3>
-                  <p>LinguaLab has converted the completed workflow into a structured report with dataset context, method, results, key insights, limitations, and recommended next steps.</p>
-                  <div className={styles.insightChips}>{buildInsights(result, workflowResult, selectedTextColumn, selectedLabelColumn).slice(0, 3).map((item) => <span key={item}>{item}</span>)}</div>
+                  <p className={styles.eyebrow}>{t("workspace.step3")}</p><h3>{t("workspace.reportReady")}</h3><p>{t("workspace.reportText")}</p>
+                  <div className={styles.insightChips}>{buildInsights(result, workflowResult, selectedTextColumn, selectedLabelColumn, language, t).slice(0, 3).map((item) => <span key={item}>{item}</span>)}</div>
                 </div>
                 <div className={styles.reportActions}>
-                  <button type="button" onClick={downloadResearchReport}>Download research report</button>
-                  <small>HTML · Open in any browser · Print or save as PDF</small>
+                  <button type="button" onClick={downloadResearchReport}>{t("workspace.download")}</button><small>{t("workspace.downloadHint")}</small>
                 </div>
               </div>
             )}

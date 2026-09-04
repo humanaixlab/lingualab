@@ -574,7 +574,7 @@
 .userMessage {
   width: fit-content;
   max-width: 78%;
-  margin-left: auto;
+  margin-inline-start: auto;
   padding: 14px 16px;
   border-radius: 16px 16px 4px 16px;
   color: #fff;

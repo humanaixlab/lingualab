@@ -1,6 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
+import { useLanguage } from "../components/LanguageProvider";
 
 function subscribe() {
   return () => {};
@@ -60,6 +61,7 @@ function getInterpretationField(interpretation, keys, fallback) {
 }
 
 export default function ResearchReport() {
+  const { language, t } = useLanguage();
   const isClient = useSyncExternalStore(
     subscribe,
     getClientSnapshot,
@@ -84,13 +86,13 @@ export default function ResearchReport() {
       "researchImplications",
       "methodological_implications",
     ],
-    "No methodological implications are available yet."
+    t("reportFallback.methodology")
   );
 
   const limitations = getInterpretationField(
     interpretation,
     ["limitations", "limitation"],
-    "No limitations are available yet."
+    t("reportFallback.limitations")
   );
 
   const nextStep = getInterpretationField(
@@ -101,7 +103,7 @@ export default function ResearchReport() {
       "next_step",
       "recommended_next_step",
     ],
-    "No recommended next analysis is available yet."
+    t("reportFallback.next")
   );
 
   const paperParagraph = getInterpretationField(
@@ -112,13 +114,13 @@ export default function ResearchReport() {
       "paper_paragraph",
       "researchParagraph",
     ],
-    "No research-ready paragraph is available yet."
+    t("reportFallback.draft")
   );
 
   const interpretationText = getInterpretationField(
     interpretation,
     ["interpretation", "summary"],
-    "No AI interpretation is available yet."
+    t("reportFallback.interpretation")
   );
 
   const topWords = Array.isArray(analysis?.topWords)
@@ -134,10 +136,10 @@ export default function ResearchReport() {
   return (
     <>
       <Head>
-        <title>Research Report | LinguaLab</title>
+        <title>{t("report.pageTitle")}</title>
         <meta
           name="description"
-          content="A research-ready LinguaLab report combining descriptive analysis, AI interpretation, limitations, and next steps."
+          content={t("report.meta")}
         />
       </Head>
 
@@ -149,54 +151,41 @@ export default function ResearchReport() {
           </Link>
 
           <div className="navLinks">
-            <Link href="/workspace">Workspace</Link>
-            <Link href="/tools/analyze">Analyze</Link>
+            <Link href="/workspace">{t("nav.workspace")}</Link>
+            <Link href="/tools/analyze">{t("nav.analyze")}</Link>
             <button
               type="button"
               onClick={printReport}
               className="exportButton"
             >
-              Export report
+              {t("report.export")}
             </button>
           </div>
         </nav>
 
         <section className="hero">
           <div>
-            <p className="eyebrow">RESEARCH REPORT</p>
-            <h1>From descriptive evidence to a defensible research summary.</h1>
-            <p className="lead">
-              LinguaLab combines the text profile and AI Research Interpreter
-              into one report with findings, methodological implications,
-              limitations, and a recommended next step.
-            </p>
+            <p className="eyebrow">{t("report.eyebrow")}</p>
+            <h1>{t("report.title")}</h1><p className="lead">{t("report.lead")}</p>
           </div>
 
           <aside className="principleCard">
-            <span>REPORTING PRINCIPLE</span>
-            <strong>
-              Treat AI interpretation as research support—not as a substitute
-              for researcher judgment.
-            </strong>
+            <span>{t("report.principleLabel")}</span><strong>{t("report.principle")}</strong>
           </aside>
         </section>
 
         {!isClient ? (
           <section className="emptyCard">
             <span className="spark">✦</span>
-            <h2>Preparing your report...</h2>
+            <h2>{t("report.preparing")}</h2>
           </section>
         ) : !hasReportData ? (
           <section className="emptyCard">
             <span className="spark">✦</span>
-            <h2>No analysis has been saved yet.</h2>
-            <p>
-              Run a text analysis and use the AI Research Interpreter before
-              opening the report.
-            </p>
+            <h2>{t("report.empty")}</h2><p>{t("report.emptyText")}</p>
 
             <Link href="/tools/analyze" className="primaryLink">
-              Go to Analyze
+              {t("report.goAnalyze")}
               <span aria-hidden="true">↗</span>
             </Link>
           </section>
@@ -204,18 +193,16 @@ export default function ResearchReport() {
           <article className="report">
             <header className="reportHeader">
               <div>
-                <p className="sectionLabel">LINGUALAB GENERATED REPORT</p>
-                <h2>Research analysis summary</h2>
+                <p className="sectionLabel">{t("report.generated")}</p><h2>{t("report.summary")}</h2>
               </div>
 
               <div className="reportMeta">
                 <span>
                   {interpretation?.mode === "preview"
-                    ? "Preview interpretation"
-                    : "AI-assisted interpretation"}
+                    ? t("report.preview") : t("report.assisted")}
                 </span>
                 <strong>
-                  {new Date().toLocaleDateString("en-GB", {
+                  {new Date().toLocaleDateString(language, {
                     day: "2-digit",
                     month: "short",
                     year: "numeric",
@@ -225,34 +212,33 @@ export default function ResearchReport() {
             </header>
 
             <section className="reportSection">
-              <p className="sectionLabel">01 · ANALYSIS OVERVIEW</p>
-              <h3>Text profile</h3>
+              <p className="sectionLabel">{t("report.overview")}</p><h3>{t("report.profile")}</h3>
 
               <div className="stats">
                 <div className="stat">
-                  <span>Words</span>
+                  <span>{t("report.words")}</span>
                   <strong>{analysis?.wordCount ?? "—"}</strong>
                 </div>
 
                 <div className="stat">
-                  <span>Sentences</span>
+                  <span>{t("report.sentences")}</span>
                   <strong>{analysis?.sentenceCount ?? "—"}</strong>
                 </div>
 
                 <div className="stat">
-                  <span>Recurring terms</span>
+                  <span>{t("report.terms")}</span>
                   <strong>{topWords.length || "—"}</strong>
                 </div>
               </div>
 
               {topWords.length > 0 && (
                 <div className="keywordBlock">
-                  <h4>Most frequent words</h4>
+                  <h4>{t("report.frequent")}</h4>
 
                   <ol className="keywordList">
                     {topWords.map(([word, count]) => (
                       <li key={`${word}-${count}`}>
-                        <span>{word}</span>
+                        <span dir="auto">{word}</span>
                         <strong>{count}</strong>
                       </li>
                     ))}
@@ -262,54 +248,44 @@ export default function ResearchReport() {
             </section>
 
             <section className="reportSection">
-              <p className="sectionLabel">02 · AI INTERPRETATION</p>
-              <h3>What the findings may mean</h3>
-              <p>{interpretationText}</p>
+              <p className="sectionLabel">{t("report.interpretationLabel")}</p><h3>{t("report.meaning")}</h3><p dir="auto">{interpretationText}</p>
             </section>
 
             <section className="reportSection splitSection">
               <div>
                 <p className="sectionLabel">
-                  03 · METHODOLOGICAL IMPLICATIONS
+                  {t("report.methodologyLabel")}
                 </p>
-                <h3>How the result should guide the research design</h3>
-                <p>{methodologicalImplications}</p>
+                <h3>{t("report.methodology")}</h3><p dir="auto">{methodologicalImplications}</p>
               </div>
 
               <div className="limitationCard">
-                <p className="sectionLabel">04 · LIMITATIONS</p>
-                <h3>What this analysis cannot establish</h3>
-                <p>{limitations}</p>
+                <p className="sectionLabel">{t("report.limitationsLabel")}</p><h3>{t("report.limitations")}</h3><p dir="auto">{limitations}</p>
               </div>
             </section>
 
             <section className="reportSection nextStepSection">
               <div>
-                <p className="sectionLabel">05 · RECOMMENDED NEXT STEP</p>
-                <h3>Continue the investigation</h3>
-                <p>{nextStep}</p>
+                <p className="sectionLabel">{t("report.nextLabel")}</p><h3>{t("report.continue")}</h3><p dir="auto">{nextStep}</p>
               </div>
 
               <Link href="/tools/analyze" className="secondaryLink">
-                Return to analysis
+                {t("report.return")}
                 <span aria-hidden="true">↗</span>
               </Link>
             </section>
 
             <section className="draftSection">
-              <p className="sectionLabel">06 · RESEARCH-READY DRAFT</p>
-              <h3>Draft paragraph</h3>
-              <blockquote>{paperParagraph}</blockquote>
+              <p className="sectionLabel">{t("report.draftLabel")}</p><h3>{t("report.draft")}</h3><blockquote dir="auto">{paperParagraph}</blockquote>
 
               <p className="draftNote">
-                Review this paragraph against the original data and your
-                disciplinary conventions before using it in academic work.
+                {t("report.draftNote")}
               </p>
             </section>
 
             {analysis?.text && (
               <details className="sourceDetails">
-                <summary>View analyzed text sample</summary>
+                <summary>{t("report.viewSource")}</summary>
                 <p dir="auto">{analysis.text}</p>
               </details>
             )}
@@ -317,12 +293,11 @@ export default function ResearchReport() {
             <footer className="reportFooter">
               <div>
                 <strong>LinguaLab</strong>
-                <span>Build. Analyze. Learn. Discover.</span>
+                <span>{t("report.tagline")}</span>
               </div>
 
               <p>
-                AI-generated interpretation should be validated by the
-                researcher before it is used to support a claim.
+                {t("report.footer")}
               </p>
             </footer>
           </article>
@@ -708,7 +683,7 @@ export default function ResearchReport() {
         .reportFooter p {
           max-width: 470px;
           margin: 0;
-          text-align: right;
+          text-align: end;
           line-height: 1.6;
         }
 
@@ -763,7 +738,7 @@ export default function ResearchReport() {
           }
 
           .reportFooter p {
-            text-align: left;
+            text-align: start;
           }
         }
 

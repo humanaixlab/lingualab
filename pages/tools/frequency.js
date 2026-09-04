@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Link from "next/link";
 
 export default function Frequency() {
   const [text, setText] = useState("");
@@ -17,6 +18,7 @@ export default function Frequency() {
 
   return (
     <div style={{ padding: 40, direction: "rtl" }}>
+      <Link href="/ar-tools#all-tools">← الرجوع إلى جميع الأدوات</Link>
       <h1>تحليل التكرار</h1>
 
       <textarea

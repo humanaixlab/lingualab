@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import Link from "next/link";
 import { readToolHandoff } from "../../lib/tool-handoff";
 
 export default function ColabPage() {
@@ -23,6 +24,7 @@ export default function ColabPage() {
         fontFamily: "Arial"
       }}
     >
+      <Link href="/ar-tools#all-tools">← الرجوع إلى جميع الأدوات</Link>
       <h1>Google Colab Workspace</h1>
       {handoff && (
         <section dir="ltr" style={{ background: "#fff", padding: "25px", borderRadius: "16px", marginBottom: "20px", textAlign: "left" }}>

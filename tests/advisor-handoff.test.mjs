@@ -23,6 +23,7 @@ function harness() {
   const state = { context: null, form: {}, result: null };
   const scope = {
     URLSearchParams, MAX_FILE_SIZE: 10 * 1024 * 1024,
+    t(key) { return ({ "workspace.errors.size": "Please use a file smaller than 10 MB for this browser-based prototype.", "workspace.errors.xls": "Legacy .xls files are not supported securely. Please save the file as .xlsx or CSV and upload it again.", "workspace.errors.type": "Please upload a CSV, TSV, or XLSX file.", "workspace.errors.empty": "The file does not contain a readable header row and data records.", "workspace.errors.read": "LinguaLab could not read this file." })[key] || key; },
     result: {
       fileName: "current.csv", rows: 5, columns: 2, textColumn: "text", labelColumn: "label",
       arabicRatio: 1, missingPercent: 0, duplicateCount: 0, labelDistribution: [["A", 3], ["B", 2]],

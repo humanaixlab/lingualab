@@ -133,7 +133,7 @@
 .summary { margin: 26px 0; color: #d3cfdf; font-size: 16px; line-height: 1.7; }
 .advisorOutput section { margin-top: 24px; }
 .advisorOutput h3 { margin: 0 0 12px; font-size: 14px; color: #f4f1ff; }
-.advisorOutput ol { margin: 0; padding-left: 22px; color: #c5c1d1; line-height: 1.65; }
+.advisorOutput ol { margin: 0; padding-inline-start: 22px; color: #c5c1d1; line-height: 1.65; }
 .advisorOutput li + li { margin-top: 8px; }
 .methodBox { padding: 18px; border: 1px solid #494365; border-radius: 16px; background: #211e37; }
 .methodBox span, .nextAction span { color: #aaa0ff; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }

@@ -2,25 +2,20 @@ import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import styles from "../styles/ResearchAdvisor.module.css";
+import { useLanguage } from "../components/LanguageProvider";
 
-const stages = [
-  { value: "idea", label: "Framing the idea" },
-  { value: "data", label: "Preparing the data" },
-  { value: "analysis", label: "Choosing or running analysis" },
-  { value: "interpretation", label: "Interpreting results" },
-  { value: "writing", label: "Writing the report" },
-];
+const stages = ["idea", "data", "analysis", "interpretation", "writing"];
 
 const examples = [
   {
-    label: "Sentiment study",
+    key: "sentiment",
     goal: "Compare sentiment patterns in Arabic customer reviews across product categories.",
     data: "A CSV file with 1,200 Arabic reviews, product category, and manually assigned sentiment labels.",
     stage: "analysis",
     question: "Which baseline should I use, and what should I check before training?",
   },
   {
-    label: "Corpus exploration",
+    key: "corpus",
     goal: "Identify recurring themes and expressions in Arabic student reflections.",
     data: "About 250 short, unlabeled reflections collected from one university course.",
     stage: "data",
@@ -28,31 +23,23 @@ const examples = [
   },
 ];
 
-function buildDemoAdvisor(goal, data, stage) {
-  const stageLabel = stages.find((item) => item.value === stage)?.label || "research planning";
+function buildDemoAdvisor(goal, data, stage, t) {
+  const stageLabel = stages.includes(stage) ? t(`advisor.stages.${stage}`) : t("advisor.stages.planning");
   return {
-    summary: `Your project has a clear direction and is currently at the “${stageLabel}” stage. Before selecting a model, connect the research question to the structure, size, and annotation quality of the data.`,
+    summary: t("advisor.demo.summary", { stage: stageLabel }),
     researchQuestions: [
-      `What observable language pattern would provide evidence for: “${goal}”?`,
-      "Which variables or labels are essential, and how were they created?",
-      "What comparison or baseline would make the result interpretable?",
+      t("advisor.demo.q1", { goal }), t("advisor.demo.q2"), t("advisor.demo.q3"),
     ],
     recommendedMethod: data.toLowerCase().includes("label")
-      ? "Start with a transparent supervised baseline, then compare it with a stronger model only after checking label balance and annotation consistency."
-      : "Begin with corpus exploration—frequency, concordance, and recurring phrases—before deciding whether a predictive model is justified.",
-    steps: [
-      "Define one primary research question and one measurable outcome.",
-      "Audit missing values, duplicates, Arabic-script consistency, and label distribution.",
-      "Create a simple baseline and record the evaluation setup.",
-      "Interpret errors and limitations before writing conclusions.",
-    ],
-    nextAction: "Open the workspace, upload the dataset, and confirm the detected text and label columns.",
-    caution: "This preview is a local planning template. Use the AI-generated recommendation only after checking it against your actual dataset and research design.",
+      ? t("advisor.demo.supervised") : t("advisor.demo.corpus"),
+    steps: [1, 2, 3, 4].map((number) => t(`advisor.demo.s${number}`)),
+    nextAction: t("advisor.demo.next"), caution: t("advisor.demo.caution"),
     isPreview: true,
   };
 }
 
 export default function ResearchAdvisorPage() {
+  const { language, t } = useLanguage();
   const [form, setForm] = useState({
     researchGoal: "",
     dataDescription: "",
@@ -148,17 +135,17 @@ export default function ResearchAdvisorPage() {
 
       if (!response.ok) {
         if (response.status === 503) {
-          setAdvisor(buildDemoAdvisor(form.researchGoal, form.dataDescription, form.currentStage));
+          setAdvisor(buildDemoAdvisor(form.researchGoal, form.dataDescription, form.currentStage, t));
           setStatus("preview");
           return;
         }
-        throw new Error(payload.error || "The advisor could not create a plan.");
+        throw new Error(payload.error || t("advisor.requestError"));
       }
 
       setAdvisor(payload.advisor);
       setStatus("success");
     } catch (requestError) {
-      setError(requestError.message || "Something went wrong. Please try again.");
+      setError(requestError.message || t("advisor.genericError"));
       setStatus("error");
     }
   }
@@ -166,10 +153,10 @@ export default function ResearchAdvisorPage() {
   return (
     <>
       <Head>
-        <title>AI Research Advisor — LinguaLab</title>
+        <title>{t("advisor.pageTitle")}</title>
         <meta
           name="description"
-          content="Turn an Arabic-language research goal into a clear, defensible next step."
+          content={t("advisor.meta")}
         />
       </Head>
 
@@ -180,24 +167,20 @@ export default function ResearchAdvisorPage() {
             <span>LinguaLab</span>
           </Link>
           <div className={styles.navActions}>
-            <Link href="/workspace">Workspace</Link>
-            <Link href="/ar-tools">Research Tools</Link>
-            <Link href="/research-advisor">Research Advisor</Link>
+            <Link href="/workspace">{t("nav.workspace")}</Link>
+            <Link href="/ar-tools">{t("nav.researchHub")}</Link>
+            <Link href="/research-advisor">{t("nav.researchAdvisor")}</Link>
           </div>
         </nav>
 
         <section className={styles.hero}>
           <div>
-            <p className={styles.eyebrow}>AI Research Advisor</p>
-            <h1>Move from a research idea to a defensible next step.</h1>
-            <p className={styles.lead}>
-              Describe your goal and data. LinguaLab helps frame the question,
-              choose a method, surface risks, and decide what to do next.
-            </p>
+            <p className={styles.eyebrow}>{t("advisor.eyebrow")}</p>
+            <h1>{t("advisor.title")}</h1>
+            <p className={styles.lead}>{t("advisor.lead")}</p>
           </div>
           <div className={styles.principleCard}>
-            <span>Research principle</span>
-            <strong>Method follows the question—not the other way around.</strong>
+            <span>{t("advisor.principleLabel")}</span><strong>{t("advisor.principle")}</strong>
           </div>
         </section>
 
@@ -205,100 +188,90 @@ export default function ResearchAdvisorPage() {
           <form className={styles.formCard} onSubmit={submit}>
             <div className={styles.cardHeading}>
               <div>
-                <p className={styles.step}>01 · Research context</p>
-                <h2>Tell the advisor what you are trying to learn.</h2>
+                <p className={styles.step}>{t("advisor.contextStep")}</p><h2>{t("advisor.contextTitle")}</h2>
               </div>
-              <span className={styles.privateBadge}>No file required</span>
+              <span className={styles.privateBadge}>{t("advisor.private")}</span>
             </div>
 
             {datasetContext ? (
               <div className={styles.contextBanner}>
                 <div>
-                  <span>Dataset context imported</span>
-                  <strong>{datasetContext.fileName}</strong>
-                  <small>{datasetContext.rows.toLocaleString()} records · {datasetContext.textColumn} · {datasetContext.labelColumn}</small>
+                  <span>{t("advisor.imported")}</span><strong dir="auto">{datasetContext.fileName}</strong>
+                  <small dir="auto">{t("advisor.records", { count: datasetContext.rows.toLocaleString(language), text: datasetContext.textColumn, label: datasetContext.labelColumn })}</small>
                 </div>
-                <button type="button" onClick={clearDatasetContext}>Clear</button>
+                <button type="button" onClick={clearDatasetContext}>{t("advisor.clear")}</button>
               </div>
             ) : null}
 
             <label>
-              Research goal
+              {t("advisor.goal")}
               <textarea
                 name="researchGoal"
                 value={form.researchGoal}
                 onChange={updateField}
                 maxLength={4000}
-                placeholder="Example: Compare sentiment patterns in Arabic customer reviews..."
+                placeholder={t("advisor.goalPlaceholder")} dir="auto"
                 required
               />
             </label>
 
             <label>
-              What data do you have?
+              {t("advisor.data")}
               <textarea
                 name="dataDescription"
                 value={form.dataDescription}
                 onChange={updateField}
                 maxLength={4000}
-                placeholder="Describe the file, number of records, columns, labels, source, and language variety."
+                placeholder={t("advisor.dataPlaceholder")} dir="auto"
                 required
               />
             </label>
 
             <div className={styles.twoColumns}>
               <label>
-                Current stage
+                {t("advisor.stage")}
                 <select name="currentStage" value={form.currentStage} onChange={updateField}>
                   {stages.map((stage) => (
-                    <option key={stage.value} value={stage.value}>{stage.label}</option>
+                    <option key={stage} value={stage}>{t(`advisor.stages.${stage}`)}</option>
                   ))}
                 </select>
               </label>
 
               <label>
-                Your immediate question <span>(optional)</span>
+                {t("advisor.question")} <span>{t("advisor.optional")}</span>
                 <input
                   name="question"
                   value={form.question}
                   onChange={updateField}
                   maxLength={4000}
-                  placeholder="What should I do next?"
+                  placeholder={t("advisor.questionPlaceholder")} dir="auto"
                 />
               </label>
             </div>
 
             <div className={styles.examples}>
-              <span>Try an example:</span>
+              <span>{t("advisor.try")}</span>
               {examples.map((example) => (
-                <button type="button" key={example.label} onClick={() => loadExample(example)}>
-                  {example.label}
+                <button type="button" key={example.key} onClick={() => loadExample(example)}>
+                  {t(`advisor.examples.${example.key}`)}
                 </button>
               ))}
             </div>
 
             <button className={styles.submitButton} type="submit" disabled={!canSubmit}>
-              {status === "loading" ? "Building your research plan…" : "Ask the Research Advisor"}
+              {status === "loading" ? t("advisor.loading") : t("advisor.submit")}
               <span aria-hidden="true">↗</span>
             </button>
-            {error ? <p className={styles.error} role="alert">{error}</p> : null}
+            {error ? <p className={styles.error} role="alert" dir="auto">{error}</p> : null}
           </form>
 
           <aside className={styles.resultCard} aria-live="polite">
             {!advisor ? (
               <div className={styles.emptyState}>
                 <div className={styles.spark}>✦</div>
-                <p className={styles.step}>02 · Advisor response</p>
-                <h2>Your research roadmap will appear here.</h2>
-                <p>
-                  You will receive focused research questions, a recommended method,
-                  practical steps, and one validity warning.
-                </p>
+                <p className={styles.step}>{t("advisor.responseStep")}</p><h2>{t("advisor.emptyTitle")}</h2><p>{t("advisor.emptyText")}</p>
                 <div className={styles.emptyChecklist}>
-                  <span>Question framing</span>
-                  <span>Method choice</span>
-                  <span>Next action</span>
-                  <span>Research caution</span>
+                  <span>{t("advisor.framing")}</span><span>{t("advisor.methodChoice")}</span><span>{t("advisor.nextAction")}</span><span>{t("advisor.cautionShort")}</span>
                 </div>
               </div>
             ) : (
@@ -306,33 +279,31 @@ export default function ResearchAdvisorPage() {
                 <div className={styles.outputHeader}>
                   <div className={styles.spark}>✦</div>
                   <div>
-                    <p className={styles.step}>LinguaLab recommendation</p>
-                    <h2>Your next research decision</h2>
+                    <p className={styles.step}>{t("advisor.recommendation")}</p><h2>{t("advisor.decision")}</h2>
                   </div>
-                  {advisor.isPreview ? <span className={styles.previewBadge}>Preview mode</span> : null}
+                  {advisor.isPreview ? <span className={styles.previewBadge}>{t("advisor.preview")}</span> : null}
                 </div>
 
-                <p className={styles.summary}>{advisor.summary}</p>
+                <p className={styles.summary} dir="auto">{advisor.summary}</p>
 
                 <section>
-                  <h3>Questions worth answering</h3>
+                  <h3>{t("advisor.questions")}</h3>
                   <ol>
-                    {advisor.researchQuestions.map((item) => <li key={item}>{item}</li>)}
+                    {advisor.researchQuestions.map((item) => <li key={item} dir="auto">{item}</li>)}
                   </ol>
                 </section>
 
                 <section className={styles.methodBox}>
-                  <span>Recommended method</span>
-                  <p>{advisor.recommendedMethod}</p>
+                  <span>{t("advisor.method")}</span><p dir="auto">{advisor.recommendedMethod}</p>
                 </section>
 
                 <section>
-                  <h3>Suggested workflow</h3>
+                  <h3>{t("advisor.workflow")}</h3>
                   <div className={styles.stepsList}>
                     {advisor.steps.map((item, index) => (
                       <div key={item}>
                         <span>{String(index + 1).padStart(2, "0")}</span>
-                        <p>{item}</p>
+                        <p dir="auto">{item}</p>
                       </div>
                     ))}
                   </div>
@@ -340,13 +311,12 @@ export default function ResearchAdvisorPage() {
 
                 <section className={styles.nextAction}>
                   <div>
-                    <span>Do this next</span>
-                    <strong>{advisor.nextAction}</strong>
+                    <span>{t("advisor.doNext")}</span><strong dir="auto">{advisor.nextAction}</strong>
                   </div>
-                  <Link href="/workspace">Open workspace ↗</Link>
+                  <Link href="/workspace">{t("advisor.openWorkspace")}</Link>
                 </section>
 
-                <p className={styles.caution}><strong>Research caution:</strong> {advisor.caution}</p>
+                <p className={styles.caution} dir="auto"><strong>{t("advisor.caution")}</strong> {advisor.caution}</p>
               </div>
             )}
           </aside>
@@ -355,4 +325,3 @@ export default function ResearchAdvisorPage() {
     </>
   );
 }
-

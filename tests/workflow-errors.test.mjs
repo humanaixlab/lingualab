@@ -6,11 +6,12 @@ import { setImmediate } from "node:timers/promises";
 import vm from "node:vm";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { translate } from "../lib/i18n/translate.js";
 
 const require = createRequire(import.meta.url);
 const swc = require("next/dist/build/swc");
 await swc.loadBindings();
-const source = readFileSync(new URL("../pages/workspace.js", import.meta.url), "utf8");
+const source = `${readFileSync(new URL("../pages/workspace.js", import.meta.url), "utf8")}\nexport { createReportHtml };`;
 const { code } = await swc.transform(source, {
   jsc: { parser: { syntax: "ecmascript", jsx: true }, transform: { react: { runtime: "automatic" } } },
   module: { type: "commonjs" },
@@ -48,6 +49,7 @@ function workspace() {
       if (name === "react") return hooks;
       if (name === "next/router") return { useRouter: () => ({ asPath: "/workspace" }) };
       if (name === "../lib/research-context") return {};
+      if (name === "../components/LanguageProvider") return { useLanguage: () => ({ language: "en", direction: "ltr", t: (key, values) => translate("en", key, values) }) };
       if (name === "next/head") return () => null;
       if (name === "next/link") return function MockLink({ children, ...props }) { return React.createElement("a", props, children); };
       if (name.endsWith(".css")) return {};
@@ -61,6 +63,7 @@ function workspace() {
   const render = () => { cursor = 0; return exports.default(); };
   return {
     render,
+    report: (dataset, result, language) => exports.createReportHtml(dataset, result, "نص / text", "label", language, (key, values) => translate(language, key, values)),
     async upload(count) {
       const csv = "text,label\n" + Array.from({ length: count }, (_, i) => `نص عربي ${i},${i < 3 ? "A" : "B"}`).join("\n");
       const input = find(render(), (el) => el.type === "input" && el.props.type === "file");
@@ -84,6 +87,23 @@ test("validation failure appears exactly once, inside Step 2", async () => {
   assert.equal(alert.props.children, message);
   const html = renderToStaticMarkup(page.render());
   assert.equal(html.split(message).length - 1, 1);
+});
+
+test("downloaded Workspace report follows UI language without translating dataset metadata", () => {
+  const page = workspace();
+  const dataset = { fileName: "بيانات-user.csv", rows: 6, columns: 2, arabicRatio: 1, missingPercent: 0, duplicateCount: 0, imbalance: 1 };
+  const result = { mode: "classification", data: { accuracy: 0.5, trainSize: 4, testSize: 2, vocabularySize: 12 } };
+  const english = page.report(dataset, result, "en");
+  const arabic = page.report(dataset, result, "ar");
+  assert.match(english, /<html lang="en" dir="ltr">/);
+  assert.match(english, /Dataset summary/);
+  assert.match(arabic, /<html lang="ar" dir="rtl">/);
+  assert.match(arabic, /ملخص مجموعة البيانات/);
+  for (const report of [english, arabic]) {
+    assert.match(report, /بيانات-user\.csv/);
+    assert.match(report, /نص \/ text/);
+  }
+  assert.doesNotMatch(arabic, /text-align:left|padding-left|float:right/);
 });
 
 test("a new run immediately clears the previous error before execution", async () => {

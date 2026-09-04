@@ -1,10 +1,12 @@
 import { useState } from "react";
+import Link from "next/link";
 
 export default function POS() {
   const [text, setText] = useState("");
 
   return (
     <div style={{ padding: 40, direction: "rtl" }}>
+      <Link href="/ar-tools#all-tools">← الرجوع إلى جميع الأدوات</Link>
       <h1>تحليل POS (تجريبي)</h1>
 
       <textarea
