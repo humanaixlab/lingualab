@@ -1,6 +1,6 @@
 import Head from "next/head";
 import Link from "next/link";
-import { useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { useLanguage } from "../components/LanguageProvider";
 
 function subscribe() {
@@ -60,8 +60,39 @@ function getInterpretationField(interpretation, keys, fallback) {
   return fallback;
 }
 
+function detectInterpretationLanguage(interpretation) {
+  const text = [
+    interpretation?.interpretation,
+    interpretation?.methodologicalImplications,
+    interpretation?.methodology,
+    interpretation?.limitations,
+    interpretation?.nextStep,
+    interpretation?.paperParagraph,
+  ].filter((value) => typeof value === "string").join(" ");
+  const arabic = (text.match(/[\u0600-\u06ff]/g) || []).length;
+  const latin = (text.match(/[a-z]/gi) || []).length;
+  if (!arabic && !latin) return null;
+  return arabic >= latin ? "ar" : "en";
+}
+
+function normalizeDistribution(value) {
+  const entries = Array.isArray(value) ? value : value && typeof value === "object" ? Object.entries(value) : [];
+  return entries
+    .filter((item) => Array.isArray(item) && String(item[0]).trim() && Number.isFinite(Number(item[1])) && Number(item[1]) > 0)
+    .map(([label, count]) => [String(label), Number(count)]);
+}
+
+const REPORT_COPY = {
+  en: { metrics: "Key Metrics", visuals: "Visual Results", frequencyChart: "Most frequent terms", distributionChart: "Category distribution", regenerate: "Regenerate interpretation in English", regenerating: "Regenerating interpretation…", mismatch: "The saved interpretation was generated in another language. Regenerate it to match the English interface.", regenerateError: "The interpretation could not be regenerated. Please try again.", interpretation: "AI Interpretation", conclusions: "Conclusions / Next Steps" },
+  ar: { metrics: "المقاييس الرئيسة", visuals: "النتائج البصرية", frequencyChart: "أكثر المفردات تكرارًا", distributionChart: "توزيع الفئات", regenerate: "إعادة توليد التفسير بالعربية", regenerating: "جارٍ إعادة توليد التفسير…", mismatch: "أُنشئ التفسير المحفوظ بلغة أخرى. أعد توليده ليتوافق مع الواجهة العربية.", regenerateError: "تعذرت إعادة توليد التفسير. حاول مرة أخرى.", interpretation: "تفسير الذكاء الاصطناعي", conclusions: "الاستنتاجات والخطوات التالية" },
+};
+
 export default function ResearchReport() {
   const { language, t } = useLanguage();
+  const copy = REPORT_COPY[language];
+  const [regeneratedInterpretation, setRegeneratedInterpretation] = useState(null);
+  const [regenerating, setRegenerating] = useState(false);
+  const [regenerationError, setRegenerationError] = useState("");
   const isClient = useSyncExternalStore(
     subscribe,
     getClientSnapshot,
@@ -76,10 +107,13 @@ export default function ResearchReport() {
     ? readStoredJson("lingualab-interpretation")
     : null;
 
-  const interpretation = normalizeInterpretation(storedInterpretation);
+  const interpretation = regeneratedInterpretation || normalizeInterpretation(storedInterpretation);
+  const interpretationLanguage = detectInterpretationLanguage(interpretation);
+  const languageMismatch = Boolean(interpretation && interpretationLanguage && interpretationLanguage !== language);
+  const displayedInterpretation = languageMismatch ? null : interpretation;
 
   const methodologicalImplications = getInterpretationField(
-    interpretation,
+    displayedInterpretation,
     [
       "methodology",
       "methodologicalImplications",
@@ -90,13 +124,13 @@ export default function ResearchReport() {
   );
 
   const limitations = getInterpretationField(
-    interpretation,
+    displayedInterpretation,
     ["limitations", "limitation"],
     t("reportFallback.limitations")
   );
 
   const nextStep = getInterpretationField(
-    interpretation,
+    displayedInterpretation,
     [
       "nextStep",
       "recommendedNextStep",
@@ -107,7 +141,7 @@ export default function ResearchReport() {
   );
 
   const paperParagraph = getInterpretationField(
-    interpretation,
+    displayedInterpretation,
     [
       "paperParagraph",
       "draftParagraph",
@@ -118,7 +152,7 @@ export default function ResearchReport() {
   );
 
   const interpretationText = getInterpretationField(
-    interpretation,
+    displayedInterpretation,
     ["interpretation", "summary"],
     t("reportFallback.interpretation")
   );
@@ -126,11 +160,42 @@ export default function ResearchReport() {
   const topWords = Array.isArray(analysis?.topWords)
     ? analysis.topWords
     : [];
+  const distribution = normalizeDistribution(analysis?.labelDistribution || analysis?.distribution);
+  const maxFrequency = Math.max(0, ...topWords.map((item) => Number(item?.[1]) || 0));
+  const distributionTotal = distribution.reduce((sum, item) => sum + item[1], 0);
+  const distributionGradient = distribution.map(([, count], index) => {
+    const start = distribution.slice(0, index).reduce((sum, item) => sum + item[1], 0) / distributionTotal * 100;
+    const end = start + count / distributionTotal * 100;
+    return `${["#7c6cf2", "#4da7d8", "#55b89f", "#e6a85c", "#d96f91"][index % 5]} ${start}% ${end}%`;
+  }).join(", ");
 
   const hasReportData = Boolean(analysis || interpretation);
 
   const printReport = () => {
     window.print();
+  };
+
+  const regenerateInterpretation = async () => {
+    if (!analysis?.text || regenerating) return;
+    setRegenerating(true);
+    setRegenerationError("");
+    try {
+      const response = await fetch("/api/research-interpreter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: analysis.text, wordCount: analysis.wordCount, sentenceCount: analysis.sentenceCount, topWords, uiLanguage: language }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data?.error || copy.regenerateError);
+      const regenerated = normalizeInterpretation(data);
+      setRegeneratedInterpretation(regenerated);
+      try { sessionStorage.setItem("lingualab-interpretation", JSON.stringify(regenerated)); } catch {}
+      try { localStorage.setItem("lingualab-interpretation", JSON.stringify(regenerated)); } catch {}
+    } catch {
+      setRegenerationError(copy.regenerateError);
+    } finally {
+      setRegenerating(false);
+    }
   };
 
   return (
@@ -211,62 +276,39 @@ export default function ResearchReport() {
               </div>
             </header>
 
-            <section className="reportSection">
-              <p className="sectionLabel">{t("report.overview")}</p><h3>{t("report.profile")}</h3>
-
-              <div className="stats">
-                <div className="stat">
-                  <span>{t("report.words")}</span>
-                  <strong>{analysis?.wordCount ?? "—"}</strong>
+            {analysis && (
+              <section className="reportSection">
+                <p className="sectionLabel">02</p><h3>{copy.metrics}</h3>
+                <div className="stats">
+                  {Number.isFinite(Number(analysis.wordCount)) && <div className="stat"><span>{t("report.words")}</span><strong>{Number(analysis.wordCount).toLocaleString(language)}</strong></div>}
+                  {Number.isFinite(Number(analysis.sentenceCount)) && <div className="stat"><span>{t("report.sentences")}</span><strong>{Number(analysis.sentenceCount).toLocaleString(language)}</strong></div>}
+                  {topWords.length > 0 && <div className="stat"><span>{t("report.terms")}</span><strong>{topWords.length.toLocaleString(language)}</strong></div>}
                 </div>
+              </section>
+            )}
 
-                <div className="stat">
-                  <span>{t("report.sentences")}</span>
-                  <strong>{analysis?.sentenceCount ?? "—"}</strong>
+            {(topWords.length > 0 || distribution.length > 0) && (
+              <section className="reportSection">
+                <p className="sectionLabel">03</p><h3>{copy.visuals}</h3>
+                <div className="visualGrid">
+                  {topWords.length > 0 && <figure className="chartCard"><figcaption>{copy.frequencyChart}</figcaption><div className="barChart">{topWords.map(([word, count]) => <div className="barRow" key={`${word}-${count}`}><span dir="auto">{word}</span><div><i style={{ width: `${maxFrequency ? Math.max(4, Number(count) / maxFrequency * 100) : 0}%` }} /></div><strong>{count}</strong></div>)}</div></figure>}
+                  {distribution.length > 0 && <figure className="chartCard"><figcaption>{copy.distributionChart}</figcaption><div className="donutLayout"><div className="donut" style={{ background: `conic-gradient(${distributionGradient})` }} aria-label={copy.distributionChart} /><ul>{distribution.map(([label, count], index) => <li key={`${label}-${count}`}><i style={{ background: ["#7c6cf2", "#4da7d8", "#55b89f", "#e6a85c", "#d96f91"][index % 5] }} /><span dir="auto">{label}</span><strong>{count}</strong></li>)}</ul></div></figure>}
                 </div>
-
-                <div className="stat">
-                  <span>{t("report.terms")}</span>
-                  <strong>{topWords.length || "—"}</strong>
-                </div>
-              </div>
-
-              {topWords.length > 0 && (
-                <div className="keywordBlock">
-                  <h4>{t("report.frequent")}</h4>
-
-                  <ol className="keywordList">
-                    {topWords.map(([word, count]) => (
-                      <li key={`${word}-${count}`}>
-                        <span dir="auto">{word}</span>
-                        <strong>{count}</strong>
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-              )}
-            </section>
+              </section>
+            )}
 
             <section className="reportSection">
-              <p className="sectionLabel">{t("report.interpretationLabel")}</p><h3>{t("report.meaning")}</h3><p dir="auto">{interpretationText}</p>
+              <p className="sectionLabel">04</p><h3>{copy.interpretation}</h3>
+              {languageMismatch ? <div className="languageNotice" role="status"><p>{copy.mismatch}</p><button type="button" onClick={regenerateInterpretation} disabled={regenerating || !analysis?.text}>{regenerating ? copy.regenerating : copy.regenerate}</button>{regenerationError && <span role="alert">{regenerationError}</span>}</div> : <><p dir="auto">{interpretationText}</p><h4>{t("report.methodology")}</h4><p dir="auto">{methodologicalImplications}</p></>}
             </section>
 
-            <section className="reportSection splitSection">
-              <div>
-                <p className="sectionLabel">
-                  {t("report.methodologyLabel")}
-                </p>
-                <h3>{t("report.methodology")}</h3><p dir="auto">{methodologicalImplications}</p>
-              </div>
-
-              <div className="limitationCard">
-                <p className="sectionLabel">{t("report.limitationsLabel")}</p><h3>{t("report.limitations")}</h3><p dir="auto">{limitations}</p>
-              </div>
+            <section className="reportSection limitationCard">
+              <p className="sectionLabel">05</p><h3>{t("report.limitations")}</h3><p dir="auto">{limitations}</p>
             </section>
 
             <section className="reportSection nextStepSection">
               <div>
-                <p className="sectionLabel">{t("report.nextLabel")}</p><h3>{t("report.continue")}</h3><p dir="auto">{nextStep}</p>
+                <p className="sectionLabel">06</p><h3>{copy.conclusions}</h3><p dir="auto">{nextStep}</p>
               </div>
 
               <Link href="/tools/analyze" className="secondaryLink">
@@ -276,7 +318,7 @@ export default function ResearchReport() {
             </section>
 
             <section className="draftSection">
-              <p className="sectionLabel">{t("report.draftLabel")}</p><h3>{t("report.draft")}</h3><blockquote dir="auto">{paperParagraph}</blockquote>
+              <h3>{t("report.draft")}</h3><blockquote dir="auto">{paperParagraph}</blockquote>
 
               <p className="draftNote">
                 {t("report.draftNote")}
@@ -315,7 +357,6 @@ export default function ResearchReport() {
             radial-gradient(circle at 15% 10%, #ece9ff 0, transparent 34%),
             linear-gradient(135deg, #fbfbff 0%, #f5f5ff 100%);
           color: #17142f;
-          font-family: var(--font-ui);
         }
 
         :global(a) {
@@ -326,6 +367,7 @@ export default function ResearchReport() {
         .reportPage {
           min-height: 100vh;
           padding: 0 34px 70px;
+          font-family: var(--font-ui);
         }
 
         .nav {
@@ -396,7 +438,7 @@ export default function ResearchReport() {
         .hero h1 {
           max-width: 850px;
           margin: 0;
-          font-size: var(--text-hero);
+          font-size: var(--text-page);
           line-height: var(--leading-heading);
           letter-spacing: var(--tracking-heading);
         }
@@ -428,6 +470,14 @@ export default function ResearchReport() {
         .principleCard strong {
           font-size: var(--text-body);
           line-height: var(--leading-body);
+        }
+
+        :global(html[lang="ar"]) .eyebrow,
+        :global(html[lang="ar"]) .sectionLabel,
+        :global(html[lang="ar"]) .principleCard span,
+        :global(html[lang="ar"]) .stat span {
+          letter-spacing: 0;
+          text-transform: none;
         }
 
         .emptyCard,
@@ -607,6 +657,46 @@ export default function ResearchReport() {
           border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
+        .visualGrid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 18px;
+          margin-top: 26px;
+        }
+
+        .chartCard {
+          margin: 0;
+          padding: 24px;
+          border: 1px solid rgba(255, 255, 255, 0.13);
+          border-radius: 20px;
+          background: rgba(255, 255, 255, 0.06);
+        }
+
+        .chartCard figcaption {
+          margin-bottom: 20px;
+          font-size: var(--text-card);
+          font-weight: 600;
+        }
+
+        .barChart { display: grid; gap: 13px; }
+        .barRow { display: grid; grid-template-columns: minmax(80px, 0.7fr) minmax(120px, 2fr) auto; align-items: center; gap: 12px; font-size: var(--text-helper); }
+        .barRow > div { height: 10px; overflow: hidden; border-radius: 999px; background: rgba(255, 255, 255, 0.1); }
+        .barRow i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #7c6cf2, #62b5dc); }
+        .donutLayout { display: flex; align-items: center; gap: 24px; }
+        .donut { width: 150px; aspect-ratio: 1; flex: 0 0 auto; border-radius: 50%; position: relative; }
+        .donut::after { content: ""; position: absolute; inset: 28%; border-radius: 50%; background: #27223d; }
+        .donutLayout ul { display: grid; gap: 10px; width: 100%; margin: 0; padding: 0; list-style: none; }
+        .donutLayout li { display: grid; grid-template-columns: 10px 1fr auto; align-items: center; gap: 9px; font-size: var(--text-helper); }
+        .donutLayout li i { width: 10px; height: 10px; border-radius: 50%; }
+
+        .languageNotice { padding: 22px; border: 1px solid rgba(184, 175, 255, 0.35); border-radius: 18px; background: rgba(184, 175, 255, 0.08); }
+        .languageNotice p { margin-top: 0; }
+        .languageNotice button { border: 0; border-radius: 999px; padding: 12px 18px; background: #fff; color: #17142f; font: inherit; font-size: var(--text-button); font-weight: 600; cursor: pointer; }
+        .languageNotice button:disabled { cursor: not-allowed; opacity: 0.65; }
+        .languageNotice span { display: block; margin-top: 12px; color: #ffc9c9; font-size: var(--text-helper); }
+
+        .reportSection h4 { margin: 26px 0 8px; font-size: var(--text-card); }
+
         .splitSection {
           display: grid;
           grid-template-columns: 1fr 0.85fr;
@@ -614,8 +704,6 @@ export default function ResearchReport() {
         }
 
         .limitationCard {
-          padding: 27px;
-          border-radius: 22px;
           background: rgba(255, 255, 255, 0.07);
         }
 
@@ -733,6 +821,10 @@ export default function ResearchReport() {
             grid-template-columns: 1fr;
           }
 
+          .visualGrid { grid-template-columns: 1fr; }
+          .donutLayout { align-items: flex-start; flex-direction: column; }
+          .barRow { grid-template-columns: minmax(70px, 0.8fr) minmax(90px, 1.5fr) auto; }
+
           .reportHeader,
           .reportSection,
           .draftSection,
@@ -758,6 +850,7 @@ export default function ResearchReport() {
 
           .nav,
           .hero,
+          .languageNotice,
           .emptyCard,
           .secondaryLink {
             display: none !important;
