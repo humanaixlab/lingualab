@@ -704,6 +704,7 @@ export default function WorkspacePage() {
       : [];
 
     const payload = result ? {
+      uiLanguage: language,
       rowCount: result.rows,
       columnCount: result.columns,
       columnNames: result.headers.slice(0, 20),
@@ -716,7 +717,7 @@ export default function WorkspacePage() {
       labelDistribution: selectedLabelDistribution.slice(0, 10).map(([label, count]) => ({ label, count })),
       recommendedWorkflow: result.recommendation.type,
       researchGoal: researchGoal.trim(),
-    } : { ...currentHubContext.copilotMetadata, researchGoal: researchGoal.trim() };
+    } : { ...currentHubContext.copilotMetadata, researchGoal: researchGoal.trim(), uiLanguage: language };
 
     const controller = new AbortController();
     const timeoutId = window.setTimeout(() => controller.abort(), 65000);

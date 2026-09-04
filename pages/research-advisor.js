@@ -129,7 +129,7 @@ export default function ResearchAdvisorPage() {
       const response = await fetch("/api/research-advisor", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, uiLanguage: language }),
       });
       const payload = await response.json();
 

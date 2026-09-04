@@ -37,6 +37,7 @@ export default async function handler(req, res) {
   const dataDescription = clean(req.body?.dataDescription);
   const currentStage = clean(req.body?.currentStage);
   const question = clean(req.body?.question);
+  const uiLanguage = req.body?.uiLanguage === "ar" ? "ar" : "en";
 
   if (!researchGoal || !dataDescription || !ALLOWED_STAGES.has(currentStage)) {
     return res.status(400).json({
@@ -80,7 +81,7 @@ Return ONLY valid JSON with this exact shape:
   "caution": "one important limitation, validity risk, or ethics note"
 }
 
-Use clear English. Respect Arabic-data considerations such as normalization, dialect, annotation quality, class imbalance, and interpretability when relevant. Never claim that an analysis has been run unless the user explicitly says so.`;
+Write every response value directly in ${uiLanguage === "ar" ? "natural academic Arabic" : "clear academic English"}. Keep the JSON field names exactly as specified in English. Do not translate dataset content, filenames, column names, user-provided quotations, or original citations. Respect Arabic-data considerations such as normalization, dialect, annotation quality, class imbalance, and interpretability when relevant. Never claim that an analysis has been run unless the user explicitly says so.`;
 
   try {
     const client = new OpenAI({ apiKey });

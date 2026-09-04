@@ -160,6 +160,7 @@ const interpretResults = async () => {
       },
       body: JSON.stringify({
         text,
+        uiLanguage: language,
         wordCount: result.wordCount,
         sentenceCount: result.sentenceCount,
         topWords: result.topWords,

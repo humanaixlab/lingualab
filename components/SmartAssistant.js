@@ -8,12 +8,53 @@ const suggestions = [
   { id: "frequency", key: "assistant.frequencyTool" },
 ];
 
+const CORE_ROUTES = new Set([
+  "/",
+  "/workspace",
+  "/ar-tools",
+  "/tools/analyze",
+  "/research-advisor",
+  "/research-report",
+  "/student-dashboard",
+]);
+
 export default function SmartAssistant() {
   const router = useRouter();
   const { direction, t } = useLanguage();
+  const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     { role: "assistant", key: "assistant.welcome" },
   ]);
+
+  if (!CORE_ROUTES.has(router.pathname)) return null;
+
+  if (!isOpen) {
+    return (
+      <button
+        type="button"
+        onClick={() => setIsOpen(true)}
+        aria-label={t("assistant.open")}
+        title={t("assistant.open")}
+        style={{
+          position: "fixed",
+          insetInlineEnd: "18px",
+          bottom: "18px",
+          width: "48px",
+          height: "48px",
+          borderRadius: "50%",
+          border: "none",
+          background: "#4f46e5",
+          color: "#fff",
+          cursor: "pointer",
+          boxShadow: "0 8px 24px rgba(15, 23, 42, 0.22)",
+          zIndex: 9999,
+          fontSize: "20px",
+        }}
+      >
+        ✦
+      </button>
+    );
+  }
 
   const handleClick = (suggestion) => {
     let response = "";
@@ -47,9 +88,9 @@ export default function SmartAssistant() {
     <div
       style={{
         position: "fixed",
-        bottom: "20px",
-        left: "20px",
-        width: "280px",
+        bottom: "18px",
+        insetInlineEnd: "18px",
+        width: "min(260px, calc(100vw - 36px))",
         background: "#fff",
         borderRadius: "16px",
         boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
@@ -65,17 +106,37 @@ export default function SmartAssistant() {
           color: "#fff",
           padding: "12px",
           fontWeight: "600",
-          fontSize: "var(--text-card)",
+          fontSize: "var(--text-button)",
           boxShadow: "0 4px 14px rgba(0,0,0,0.15)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
         }}
       >
-        {t("assistant.title")}
+        <span>{t("assistant.title")}</span>
+        <button
+          type="button"
+          onClick={() => setIsOpen(false)}
+          aria-label={t("assistant.close")}
+          title={t("assistant.close")}
+          style={{
+            border: "none",
+            background: "transparent",
+            color: "inherit",
+            cursor: "pointer",
+            padding: "0 4px",
+            fontSize: "18px",
+            lineHeight: 1,
+          }}
+        >
+          ×
+        </button>
       </div>
 
       <div
         style={{
           padding: "10px",
-          maxHeight: "220px",
+          maxHeight: "180px",
           overflowY: "auto",
           background: "#f9fafb",
         }}

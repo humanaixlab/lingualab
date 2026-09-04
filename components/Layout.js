@@ -1,5 +1,4 @@
 import Link from "next/link";
-import SmartAssistant from "./SmartAssistant";
 import { useLanguage } from "./LanguageProvider";
 
 export default function Layout({ title, children }) {
@@ -82,8 +81,6 @@ export default function Layout({ title, children }) {
           </div>
         </div>
       </div>
-
-      <SmartAssistant />
     </div>
   );
 }

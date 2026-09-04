@@ -152,7 +152,7 @@ test("Hub Copilot opens with metadata, sends the existing payload, and rejects e
   let calls = 0;
   let payload;
   Object.assign(scope, {
-    AbortController, result: null, datasetRows: [], selectedLabelColumn: "", copilotStatus: "idle", researchGoal: "Study Arabic",
+    AbortController, result: null, datasetRows: [], selectedLabelColumn: "", copilotStatus: "idle", researchGoal: "Study Arabic", language: "en",
     setHubCopilotContext: (value) => { scope.hubCopilotContext = value; },
     setCopilotOpen: (value) => { scope.copilotOpen = value; },
     setCopilotStatus: (value) => { scope.copilotStatus = value; },
@@ -175,7 +175,7 @@ test("Hub Copilot opens with metadata, sends the existing payload, and rejects e
   assert.deepEqual(scope.datasetRows, []);
   vm.runInContext(workspaceSource.slice(workspaceSource.indexOf("  async function designMyStudy()"), workspaceSource.indexOf("  function runWorkflow()")), scope);
   await scope.designMyStudy();
-  assert.deepEqual(payload, JSON.parse(JSON.stringify({ ...metadata, researchGoal: "Study Arabic" })));
+  assert.deepEqual(payload, JSON.parse(JSON.stringify({ ...metadata, researchGoal: "Study Arabic", uiLanguage: "en" })));
   assert.doesNotMatch(JSON.stringify(payload), /PRIVATE ROW/);
   assert.equal(scope.copilotStatus, "success");
   const expiredNow = Date.now() + 31 * 60 * 1000;

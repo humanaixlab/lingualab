@@ -117,6 +117,7 @@ export default async function handler(req, res) {
 
   const body = req.body && typeof req.body === "object" && !Array.isArray(req.body) ? req.body : {};
   const researchGoal = typeof body.researchGoal === "string" ? body.researchGoal.trim() : "";
+  const uiLanguage = body.uiLanguage === "ar" ? "ar" : "en";
   const columnNames = Array.isArray(body.columnNames) ? body.columnNames.map(cleanName).filter(Boolean) : [];
   const labelDistribution = Array.isArray(body.labelDistribution)
     ? body.labelDistribution.map((item) => ({ label: cleanName(item?.label), count: Number(item?.count) }))
@@ -166,7 +167,8 @@ Rules:
 - Use Arabic-specific preprocessing only when justified and preserve linguistically meaningful distinctions.
 - Prefer transparent baselines and include realistic validation, error analysis, limitations, and ethics risks.
 - If the metadata cannot support a strong study, mark feasibility conditional or exploratory and say what is missing.
-- Write every response field in clear English, even when column names or labels use Arabic script.
+- Write all descriptive response values directly in ${uiLanguage === "ar" ? "natural, academically appropriate Arabic" : "clear academic English"}.
+- Keep schema field names and enum values exactly as defined in English. Do not translate dataset content, filenames, column names, label values, original quotations, or citations.
 - Keep every field concise, specific, and suitable for display in a research workspace.
 
 Optional research goal:

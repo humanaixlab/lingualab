@@ -42,8 +42,25 @@ function isValidInterpretation(value) {
   ].every((key) => typeof value[key] === "string" && value[key].trim());
 }
 
-function createPreview({ wordCount, sentenceCount, topWords }) {
+function createPreview({ wordCount, sentenceCount, topWords, uiLanguage }) {
   const repeated = topWords[0];
+  if (uiLanguage === "ar") {
+    const focus = repeated
+      ? `العنصر الأكثر تكرارًا هو «${repeated[0]}» (${repeated[1]} مرة)، مما يشير إلى تركز معجمي ظاهر في هذه العينة.`
+      : "لم تُرصد إشارة معجمية متكررة بوضوح في العينة المقدمة.";
+    const smallSample = wordCount < 100 || sentenceCount <= 1;
+    return {
+      interpretation: smallSample
+        ? `يظل الملف المعجمي استكشافيًا وغير ممثل بسبب محدودية المادة المقدمة. ${focus}`
+        : `يقدم الملف المعجمي المرصود وصفًا أوليًا للأنماط اللغوية المتكررة. ${focus}`,
+      methodologicalImplications: "تدعم هذه النتائج الوصفية انتقالًا حذرًا إلى تحليل الكلمات المفتاحية في سياقها، أو مراجعة السياقات، أو المقارنة بين مجموعات ذات دلالة قبل صياغة استنتاجات أقوى.",
+      limitations: "لا تكفي أدلة التكرار السطحي وحدها لإثبات العلاقات الدلالية أو المشاعر أو السببية أو بنية الموضوعات أو الدلالة الإحصائية أو قابلية تعميم النتائج على المجتمع.",
+      nextStep: "افحص أكثر المفردات تكرارًا في سياقاتها، وقارن تكراراتها المعيارية بين الفئات أو المدونات الفرعية ذات الصلة.",
+      paperParagraph: smallSample
+        ? "ينبغي التعامل مع الملف المعجمي الأولي بوصفه توضيحيًا لا تمثيليًا؛ لأنه مستمد من عينة نصية محدودة للغاية. وعلى الرغم من ظهور مجموعة صغيرة من الصيغ المتكررة، فإن تقديم تفسير لغوي موضوعي يقتضي إجراء تحليل سياقي ومقارن إضافي."
+        : "يكشف الملف المعجمي الأولي عن صيغ متكررة قد تستحق فحصًا سياقيًا أدق. وتوفر هذه الأنماط الوصفية أساسًا استكشافيًا لتحليلات لاحقة للسياقات والمقارنات، لكنها لا تسوغ بمفردها استنتاجات موضوعية عن المعنى أو السلوك اللغوي.",
+    };
+  }
   const focus = repeated
     ? `The most frequent item is “${repeated[0]}” (${repeated[1]} occurrences), indicating a visible lexical concentration in this sample.`
     : "No strong recurring lexical signal was detected in the submitted sample.";
@@ -77,6 +94,7 @@ export default async function handler(req, res) {
   const sentenceCount = Number(req.body?.sentenceCount);
   const topWords = cleanTopWords(req.body?.topWords);
   const datasetContext = cleanText(req.body?.datasetContext);
+  const uiLanguage = req.body?.uiLanguage === "ar" ? "ar" : "en";
 
   if (!text || !Number.isFinite(wordCount) || !Number.isFinite(sentenceCount)) {
     return res
@@ -92,7 +110,7 @@ export default async function handler(req, res) {
 
   if (!apiKey) {
     return res.status(200).json({
-      interpretation: createPreview({ wordCount, sentenceCount, topWords }),
+      interpretation: createPreview({ wordCount, sentenceCount, topWords, uiLanguage }),
       preview: true,
     });
   }
@@ -162,7 +180,8 @@ ANALYTICAL AWARENESS
 - Appropriate next steps may include concordance analysis, normalized frequency comparison, keyword analysis, collocation analysis, POS tagging, dependency parsing, discourse analysis, metaphor analysis, terminology extraction, semantic clustering, topic modeling, or comparison against a reference corpus.
 
 WRITING STANDARD
-- Write concise, publication-quality academic English.
+- Write every response value directly in ${uiLanguage === "ar" ? "natural, publication-quality academic Arabic" : "concise, publication-quality academic English"}.
+- Keep JSON field names exactly as specified in English. Do not translate field names, quoted source material, dataset content, filenames, column names, or original citations.
 - Sound like a careful discussion section in a peer-reviewed article, not a generic chatbot.
 - Avoid filler, repetition, inflated claims, and unnecessary technical jargon.
 - Do not repeat statistics already visible in the interface unless one value is essential to a research claim.
@@ -221,5 +240,4 @@ Use exactly this structure:
     });
   }
 }
-
 
