@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import styles from "../styles/ResearchAdvisor.module.css";
 import { useLanguage } from "../components/LanguageProvider";
+import { normalizeAdvisorUiLanguage } from "../lib/advisor-language";
 
 const stages = ["idea", "data", "analysis", "interpretation", "writing"];
 
@@ -126,10 +127,11 @@ export default function ResearchAdvisorPage() {
     setAdvisor(null);
 
     try {
+      const uiLanguage = normalizeAdvisorUiLanguage(language);
       const response = await fetch("/api/research-advisor", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, uiLanguage: language }),
+        body: JSON.stringify({ ...form, uiLanguage }),
       });
       const payload = await response.json();
 

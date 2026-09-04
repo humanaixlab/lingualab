@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
+import { advisorOutputLanguageInstruction, normalizeAdvisorUiLanguage } from "../lib/advisor-language.js";
 
 const source = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
@@ -10,10 +11,26 @@ test("research AI requests carry the selected UI language without changing user 
   const workspace = source("pages/workspace.js");
 
   assert.match(analyze, /body: JSON\.stringify\(\{[\s\S]*?text,[\s\S]*?uiLanguage: language,[\s\S]*?wordCount:/);
-  assert.match(advisor, /body: JSON\.stringify\(\{ \.\.\.form, uiLanguage: language \}\)/);
+  assert.match(advisor, /const uiLanguage = normalizeAdvisorUiLanguage\(language\)/);
+  assert.match(advisor, /body: JSON\.stringify\(\{ \.\.\.form, uiLanguage \}\)/);
   assert.match(workspace, /uiLanguage: language,[\s\S]*?rowCount:/);
   assert.match(workspace, /researchGoal: researchGoal\.trim\(\), uiLanguage: language/);
   assert.doesNotMatch([analyze, advisor, workspace].join("\n"), /translate(?:Output|Result)|translatedOutput/);
+});
+
+test("Arabic Advisor UI sends ar and selects the mandatory Arabic output instruction", () => {
+  const uiLanguage = normalizeAdvisorUiLanguage("ar");
+  assert.equal(uiLanguage, "ar");
+  assert.match(advisorOutputLanguageInstruction(uiLanguage), /MANDATORY.*natural academic Arabic/);
+  assert.doesNotMatch(advisorOutputLanguageInstruction(uiLanguage), /academic English/);
+
+  assert.equal(normalizeAdvisorUiLanguage("en"), "en");
+  assert.match(advisorOutputLanguageInstruction("en"), /MANDATORY.*academic English/);
+
+  const api = source("pages/api/research-advisor.js");
+  assert.match(api, /normalizeAdvisorUiLanguage\(req\.body\?\.uiLanguage\)/);
+  assert.match(api, /const prompt = `\$\{outputLanguageInstruction\}/);
+  assert.match(api, /\$\{outputLanguageInstruction\}`;/);
 });
 
 test("research APIs generate directly in the selected academic language while preserving schemas", () => {
@@ -21,14 +38,16 @@ test("research APIs generate directly in the selected academic language while pr
   const advisor = source("pages/api/research-advisor.js");
   const copilot = source("pages/api/research-copilot.js");
 
-  for (const api of [interpreter, advisor, copilot]) {
+  for (const api of [interpreter, copilot]) {
     assert.match(api, /uiLanguage[^\n]*=== "ar" \? "ar" : "en"/);
     assert.match(api, /academic Arabic|academically appropriate Arabic/);
     assert.match(api, /academic English/);
   }
 
+  assert.match(advisor, /advisorOutputLanguageInstruction\(uiLanguage\)/);
+
   assert.match(interpreter, /Keep JSON field names exactly as specified in English/);
-  assert.match(advisor, /Keep the JSON field names exactly as specified in English/);
+  assert.match(source("lib/advisor-language.js"), /Keep JSON field names unchanged/);
   assert.match(copilot, /Keep schema field names and enum values exactly as defined in English/);
   assert.match(copilot, /enum: \["strong", "conditional", "exploratory"\]/);
   assert.match(copilot, /enum: \["supervised_classification", "corpus_exploration", "qualitative_exploration"\]/);

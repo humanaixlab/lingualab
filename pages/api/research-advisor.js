@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { advisorOutputLanguageInstruction, normalizeAdvisorUiLanguage } from "../../lib/advisor-language";
 
 const MAX_FIELD_LENGTH = 4000;
 const ALLOWED_STAGES = new Set(["idea", "data", "analysis", "interpretation", "writing"]);
@@ -37,7 +38,8 @@ export default async function handler(req, res) {
   const dataDescription = clean(req.body?.dataDescription);
   const currentStage = clean(req.body?.currentStage);
   const question = clean(req.body?.question);
-  const uiLanguage = req.body?.uiLanguage === "ar" ? "ar" : "en";
+  const uiLanguage = normalizeAdvisorUiLanguage(req.body?.uiLanguage);
+  const outputLanguageInstruction = advisorOutputLanguageInstruction(uiLanguage);
 
   if (!researchGoal || !dataDescription || !ALLOWED_STAGES.has(currentStage)) {
     return res.status(400).json({
@@ -56,7 +58,9 @@ export default async function handler(req, res) {
     });
   }
 
-  const prompt = `You are LinguaLab's AI Research Advisor for Arabic-language research.
+  const prompt = `${outputLanguageInstruction}
+
+You are LinguaLab's AI Research Advisor for Arabic-language research.
 Your role is to help the user make a defensible next research decision, not to invent findings.
 
 Research goal:
@@ -81,7 +85,9 @@ Return ONLY valid JSON with this exact shape:
   "caution": "one important limitation, validity risk, or ethics note"
 }
 
-Write every response value directly in ${uiLanguage === "ar" ? "natural academic Arabic" : "clear academic English"}. Keep the JSON field names exactly as specified in English. Do not translate dataset content, filenames, column names, user-provided quotations, or original citations. Respect Arabic-data considerations such as normalization, dialect, annotation quality, class imbalance, and interpretability when relevant. Never claim that an analysis has been run unless the user explicitly says so.`;
+Do not translate dataset content, filenames, column names, user-provided quotations, or original citations. Respect Arabic-data considerations such as normalization, dialect, annotation quality, class imbalance, and interpretability when relevant. Never claim that an analysis has been run unless the user explicitly says so.
+
+${outputLanguageInstruction}`;
 
   try {
     const client = new OpenAI({ apiKey });
