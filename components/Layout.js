@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { useLanguage } from "./LanguageProvider";
 
-export default function Layout({ title, children, backHref = "/ar-tools#all-tools" }) {
+export default function Layout({ title, children, backHref = "/ar-tools#all-tools", backLabel, description }) {
   const { direction, t } = useLanguage();
   return (
     <div
@@ -28,7 +28,7 @@ export default function Layout({ title, children, backHref = "/ar-tools#all-tool
               fontSize: "var(--text-button)",
             }}
           >
-            {t("common.backToAllTools")}
+            {backLabel || t("common.backToAllTools")}
           </button>
         </Link>
 
@@ -66,7 +66,7 @@ export default function Layout({ title, children, backHref = "/ar-tools#all-tool
               lineHeight: "var(--leading-body)",
             }}
           >
-            {t("common.smartToolsDescription")}
+            {description || t("common.smartToolsDescription")}
           </p>
 
           <div

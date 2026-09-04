@@ -1,23 +1,28 @@
 import { useState } from "react";
-import Link from "next/link";
+import Layout from "../../components/Layout";
+import { useLanguage } from "../../components/LanguageProvider";
+import styles from "../../styles/AnalysisTool.module.css";
 
 export default function POS() {
+  const { language } = useLanguage();
   const [text, setText] = useState("");
 
   return (
-    <div style={{ padding: 40, direction: "rtl" }}>
-      <Link href="/tools/analyze">← الرجوع إلى جميع الأدوات</Link>
-      <h1>تحليل POS (تجريبي)</h1>
+    <Layout
+      title={language === "ar" ? "تحليل أقسام الكلام (POS)" : "Parts of Speech Analysis (POS)"}
+      backHref="/tools/analyze"
+      backLabel={language === "ar" ? "العودة إلى مركز التحليل" : "Back to Analyze"}
+      description={language === "ar" ? "استكشف الأنماط الأولية لأقسام الكلام في النص المدخل." : "Explore preliminary parts-of-speech patterns in the supplied text."}
+    >
 
       <textarea
         rows={6}
-        placeholder="اكتبي النص هنا..."
+        placeholder={language === "ar" ? "ألصق النص هنا…" : "Paste text here…"}
         value={text}
         onChange={(e) => setText(e.target.value)}
-        style={{ width: "100%", marginBottom: 10 }}
+        className={styles.control}
       />
-
-      <p>هذه نسخة تجريبية لعرض الفكرة.</p>
-    </div>
+      <div className={styles.note}><p>{language === "ar" ? "هذه نسخة تجريبية لعرض الفكرة." : "This is an experimental preview of the concept."}</p></div>
+    </Layout>
   );
 }

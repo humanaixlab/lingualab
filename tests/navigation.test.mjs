@@ -47,7 +47,7 @@ test("All Tools is the secondary directory and non-analysis tool back links targ
 
 test("corpus-analysis tools return to Analyze instead of the Research Interpreter section", () => {
   for (const path of ["pages/tools/frequency.js", "pages/tools/pos.js"]) {
-    assert.match(source(path), /href="\/tools\/analyze"/);
+    assert.match(source(path), /backHref="\/tools\/analyze"/);
     assert.doesNotMatch(source(path), /href="\/ar-tools#all-tools"/);
   }
   for (const path of ["pages/tools/concordance.js", "pages/tools/ngrams.js"]) {
@@ -94,6 +94,9 @@ test("Frequency, POS, and Colab remain renderable as standalone routes", async (
         if (module === "react") return React;
         if (module === "next/link") return function MockLink({ children, ...props }) { return React.createElement("a", props, children); };
         if (module === "next/router") return { useRouter: () => ({ asPath: `/tools/${name}` }) };
+        if (module === "../../components/Layout") return function MockLayout({ children, backHref }) { return React.createElement("main", null, React.createElement("a", { href: backHref }, "Back"), children); };
+        if (module === "../../components/LanguageProvider") return { useLanguage: () => ({ language: "en" }) };
+        if (module === "../../styles/AnalysisTool.module.css") return new Proxy({}, { get: (_, key) => String(key) });
         if (module === "../../lib/tool-handoff") return { readToolHandoff: () => null };
         return require(module);
       },

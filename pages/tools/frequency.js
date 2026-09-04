@@ -1,7 +1,11 @@
 import { useState } from "react";
 import Link from "next/link";
+import Layout from "../../components/Layout";
+import { useLanguage } from "../../components/LanguageProvider";
+import styles from "../../styles/AnalysisTool.module.css";
 
 export default function Frequency() {
+  const { language } = useLanguage();
   const [text, setText] = useState("");
   const [result, setResult] = useState("");
 
@@ -17,21 +21,22 @@ export default function Frequency() {
   };
 
   return (
-    <div style={{ padding: 40, direction: "rtl" }}>
-      <Link href="/tools/analyze">← الرجوع إلى جميع الأدوات</Link>
-      <h1>تحليل التكرار</h1>
+    <Layout
+      title={language === "ar" ? "تحليل التكرار" : "Frequency Analysis"}
+      backHref="/tools/analyze"
+      backLabel={language === "ar" ? "العودة إلى مركز التحليل" : "Back to Analyze"}
+      description={language === "ar" ? "استكشف تكرار الكلمات والأنماط المعجمية في نصك البحثي." : "Explore word frequency and lexical patterns in your research text."}
+    >
 
       <textarea
         rows={6}
-        placeholder="اكتبي النص هنا..."
+        placeholder={language === "ar" ? "ألصق النص هنا…" : "Paste text here…"}
         value={text}
         onChange={(e) => setText(e.target.value)}
-        style={{ width: "100%", marginBottom: 10 }}
+        className={styles.control}
       />
-
-      <button onClick={analyze}>تحليل</button>
-
-      <pre>{result}</pre>
-    </div>
+      <div className={styles.actions}><button className={styles.button} onClick={analyze}>{language === "ar" ? "ابدأ التحليل" : "Run analysis"}</button></div>
+      {result && <section className={styles.result}><h2>{language === "ar" ? "النتائج" : "Results"}</h2><pre>{result}</pre><Link className={`${styles.button} ${styles.next}`} href="/tools/analyze">{language === "ar" ? "فسّر النتائج بالذكاء الاصطناعي" : "Interpret results with AI"}</Link></section>}
+    </Layout>
   );
 }

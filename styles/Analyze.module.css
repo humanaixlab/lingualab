@@ -109,6 +109,27 @@
   border-radius: 32px;
 }
 
+.toolDirectory {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 1.35fr);
+  gap: 28px;
+  margin: 28px 0;
+  padding: 28px;
+  border: 1px solid rgba(23, 20, 47, 0.12);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.toolDirectory h2 { margin: 8px 0 10px; font-size: var(--text-section); line-height: var(--leading-heading); }
+.toolDirectory p { margin: 0; color: #68647d; font-size: var(--text-body); line-height: var(--leading-body); }
+.toolLinks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.toolLinks a { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 15px; border: 1px solid rgba(23, 20, 47, 0.12); border-radius: 14px; background: #fff; color: #17142f; font-size: var(--text-button); font-weight: 600; text-decoration: none; }
+
+@media (max-width: 760px) {
+  .toolDirectory { grid-template-columns: 1fr; }
+  .toolLinks { grid-template-columns: 1fr; }
+}
+
 .planner {
   overflow: hidden;
   color: white;

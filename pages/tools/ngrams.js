@@ -1,7 +1,11 @@
 import { useState } from "react";
 import Layout from "../../components/Layout";
+import Link from "next/link";
+import { useLanguage } from "../../components/LanguageProvider";
+import styles from "../../styles/AnalysisTool.module.css";
 
 export default function NgramsTool() {
+  const { language } = useLanguage();
   const [text, setText] = useState("");
   const [size, setSize] = useState(2);
   const [results, setResults] = useState([]);
@@ -40,29 +44,19 @@ export default function NgramsTool() {
   };
 
   return (
-    <Layout title="أداة الثنائيات والثلاثيات" backHref="/tools/analyze">
-      <p style={{ color: "#4b5563", lineHeight: "1.8", marginBottom: "20px" }}>
-        تعرض هذه الأداة التراكيب المتجاورة الأكثر تكرارًا في النص، وتساعد على
-        اكتشاف الأنماط اللغوية والعبارات الشائعة.
-      </p>
+    <Layout title={language === "ar" ? "المتتاليات اللفظية" : "N-grams"} backHref="/tools/analyze" backLabel={language === "ar" ? "العودة إلى مركز التحليل" : "Back to Analyze"} description={language === "ar" ? "اكتشف المتتاليات اللفظية والعبارات المتجاورة المتكررة في النص." : "Discover recurring word sequences and adjacent phrases in the text."}>
 
       <div style={{ marginBottom: "15px" }}>
         <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold" }}>
-          اختاري نوع التحليل
+          {language === "ar" ? "اختر نوع المتتالية" : "Choose sequence type"}
         </label>
         <select
           value={size}
           onChange={(e) => setSize(Number(e.target.value))}
-          style={{
-            padding: "12px",
-            borderRadius: "12px",
-            border: "1px solid #d1d5db",
-            backgroundColor: "#f9fafb",
-            fontSize: "15px",
-          }}
+          className={styles.control}
         >
-          <option value={2}>ثنائيات</option>
-          <option value={3}>ثلاثيات</option>
+          <option value={2}>{language === "ar" ? "ثنائيات (Bigrams)" : "Bigrams"}</option>
+          <option value={3}>{language === "ar" ? "ثلاثيات (Trigrams)" : "Trigrams"}</option>
         </select>
       </div>
 
@@ -70,149 +64,62 @@ export default function NgramsTool() {
         rows="8"
         value={text}
         onChange={(e) => setText(e.target.value)}
-        placeholder="ألصقي النص هنا..."
-        style={{
-          width: "100%",
-          padding: "14px",
-          borderRadius: "14px",
-          border: "1px solid #d1d5db",
-          fontSize: "15px",
-          lineHeight: "1.8",
-          backgroundColor: "#f9fafb",
-          boxSizing: "border-box",
-        }}
+        placeholder={language === "ar" ? "ألصق النص هنا…" : "Paste text here…"}
+        className={styles.control}
       />
 
-      <div
-        style={{
-          marginTop: "16px",
-          display: "flex",
-          gap: "10px",
-          flexWrap: "wrap",
-        }}
-      >
+      <div className={styles.actions}>
         <button
           onClick={analyzeNgrams}
-          style={{
-            padding: "10px 16px",
-            borderRadius: "12px",
-            border: "none",
-            backgroundColor: "#10b981",
-            color: "#fff",
-            cursor: "pointer",
-            fontWeight: "bold",
-          }}
+          className={styles.button}
         >
-          تحليل التراكيب
+          {language === "ar" ? "تحليل المتتاليات" : "Analyze sequences"}
         </button>
 
         <button
           onClick={clearAll}
-          style={{
-            padding: "10px 16px",
-            borderRadius: "12px",
-            border: "none",
-            backgroundColor: "#ef4444",
-            color: "#fff",
-            cursor: "pointer",
-            fontWeight: "bold",
-          }}
+          className={styles.danger}
         >
-          مسح
+          {language === "ar" ? "مسح" : "Clear"}
         </button>
 
         <button
           onClick={loadSample}
-          style={{
-            padding: "10px 16px",
-            borderRadius: "12px",
-            border: "none",
-            backgroundColor: "#3b82f6",
-            color: "#fff",
-            cursor: "pointer",
-            fontWeight: "bold",
-          }}
+          className={styles.secondary}
         >
-          تحميل مثال
+          {language === "ar" ? "تحميل مثال" : "Load example"}
         </button>
       </div>
 
       {results.length > 0 && (
-        <div style={{ marginTop: "28px" }}>
-          <h3 style={{ marginBottom: "12px", color: "#111827" }}>النتائج</h3>
+        <section className={styles.result}>
+          <h2>{language === "ar" ? "النتائج" : "Results"}</h2>
 
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              backgroundColor: "#fff",
-              overflow: "hidden",
-              borderRadius: "14px",
-              boxShadow: "0 4px 14px rgba(0,0,0,0.06)",
-            }}
-          >
+          <div className={styles.tableWrap}><table className={styles.table}>
             <thead>
-              <tr style={{ backgroundColor: "#eef2ff" }}>
-                <th
-                  style={{
-                    padding: "14px",
-                    textAlign: "right",
-                    borderBottom: "1px solid #e5e7eb",
-                  }}
-                >
-                  التركيب
-                </th>
-                <th
-                  style={{
-                    padding: "14px",
-                    textAlign: "right",
-                    borderBottom: "1px solid #e5e7eb",
-                  }}
-                >
-                  عدد التكرارات
-                </th>
+              <tr><th>{language === "ar" ? "المتتالية" : "Sequence"}</th><th>{language === "ar" ? "عدد التكرارات" : "Frequency"}</th>
               </tr>
             </thead>
             <tbody>
               {results.map(([gram, count], index) => (
                 <tr key={index}>
-                  <td
-                    style={{
-                      padding: "12px 14px",
-                      borderBottom: "1px solid #f1f5f9",
-                    }}
-                  >
+                  <td>
                     {gram}
                   </td>
-                  <td
-                    style={{
-                      padding: "12px 14px",
-                      borderBottom: "1px solid #f1f5f9",
-                    }}
-                  >
+                  <td>
                     {count}
                   </td>
                 </tr>
               ))}
             </tbody>
-          </table>
-        </div>
+          </table></div>
+          <Link className={`${styles.button} ${styles.next}`} href="/tools/analyze">{language === "ar" ? "فسّر النتائج بالذكاء الاصطناعي" : "Interpret results with AI"}</Link>
+        </section>
       )}
 
-      <div
-        style={{
-          marginTop: "30px",
-          backgroundColor: "#f8fafc",
-          border: "1px solid #e5e7eb",
-          borderRadius: "14px",
-          padding: "18px",
-        }}
-      >
-        <h3 style={{ marginBottom: "10px" }}>ماذا تعني هذه النتيجة؟</h3>
-        <p style={{ color: "#4b5563", lineHeight: "1.8", margin: 0 }}>
-          تبين النتائج أكثر العبارات القصيرة تكرارًا في النص، مما يساعد على
-          اكتشاف الأنماط اللغوية والتراكيب الشائعة.
-        </p>
+      <div className={styles.note}>
+        <h2>{language === "ar" ? "ماذا تعني هذه النتيجة؟" : "What does this result mean?"}</h2>
+        <p>{language === "ar" ? "تعرض النتائج أكثر العبارات القصيرة تكرارًا للمساعدة في اكتشاف الأنماط اللغوية والتراكيب الشائعة." : "The results identify frequent short phrases to support discovery of recurring linguistic patterns."}</p>
       </div>
     </Layout>
   );

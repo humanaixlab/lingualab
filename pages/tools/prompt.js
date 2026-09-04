@@ -1,8 +1,19 @@
 import { useState } from "react";
 import Layout from "../../components/Layout";
 import { createToolHandoff } from "../../lib/tool-handoff";
+import { useLanguage } from "../../components/LanguageProvider";
+
+const COPY = {
+  en: { title: "Prompt Assistant", description: "Create clear, structured instructions for research, analysis, and writing tasks.", intro: "Build an editable prompt from your task, topic, audience, and preferred writing style.", task: "Task type", topic: "Topic", topicPlaceholder: "Example: Sentiment patterns in customer reviews", audience: "Target audience", audiencePlaceholder: "Example: Undergraduate researchers", style: "Writing style", generate: "Generate prompt with GPT-5.6", generating: "Generating with GPT-5.6…", clear: "Clear", output: "GENERATED OUTPUT", yours: "Your prompt", copied: "Copied", copy: "Copy prompt", continue: "Continue to Code Generator →", guide: "HOW TO USE THIS TOOL", guideTitle: "Create a stronger starting prompt.", guideText: "Choose a task, describe the topic and audience, then generate a reusable prompt for analysis, explanation, summarization, academic writing, or learning activities.", tasks: ["Text analysis", "Summarization", "Simplified explanation", "Academic writing", "Data classification", "Learning activity design"], styles: ["Academic", "Simple", "Formal", "Creative"] },
+  ar: { title: "مساعد التعليمات", description: "أنشئ تعليمات واضحة ومنظمة لمهام البحث والتحليل والكتابة.", intro: "أنشئ تعليمات قابلة للمراجعة انطلاقًا من المهمة والموضوع والجمهور وأسلوب الكتابة.", task: "نوع المهمة", topic: "الموضوع", topicPlaceholder: "مثال: أنماط المشاعر في مراجعات العملاء", audience: "الجمهور المستهدف", audiencePlaceholder: "مثال: باحثون في المرحلة الجامعية", style: "أسلوب الكتابة", generate: "أنشئ التعليمات باستخدام GPT-5.6", generating: "جارٍ إنشاء التعليمات باستخدام GPT-5.6…", clear: "مسح", output: "الناتج المنشأ", yours: "تعليماتك", copied: "تم النسخ", copy: "نسخ التعليمات", continue: "المتابعة إلى مولّد الشفرة ←", guide: "طريقة استخدام الأداة", guideTitle: "أنشئ نقطة بداية أكثر وضوحًا.", guideText: "اختر المهمة، وحدد الموضوع والجمهور، ثم أنشئ تعليمات قابلة لإعادة الاستخدام في التحليل أو الشرح أو التلخيص أو الكتابة الأكاديمية أو أنشطة التعلم.", tasks: ["تحليل النص", "التلخيص", "شرح مبسط", "الكتابة الأكاديمية", "تصنيف البيانات", "تصميم نشاط تعليمي"], styles: ["أكاديمي", "مبسّط", "رسمي", "إبداعي"] },
+};
+
+const TASK_VALUES = ["Text analysis", "Summarization", "Simplified explanation", "Academic writing", "Data classification", "Learning activity design"];
+const STYLE_VALUES = ["Academic", "Simple", "Formal", "Creative"];
 
 export default function PromptTool() {
+  const { language, direction } = useLanguage();
+  const copy = COPY[language];
   const [taskType, setTaskType] = useState("Text analysis");
   const [topic, setTopic] = useState("");
   const [audience, setAudience] = useState("");
@@ -74,63 +85,54 @@ export default function PromptTool() {
   };
 
   return (
-    <Layout title="Prompt Builder">
-      <div style={{ direction: "ltr" }}>
+    <Layout title={copy.title} description={copy.description}>
+      <div style={{ direction }}>
         <p style={styles.intro}>
-          Build a clear, structured prompt based on your task, topic, target
-          audience, and preferred writing style.
+          {copy.intro}
         </p>
 
         <div style={styles.formCard}>
           <div style={styles.field}>
-            <label style={styles.label}>Task type</label>
+            <label style={styles.label}>{copy.task}</label>
             <select
               value={taskType}
               onChange={(event) => setTaskType(event.target.value)}
               style={styles.control}
             >
-              <option>Text analysis</option>
-              <option>Summarization</option>
-              <option>Simplified explanation</option>
-              <option>Academic writing</option>
-              <option>Data classification</option>
-              <option>Learning activity design</option>
+              {TASK_VALUES.map((value, index) => <option key={value} value={value}>{copy.tasks[index]}</option>)}
             </select>
           </div>
 
           <div style={styles.field}>
-            <label style={styles.label}>Topic</label>
+            <label style={styles.label}>{copy.topic}</label>
             <input
               type="text"
               value={topic}
               onChange={(event) => setTopic(event.target.value)}
-              placeholder="Example: Sentiment analysis in Arabic reviews"
+              placeholder={copy.topicPlaceholder}
               style={styles.control}
             />
           </div>
 
           <div style={styles.field}>
-            <label style={styles.label}>Target audience</label>
+            <label style={styles.label}>{copy.audience}</label>
             <input
               type="text"
               value={audience}
               onChange={(event) => setAudience(event.target.value)}
-              placeholder="Example: Undergraduate researchers"
+              placeholder={copy.audiencePlaceholder}
               style={styles.control}
             />
           </div>
 
           <div style={styles.field}>
-            <label style={styles.label}>Writing style</label>
+            <label style={styles.label}>{copy.style}</label>
             <select
               value={style}
               onChange={(event) => setStyle(event.target.value)}
               style={styles.control}
             >
-              <option>Academic</option>
-              <option>Simple</option>
-              <option>Formal</option>
-              <option>Creative</option>
+              {STYLE_VALUES.map((value, index) => <option key={value} value={value}>{copy.styles[index]}</option>)}
             </select>
           </div>
 
@@ -150,7 +152,7 @@ export default function PromptTool() {
               }}
               disabled={loading}
             >
-              {loading ? "Generating with GPT-5.6..." : "Generate prompt with GPT-5.6"}
+              {loading ? copy.generating : copy.generate}
             </button>
 
             <button
@@ -159,7 +161,7 @@ export default function PromptTool() {
               style={styles.secondaryButton}
               disabled={loading}
             >
-              Clear
+              {copy.clear}
             </button>
           </div>
         </div>
@@ -168,8 +170,8 @@ export default function PromptTool() {
           <div style={styles.outputCard}>
             <div style={styles.outputHeader}>
               <div>
-                <p style={styles.miniLabel}>GENERATED OUTPUT</p>
-                <h3 style={styles.outputTitle}>Your prompt</h3>
+                <p style={styles.miniLabel}>{copy.output}</p>
+                <h3 style={styles.outputTitle}>{copy.yours}</h3>
               </div>
 
               <button
@@ -177,7 +179,7 @@ export default function PromptTool() {
                 onClick={copyPrompt}
                 style={styles.copyButton}
               >
-                {copied ? "Copied" : "Copy prompt"}
+                {copied ? copy.copied : copy.copy}
               </button>
             </div>
 
@@ -186,17 +188,15 @@ export default function PromptTool() {
               try {
                 window.location.href = createToolHandoff("prompt", "code", { prompt: generatedPrompt });
               } catch (transferError) { setError(transferError.message); }
-            }}>Continue to Code Generator →</button>
+            }}>{copy.continue}</button>
           </div>
         )}
 
         <div style={styles.guideCard}>
-          <p style={styles.miniLabel}>HOW TO USE THIS TOOL</p>
-          <h3 style={styles.guideTitle}>Create a stronger starting prompt.</h3>
+          <p style={styles.miniLabel}>{copy.guide}</p>
+          <h3 style={styles.guideTitle}>{copy.guideTitle}</h3>
           <p style={styles.guideText}>
-            Choose a task, describe the topic and audience, then generate a
-            reusable prompt for analysis, explanation, summarization, academic
-            writing, or learning activities.
+            {copy.guideText}
           </p>
         </div>
       </div>

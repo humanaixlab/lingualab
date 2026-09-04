@@ -478,6 +478,11 @@ export default function ArabicToolsPage() {
                 >
                   {t(`hub.sections.${section.key}.description`)}
                 </p>
+                {section.key === "workflows" && (
+                  <p style={{ width: "100%", margin: "12px 0 0", color: "#4c43ce", fontSize: "var(--text-helper)", fontWeight: 600 }}>
+                    {language === "ar" ? "جهّز البيانات ← أنشئ الشفرة ← شغّلها في Colab" : "Prepare data → Generate code → Run in Colab"}
+                  </p>
+                )}
               </div>
 
               <div
@@ -598,7 +603,7 @@ export default function ArabicToolsPage() {
                           color: tool.featured ? "#ffffff" : "#4c43ce",
                         }}
                       >
-                        Open tool <span aria-hidden="true">↗</span>
+                        {language === "ar" ? "فتح الأداة" : "Open tool"} <span aria-hidden="true">↗</span>
                       </span>
                     </article>
                   </Link>
