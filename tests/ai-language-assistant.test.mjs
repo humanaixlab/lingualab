@@ -80,16 +80,17 @@ test("Research Report presents stored AI output unchanged rather than translatin
   assert.doesNotMatch(report, /t\(interpretationText\)|t\(paperParagraph\)/);
 });
 
-test("one compact bilingual assistant is mounted globally and limited to core routes", () => {
+test("one compact bilingual assistant is mounted globally with contextual route guidance", () => {
   const app = source("pages/_app.js");
   const layout = source("components/Layout.js");
   const assistant = source("components/SmartAssistant.js");
+  const guidance = source("lib/assistant-guidance.js");
 
   assert.match(app, /import SmartAssistant from "\.\.\/components\/SmartAssistant"/);
   assert.match(app, /<SmartAssistant \/>/);
   assert.doesNotMatch(layout, /SmartAssistant/);
-  for (const route of ["/", "/workspace", "/ar-tools", "/tools/analyze", "/research-advisor", "/research-report", "/student-dashboard"]) {
-    assert.ok(assistant.includes(`"${route}"`), `missing assistant core route: ${route}`);
+  for (const route of ["/", "/workspace", "/ar-tools", "/tools/analyze", "/research-advisor", "/research-report", "/student-dashboard", "/tools/frequency", "/tools/concordance", "/tools/ngrams", "/tools/pos", "/tools/prompt", "/tools/code", "/tools/excel", "/tools/colab"]) {
+    assert.ok(guidance.includes(`"${route}"`), `missing assistant route: ${route}`);
   }
   assert.match(assistant, /const \[isOpen, setIsOpen\] = useState\(false\)/);
   assert.match(assistant, /onClick=\{\(\) => setIsOpen\(true\)\}/);
@@ -97,4 +98,6 @@ test("one compact bilingual assistant is mounted globally and limited to core ro
   assert.match(assistant, /t\("assistant\.open"\)/);
   assert.match(assistant, /t\("assistant\.close"\)/);
   assert.match(assistant, /width: "min\(260px, calc\(100vw - 36px\)\)"/);
+  assert.match(assistant, /getAssistantGuidance\(router\.pathname, language\)/);
+  assert.doesNotMatch(assistant, /router\.push|fetch\(/);
 });

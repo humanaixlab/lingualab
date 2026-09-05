@@ -1,32 +1,16 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
 import { useLanguage } from "./LanguageProvider";
-
-const suggestions = [
-  { id: "text", key: "assistant.textAnalysis" },
-  { id: "pos", key: "assistant.posDifference" },
-  { id: "frequency", key: "assistant.frequencyTool" },
-];
-
-const CORE_ROUTES = new Set([
-  "/",
-  "/workspace",
-  "/ar-tools",
-  "/tools/analyze",
-  "/research-advisor",
-  "/research-report",
-  "/student-dashboard",
-]);
+import { getAssistantGuidance } from "../lib/assistant-guidance";
 
 export default function SmartAssistant() {
   const router = useRouter();
-  const { direction, t } = useLanguage();
+  const { direction, language, t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    { role: "assistant", key: "assistant.welcome" },
-  ]);
+  const [answers, setAnswers] = useState([]);
+  const guidance = getAssistantGuidance(router.pathname, language);
 
-  if (!CORE_ROUTES.has(router.pathname)) return null;
+  if (!guidance) return null;
 
   if (!isOpen) {
     return (
@@ -56,32 +40,13 @@ export default function SmartAssistant() {
     );
   }
 
+  const visibleAnswers = answers.filter((answer) => answer.contextId === guidance.contextId);
+
   const handleClick = (suggestion) => {
-    let response = "";
-    let route = null;
-
-    if (suggestion.id === "text") {
-      response = "assistant.routingAnalyze";
-      route = "/tools/analyze";
-    } else if (suggestion.id === "pos") {
-      response = "assistant.routingPos";
-      route = "/tools/pos";
-    } else if (suggestion.id === "frequency") {
-      response = "assistant.routingFrequency";
-      route = "/tools/frequency";
-    } else {
-      response = "assistant.fallback";
-    }
-
-    setMessages((prev) => [
-      ...prev,
-      { role: "user", key: suggestion.key },
-      { role: "assistant", key: response },
+    setAnswers((previous) => [
+      ...previous.filter((answer) => answer.contextId !== guidance.contextId),
+      { contextId: guidance.contextId, suggestionId: suggestion.id },
     ]);
-
-    if (route) {
-      setTimeout(() => router.push(route), 800);
-    }
   };
 
   return (
@@ -136,31 +101,62 @@ export default function SmartAssistant() {
       <div
         style={{
           padding: "10px",
-          maxHeight: "180px",
+          maxHeight: "210px",
           overflowY: "auto",
           background: "#f9fafb",
         }}
       >
-        {messages.map((m, i) => (
-          <div
-            key={i}
-            style={{
-              background: m.role === "assistant" ? "#eeeeee" : "#dbeafe",
-              padding: "10px",
-              marginBottom: "8px",
-              borderRadius: "10px",
-              lineHeight: "1.7",
-              fontSize: "var(--text-helper)",
-              color: "#111827",
-            }}
-          >
-              {t(m.key)}
-          </div>
-        ))}
+        <div
+          style={{
+            background: "#eeeeee",
+            padding: "10px",
+            marginBottom: "8px",
+            borderRadius: "10px",
+            lineHeight: "1.7",
+            fontSize: "var(--text-helper)",
+            color: "#111827",
+          }}
+        >
+          {t("assistant.welcome")}
+        </div>
+        {visibleAnswers.map((message) => {
+          const suggestion = guidance.suggestions.find((item) => item.id === message.suggestionId);
+          if (!suggestion) return null;
+          return (
+            <div key={message.suggestionId}>
+              <div
+                style={{
+                  background: "#dbeafe",
+                  padding: "10px",
+                  marginBottom: "8px",
+                  borderRadius: "10px",
+                  lineHeight: "1.7",
+                  fontSize: "var(--text-helper)",
+                  color: "#111827",
+                }}
+              >
+                {suggestion.question}
+              </div>
+              <div
+                style={{
+                  background: "#eeeeee",
+                  padding: "10px",
+                  marginBottom: "8px",
+                  borderRadius: "10px",
+                  lineHeight: "1.7",
+                  fontSize: "var(--text-helper)",
+                  color: "#111827",
+                }}
+              >
+                {suggestion.answer}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       <div style={{ padding: "10px", background: "#fff" }}>
-        {suggestions.map((suggestion) => (
+        {guidance.suggestions.map((suggestion) => (
           <button
             key={suggestion.id}
             onClick={() => handleClick(suggestion)}
@@ -175,7 +171,7 @@ export default function SmartAssistant() {
               fontSize: "var(--text-button)",
             }}
           >
-            {t(suggestion.key)}
+            {suggestion.question}
           </button>
         ))}
       </div>
