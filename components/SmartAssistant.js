@@ -1,14 +1,42 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useLanguage } from "./LanguageProvider";
 import { getAssistantGuidance } from "../lib/assistant-guidance";
+import { readResearchPathContext } from "../lib/research-path-context";
+
+const ASSISTANT_LEVEL_KEY = "lingualab-assistant-level";
 
 export default function SmartAssistant() {
   const router = useRouter();
   const { direction, language, t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [answers, setAnswers] = useState([]);
-  const guidance = getAssistantGuidance(router.pathname, language);
+  const [level, setLevel] = useState("beginner");
+  const pathContext = readResearchPathContext(router.asPath, router.pathname);
+  const hubPathId = router.pathname === "/ar-tools" ? router.asPath?.split("#")[1]?.split("?")[0] : null;
+  const guidance = getAssistantGuidance(router.pathname, language, {
+    level,
+    pathId: pathContext?.pathId || hubPathId,
+    mode: router.asPath?.includes("copilot=1") ? "copilot" : undefined,
+  });
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      try {
+        const saved = localStorage.getItem(ASSISTANT_LEVEL_KEY);
+        if (saved === "beginner" || saved === "advanced") setLevel(saved);
+      } catch {}
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
+
+  const changeLevel = (nextLevel) => {
+    setLevel(nextLevel);
+    setAnswers([]);
+    try {
+      localStorage.setItem(ASSISTANT_LEVEL_KEY, nextLevel);
+    } catch {}
+  };
 
   if (!guidance) return null;
 
@@ -156,6 +184,19 @@ export default function SmartAssistant() {
       </div>
 
       <div style={{ padding: "10px", background: "#fff" }}>
+        <div style={{ display: "flex", gap: "6px", marginBottom: "10px" }} role="group" aria-label={language === "ar" ? "مستوى الإرشاد" : "Guidance level"}>
+          {["beginner", "advanced"].map((option) => (
+            <button
+              type="button"
+              key={option}
+              aria-pressed={level === option}
+              onClick={() => changeLevel(option)}
+              style={{ flex: 1, padding: "7px", borderRadius: "8px", border: "1px solid #c7d2fe", background: level === option ? "#4f46e5" : "#fff", color: level === option ? "#fff" : "#3730a3", cursor: "pointer", fontSize: "var(--text-meta)", fontWeight: 600 }}
+            >
+              {language === "ar" ? option === "beginner" ? "مبتدئ" : "متقدم" : option === "beginner" ? "Beginner" : "Advanced"}
+            </button>
+          ))}
+        </div>
         {guidance.suggestions.map((suggestion) => (
           <button
             key={suggestion.id}

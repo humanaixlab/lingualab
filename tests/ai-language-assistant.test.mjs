@@ -98,6 +98,6 @@ test("one compact bilingual assistant is mounted globally with contextual route 
   assert.match(assistant, /t\("assistant\.open"\)/);
   assert.match(assistant, /t\("assistant\.close"\)/);
   assert.match(assistant, /width: "min\(260px, calc\(100vw - 36px\)\)"/);
-  assert.match(assistant, /getAssistantGuidance\(router\.pathname, language\)/);
+  assert.match(assistant, /getAssistantGuidance\(router\.pathname, language, \{/);
   assert.doesNotMatch(assistant, /router\.push|fetch\(/);
 });

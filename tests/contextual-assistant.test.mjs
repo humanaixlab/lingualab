@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { ASSISTANT_ROUTES, getAssistantGuidance } from "../lib/assistant-guidance.js";
+import { readFileSync } from "node:fs";
+import { ASSISTANT_RESEARCH_PATHS, ASSISTANT_ROUTES, getAssistantGuidance } from "../lib/assistant-guidance.js";
+
+const source = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
 const expectedRoutes = [
   "/",
@@ -62,4 +65,70 @@ test("invalid language values safely use English guidance", () => {
     getAssistantGuidance("/workspace", "unsupported").suggestions,
     getAssistantGuidance("/workspace", "en").suggestions,
   );
+});
+
+test("all seven research paths provide distinct bilingual contextual guidance", () => {
+  assert.deepEqual(ASSISTANT_RESEARCH_PATHS, [
+    "corpus-linguistics",
+    "text-classification",
+    "morphology-syntax",
+    "semantics",
+    "discourse-pragmatics",
+    "information-extraction",
+    "language-technology",
+  ]);
+  for (const pathId of ASSISTANT_RESEARCH_PATHS) {
+    const english = getAssistantGuidance("/ar-tools", "en", { pathId });
+    const arabic = getAssistantGuidance("/ar-tools", "ar", { pathId });
+    assert.equal(english.pathId, pathId);
+    assert.equal(arabic.pathId, pathId);
+    assert.equal(english.suggestions.length, 4);
+    assert.equal(arabic.suggestions.length, 4);
+  }
+  assert.match(getAssistantGuidance("/ar-tools", "en", { pathId: "corpus-linguistics" }).suggestions[1].question, /Frequency.*Concordance/);
+  assert.match(getAssistantGuidance("/ar-tools", "ar", { pathId: "language-technology" }).suggestions[3].question, /Colab/);
+});
+
+test("Beginner and Advanced levels produce different bounded guidance", () => {
+  const beginner = getAssistantGuidance("/tools/frequency", "ar", { level: "beginner" });
+  const advanced = getAssistantGuidance("/tools/frequency", "ar", { level: "advanced" });
+  assert.equal(beginner.level, "beginner");
+  assert.equal(advanced.level, "advanced");
+  assert.match(beginner.suggestions[0].answer, /ببساطة:.*مثال قصير:.*الخطوة التالية:/);
+  assert.match(advanced.suggestions[0].answer, /الافتراضات.*حدود العينة.*الخطوة المتقدمة التالية:/);
+  assert.notEqual(beginner.suggestions[0].answer, advanced.suggestions[0].answer);
+});
+
+test("known visible terms add only page-safe technical context", () => {
+  const report = getAssistantGuidance("/research-report", "en");
+  assert.deepEqual(report.technicalTerms, ["Macro-F1", "Confusion Matrix"]);
+  assert.match(report.suggestions[2].question, /Macro-F1.*Confusion Matrix/);
+  const classification = getAssistantGuidance("/workspace", "ar", { pathId: "text-classification" });
+  assert.deepEqual(classification.technicalTerms, ["Naive Bayes", "Evaluation Metrics"]);
+  assert.match(classification.suggestions.map((item) => item.question).join(" "), /Naive Bayes.*Evaluation Metrics/);
+});
+
+test("unavailable paths never suggest launching nonexistent tools", () => {
+  for (const pathId of ["semantics", "discourse-pragmatics", "information-extraction"]) {
+    const result = getAssistantGuidance("/ar-tools", "en", { pathId });
+    assert.match(result.suggestions.map((item) => item.answer).join(" "), /no dedicated|No dedicated|not runnable|cannot be launched|Coming next/i);
+    assert.ok(result.suggestions.every((item) => !("href" in item)));
+  }
+});
+
+test("assistant level storage is isolated and guidance has no automatic actions or raw data", () => {
+  const assistant = source("components/SmartAssistant.js");
+  assert.match(assistant, /lingualab-assistant-level/);
+  assert.match(assistant, /localStorage\.getItem\(ASSISTANT_LEVEL_KEY\)/);
+  assert.match(assistant, /localStorage\.setItem\(ASSISTANT_LEVEL_KEY, nextLevel\)/);
+  assert.doesNotMatch(assistant, /router\.push|window\.location|fetch\(|sessionStorage/);
+  const result = getAssistantGuidance("/tools/frequency", "en", { level: "advanced", rawRows: ["private"], dataset: "private" });
+  assert.doesNotMatch(JSON.stringify(result), /private|rawRows|dataset/);
+});
+
+test("Research Copilot receives its own page-mode guidance", () => {
+  const copilot = getAssistantGuidance("/workspace", "en", { mode: "copilot" });
+  assert.equal(copilot.contextId, "copilot");
+  assert.match(copilot.suggestions[0].question, /study type suggested/i);
+  assert.match(copilot.suggestions[1].question, /Baseline/);
 });
