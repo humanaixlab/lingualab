@@ -107,7 +107,8 @@ function contextualTitle(type, language, size) {
   return titles[type]?.[language === "ar" ? 1 : 0] || (language === "ar" ? "تقرير بحثي" : "Research report");
 }
 
-function ContextualReport({ context, language, reportRef, view, setView, returnTarget }) {
+function ContextualReport({ context, language, returnTarget }) {
+  const [view, setView] = useState("standard");
   const copy = CONTEXT_COPY[language];
   const payload = context.payload;
   const interpretation = payload.interpretation;
@@ -253,10 +254,6 @@ export default function ResearchReport() {
   }).join(", ");
 
   const hasReportData = Boolean(reportContext || analysis || interpretation);
-  const exportModel = reportExportModel(reportContext, analysis);
-  const reportTitle = reportContext
-    ? contextualTitle(reportContext.analysisType, language, reportContext.payload.size)
-    : t("report.title");
   const returnTarget = reportReturnTarget(reportContext?.sourceTool, language);
 
   const printReport = () => {
@@ -345,7 +342,7 @@ export default function ResearchReport() {
             </Link>
           </section>
         ) : reportContext ? (
-          <ContextualReport context={reportContext} language={language} reportRef={reportRef} view={reportView} setView={setReportView} returnTarget={returnTarget} />
+          <ContextualReport context={reportContext} language={language} returnTarget={returnTarget} />
         ) : (
           <article className="report">
             <header className="reportHeader">
