@@ -1,8 +1,16 @@
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { useLanguage } from "./LanguageProvider";
+import DataSourceIndicator from "./DataSourceIndicator";
 
-export default function Layout({ title, children, backHref = "/ar-tools#all-tools", backLabel, description }) {
-  const { direction, t } = useLanguage();
+export default function Layout({ title, children, backHref = "/ar-tools#all-tools", backLabel, description, dataSource }) {
+  const { direction, language, t } = useLanguage();
+  const router = useRouter();
+  const fromLearn = router.query?.from === "learn";
+  const effectiveBackHref = fromLearn ? "/student-dashboard" : backHref;
+  const effectiveBackLabel = fromLearn
+    ? language === "ar" ? "العودة إلى مركز التعلّم" : "Back to Learn"
+    : backLabel || t("common.backToAllTools");
   return (
     <div
       style={{
@@ -15,7 +23,7 @@ export default function Layout({ title, children, backHref = "/ar-tools#all-tool
       }}
     >
       <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
-        <Link href={backHref} style={{ textDecoration: "none" }}>
+        <Link href={effectiveBackHref} style={{ textDecoration: "none" }}>
           <button
             style={{
               marginBottom: "20px",
@@ -28,7 +36,7 @@ export default function Layout({ title, children, backHref = "/ar-tools#all-tool
               fontSize: "var(--text-button)",
             }}
           >
-            {backLabel || t("common.backToAllTools")}
+            {effectiveBackLabel}
           </button>
         </Link>
 
@@ -68,6 +76,8 @@ export default function Layout({ title, children, backHref = "/ar-tools#all-tool
           >
             {description || t("common.smartToolsDescription")}
           </p>
+
+          {dataSource && <DataSourceIndicator language={language} mode={dataSource} />}
 
           <div
             style={{

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { readResearchContext, researchContextHref, RESEARCH_CONTEXT_TTL_MS } from "../lib/research-context";
 import { useLanguage } from "../components/LanguageProvider";
+import DataSourceIndicator from "../components/DataSourceIndicator";
 
 const sections = [
   {
@@ -263,6 +264,8 @@ export default function ArabicToolsPage() {
             {t("hub.heroText")}
           </p>
         </section>
+
+        <DataSourceIndicator language={language} mode={context ? "projectContext" : "standalone"} />
 
         {context && (
           <p role="status" dir="auto" style={{ margin: "0 0 20px", padding: "12px 16px", border: "1px solid rgba(112, 91, 255, 0.2)", borderRadius: "12px", background: "#efedff", color: "#4c43ce", fontSize: "13px" }}>

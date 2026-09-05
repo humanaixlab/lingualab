@@ -99,6 +99,7 @@ test("Frequency, POS, and Colab remain renderable as standalone routes", async (
         if (module === "../../styles/AnalysisTool.module.css") return new Proxy({}, { get: (_, key) => String(key) });
         if (module === "../../lib/tool-handoff") return { readToolHandoff: () => null };
         if (module === "../../lib/report-context") return { createReportContext: () => "/research-report?reportId=test" };
+        if (module === "../../lib/analysis-handoff") return { createAnalysisHandoff: () => "/tools/analyze?interpretHandoff=test" };
         return require(module);
       },
     };

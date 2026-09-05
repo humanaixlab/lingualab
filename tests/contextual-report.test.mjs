@@ -41,7 +41,7 @@ test("completed analysis sources expose Generate Report without changing analysi
     assert.match(page, /إنشاء تقرير/);
     assert.match(page, /Generate Report/);
   }
-  assert.match(source("pages/tools/analyze.js"), /createReportContext\("interpreter", "interpretation"/);
+  assert.match(source("pages/tools/analyze.js"), /createReportContext\(sourceAnalysis\?\.sourceTool \|\| "interpreter", "interpretation"/);
   assert.match(source("pages/research-advisor.js"), /createReportContext\("advisor", "methodology"/);
   assert.match(source("pages/workspace.js"), /createReportContext\("copilot", "methodology"/);
   assert.doesNotMatch(source("pages/tools/pos.js"), /Generate Report|إنشاء تقرير/);

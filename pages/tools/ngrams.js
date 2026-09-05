@@ -1,9 +1,9 @@
 import { useState } from "react";
 import Layout from "../../components/Layout";
-import Link from "next/link";
 import { useLanguage } from "../../components/LanguageProvider";
 import styles from "../../styles/AnalysisTool.module.css";
 import { createReportContext } from "../../lib/report-context";
+import { createAnalysisHandoff } from "../../lib/analysis-handoff";
 
 export default function NgramsTool() {
   const { language } = useLanguage();
@@ -53,8 +53,13 @@ export default function NgramsTool() {
     if (url) window.location.href = url;
   };
 
+  const interpretResults = () => {
+    const url = createAnalysisHandoff("ngrams", "ngrams", { text, size, results });
+    if (url) window.location.href = url;
+  };
+
   return (
-    <Layout title={language === "ar" ? "المتتاليات اللفظية" : "N-grams"} backHref="/tools/analyze" backLabel={language === "ar" ? "العودة إلى مركز التحليل" : "Back to Analyze"} description={language === "ar" ? "اكتشف المتتاليات اللفظية والعبارات المتجاورة المتكررة في النص." : "Discover recurring word sequences and adjacent phrases in the text."}>
+    <Layout title={language === "ar" ? "المتتاليات اللفظية" : "N-grams"} backHref="/tools/analyze" backLabel={language === "ar" ? "العودة إلى مركز التحليل" : "Back to Analyze"} description={language === "ar" ? "اكتشف المتتاليات اللفظية والعبارات المتجاورة المتكررة في النص." : "Discover recurring word sequences and adjacent phrases in the text."} dataSource="standalone">
 
       <div style={{ marginBottom: "15px" }}>
         <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold" }}>
@@ -123,7 +128,7 @@ export default function NgramsTool() {
               ))}
             </tbody>
           </table></div>
-          <div className={styles.actions}><button className={`${styles.button} ${styles.next}`} type="button" onClick={generateReport}>{language === "ar" ? "إنشاء تقرير" : "Generate Report"}</button><Link className={`${styles.button} ${styles.next}`} href="/tools/analyze">{language === "ar" ? "فسّر النتائج بالذكاء الاصطناعي" : "Interpret results with AI"}</Link></div>
+          <div className={styles.actions}><button className={`${styles.button} ${styles.next}`} type="button" onClick={interpretResults}>{language === "ar" ? "فسّر النتائج" : "Interpret results"}</button><button className={`${styles.button} ${styles.next}`} type="button" onClick={generateReport}>{language === "ar" ? "إنشاء تقرير" : "Generate Report"}</button></div>
         </section>
       )}
 

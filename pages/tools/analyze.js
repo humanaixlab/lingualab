@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import { readResearchContext, analyzeContext } from "../../lib/research-context";
 import { createReportContext } from "../../lib/report-context";
+import { interpretationContextText, readAnalysisHandoff } from "../../lib/analysis-handoff";
+import DataSourceIndicator from "../../components/DataSourceIndicator";
 import styles from "../../styles/Analyze.module.css";
 import { useLanguage } from "../../components/LanguageProvider";
 
@@ -47,6 +49,28 @@ const CORPUS_TOOLS = [
   { href: "/tools/ngrams", en: "N-grams", ar: "المتتاليات اللفظية" },
   { href: "/tools/pos", en: "Parts of Speech Analysis (POS)", ar: "تحليل أقسام الكلام (POS)" },
 ];
+
+const SOURCE_ROUTES = {
+  frequency: "/tools/frequency",
+  concordance: "/tools/concordance",
+  ngrams: "/tools/ngrams",
+  pos: "/tools/pos",
+};
+
+function analyzeTextValue(text) {
+  const words = text.trim().split(/\s+/);
+  const sentences = text.split(/[.!؟]/);
+  const frequency = {};
+  words.forEach((word) => {
+    const clean = word.toLowerCase().replace(/[،؛:!?.,"'()\[\]]/g, "");
+    if (clean) frequency[clean] = (frequency[clean] || 0) + 1;
+  });
+  return {
+    wordCount: words.filter(Boolean).length,
+    sentenceCount: sentences.filter((sentence) => sentence.trim()).length,
+    topWords: Object.entries(frequency).sort((a, b) => b[1] - a[1]).slice(0, 5),
+  };
+}
 
 function buildPlan(context) {
   if (!context) return DEFAULT_PLAN;
@@ -105,9 +129,21 @@ export default function Analyzer() {
   const [loadingInterpretation, setLoadingInterpretation] = useState(false);
   const [interpretationError, setInterpretationError] = useState("");
   const [context, setContext] = useState(null);
+  const [sourceAnalysis, setSourceAnalysis] = useState(null);
   const router = useRouter();
   useEffect(() => {
-    const frame = window.requestAnimationFrame(() => setContext(analyzeContext(readResearchContext(window.location.search))));
+    const frame = window.requestAnimationFrame(() => {
+      const nextContext = analyzeContext(readResearchContext(window.location.search));
+      const handoff = readAnalysisHandoff(window.location.search);
+      setContext(nextContext);
+      setSourceAnalysis(handoff);
+      if (handoff) {
+        setText(handoff.text);
+        setResult(analyzeTextValue(handoff.text));
+        setInterpretation(null);
+        setInterpretationError("");
+      }
+    });
     return () => window.cancelAnimationFrame(frame);
   }, [router.asPath]);
 
@@ -125,33 +161,8 @@ export default function Analyzer() {
     setInterpretationError("");
     setLoadingInterpretation(false);
 
-    const words = text.trim().split(/\s+/);
-    const sentences = text.split(/[.!؟]/);
-    const wordCount = words.filter(Boolean).length;
-    const sentenceCount = sentences.filter(
-      (sentence) => sentence.trim()
-    ).length;
-    const frequency = {};
-
-    words.forEach((word) => {
-      const clean = word
-        .toLowerCase()
-        .replace(/[،؛:!?.,"'()\[\]]/g, "");
-
-      if (clean) {
-        frequency[clean] = (frequency[clean] || 0) + 1;
-      }
-    });
-
-    const topWords = Object.entries(frequency)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5);
-
-    setResult({
-      wordCount,
-      sentenceCount,
-      topWords,
-    });
+    setSourceAnalysis(null);
+    setResult(analyzeTextValue(text));
   };
 
 const interpretResults = async () => {
@@ -172,6 +183,7 @@ const interpretResults = async () => {
         wordCount: result.wordCount,
         sentenceCount: result.sentenceCount,
         topWords: result.topWords,
+        datasetContext: interpretationContextText(sourceAnalysis),
       }),
     });
 
@@ -240,7 +252,7 @@ const interpretResults = async () => {
 
   const generateInterpretationReport = () => {
     if (!result || !interpretation) return;
-    const url = createReportContext("interpreter", "interpretation", {
+    const url = createReportContext(sourceAnalysis?.sourceTool || "interpreter", "interpretation", {
       wordCount: result.wordCount,
       sentenceCount: result.sentenceCount,
       topWords: result.topWords,
@@ -291,6 +303,7 @@ const interpretResults = async () => {
           </Link>
 
           <div className={styles.navLinks}>
+            {router.query?.from === "learn" && <Link href="/student-dashboard">{language === "ar" ? "العودة إلى مركز التعلّم" : "Back to Learn"}</Link>}
             <Link href="/workspace">{t("nav.workspace")}</Link>
             <Link href="/research-advisor">{t("nav.researchAdvisor")}</Link>
           </div>
@@ -308,6 +321,16 @@ const interpretResults = async () => {
             <strong>{t("analyze.principle")}</strong>
           </div>
         </section>
+
+        <div style={{ maxWidth: "1240px", margin: "0 auto 22px" }}>
+          <DataSourceIndicator language={language} mode={sourceAnalysis ? "transferred" : context ? "projectContext" : "standalone"} />
+          {sourceAnalysis && (
+            <p style={{ margin: "0 0 16px", fontSize: "var(--text-helper)" }}>
+              {language === "ar" ? `نتائج ${sourceAnalysis.sourceTool} الحالية جاهزة للتفسير.` : `Current ${sourceAnalysis.sourceTool} results are ready for interpretation.`}{" "}
+              <Link href={SOURCE_ROUTES[sourceAnalysis.sourceTool]}>{language === "ar" ? "العودة إلى الأداة السابقة" : "Back to previous tool"}</Link>
+            </p>
+          )}
+        </div>
 
         <section className={styles.toolDirectory} aria-labelledby="corpus-tools-title">
           <div>
@@ -400,7 +423,10 @@ const interpretResults = async () => {
                 placeholder={t("analyze.placeholder")}
                 dir="auto"
                 value={text}
-                onChange={(event) => setText(event.target.value)}
+                onChange={(event) => {
+                  setText(event.target.value);
+                  setSourceAnalysis(null);
+                }}
               />
 
               <button

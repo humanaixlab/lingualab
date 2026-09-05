@@ -1,9 +1,9 @@
 import { useState } from "react";
 import Layout from "../../components/Layout";
-import Link from "next/link";
 import { useLanguage } from "../../components/LanguageProvider";
 import styles from "../../styles/AnalysisTool.module.css";
 import { createReportContext } from "../../lib/report-context";
+import { createAnalysisHandoff } from "../../lib/analysis-handoff";
 
 export default function ConcordanceTool() {
   const { language } = useLanguage();
@@ -50,8 +50,13 @@ export default function ConcordanceTool() {
     if (url) window.location.href = url;
   };
 
+  const interpretResults = () => {
+    const url = createAnalysisHandoff("concordance", "concordance", { text, target: keyword, contexts: results });
+    if (url) window.location.href = url;
+  };
+
   return (
-    <Layout title={language === "ar" ? "السياقات" : "Contexts"} backHref="/tools/analyze" backLabel={language === "ar" ? "العودة إلى مركز التحليل" : "Back to Analyze"} description={language === "ar" ? "افحص كلمة أو عبارة داخل الجمل التي وردت فيها لفهم استعمالها في السياق." : "Examine a word or phrase in the sentences where it occurs to understand its use in context."}>
+    <Layout title={language === "ar" ? "السياقات" : "Contexts"} backHref="/tools/analyze" backLabel={language === "ar" ? "العودة إلى مركز التحليل" : "Back to Analyze"} description={language === "ar" ? "افحص كلمة أو عبارة داخل الجمل التي وردت فيها لفهم استعمالها في السياق." : "Examine a word or phrase in the sentences where it occurs to understand its use in context."} dataSource="standalone">
 
       <div style={{ marginBottom: "15px" }}>
         <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold" }}>
@@ -109,7 +114,7 @@ export default function ConcordanceTool() {
               {sentence}
             </div>
           ))}</div>
-          <div className={styles.actions}><button className={`${styles.button} ${styles.next}`} type="button" onClick={generateReport}>{language === "ar" ? "إنشاء تقرير" : "Generate Report"}</button><Link className={`${styles.button} ${styles.next}`} href="/tools/analyze">{language === "ar" ? "فسّر النتائج بالذكاء الاصطناعي" : "Interpret results with AI"}</Link></div>
+          <div className={styles.actions}><button className={`${styles.button} ${styles.next}`} type="button" onClick={interpretResults}>{language === "ar" ? "فسّر النتائج" : "Interpret results"}</button><button className={`${styles.button} ${styles.next}`} type="button" onClick={generateReport}>{language === "ar" ? "إنشاء تقرير" : "Generate Report"}</button></div>
         </section>
       )}
 

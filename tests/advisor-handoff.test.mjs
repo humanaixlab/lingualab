@@ -41,6 +41,15 @@ function harness() {
     inputRef: { current: null },
     setDatasetContext(value) { state.context = value; },
     setForm(update) { state.form = update(state.form); },
+    readResearchContext(search) {
+      try {
+        const query = new URLSearchParams(search);
+        const handoffId = query.get("handoffId");
+        if (query.get("from") !== "workspace" || !handoffId) return null;
+        const context = JSON.parse(saved);
+        return context?.handoffId === handoffId ? context : null;
+      } catch { return null; }
+    },
   };
   for (const name of reset.match(/set\w+(?=\()/g)) scope[name] = (value) => { state[name] = value; };
   scope.setResult = (value) => { state.result = value; };

@@ -24,7 +24,7 @@ export default function ColabPage() {
   }, [router.asPath]);
 
   return (
-    <Layout title={copy.title} description={copy.description} backHref="/ar-tools#build-tools" backLabel={language === "ar" ? "العودة إلى البناء" : "Back to Build"}>
+    <Layout title={copy.title} description={copy.description} backHref="/ar-tools#build-tools" backLabel={language === "ar" ? "العودة إلى البناء" : "Back to Build"} dataSource={handoff ? "transferred" : "standalone"}>
       <div style={{ direction, color: "#111827" }}>
         {handoff && (
           <section style={styles.card}>

@@ -1,6 +1,13 @@
+import Link from "next/link";
+import { useLanguage } from "../components/LanguageProvider";
+
 export default function Intro() {
+  const { language } = useLanguage();
   return (
-    <div className="min-h-screen bg-gray-50 p-8" dir="rtl">
+    <div className="min-h-screen bg-gray-50 p-8">
+      <Link href="/student-dashboard">
+        {language === "ar" ? "العودة إلى مركز التعلّم" : "Back to Learn"}
+      </Link>
       
       <h1 className="text-3xl font-bold mb-4">
         مدخل إلى اللسانيات الحاسوبية

@@ -187,7 +187,7 @@ export default function LearningHubPage() {
                 <p style={styles.cardDescription}>{t(`learning.paths.${path.copyKey}.description`)}</p>
 
                 <div style={styles.cardFooter}>
-                  <Link href={path.href} style={styles.primaryAction}>
+                  <Link href={`${path.href}?from=learn`} style={styles.primaryAction}>
                     {t(`learning.paths.${path.copyKey}.action`)}
                   </Link>
 

@@ -3,6 +3,8 @@ import Link from "next/link";
 import { useState, useSyncExternalStore } from "react";
 import { useLanguage } from "../components/LanguageProvider";
 import { readReportContext } from "../lib/report-context";
+import { reportReturnTarget } from "../lib/navigation-flow";
+import DataSourceIndicator from "../components/DataSourceIndicator";
 
 function subscribe() {
   return () => {};
@@ -105,8 +107,7 @@ function contextualTitle(type, language, size) {
   return titles[type]?.[language === "ar" ? 1 : 0] || (language === "ar" ? "تقرير بحثي" : "Research report");
 }
 
-function ContextualReport({ context, language }) {
-  const [view, setView] = useState("standard");
+function ContextualReport({ context, language, reportRef, view, setView, returnTarget }) {
   const copy = CONTEXT_COPY[language];
   const payload = context.payload;
   const interpretation = payload.interpretation;
@@ -159,6 +160,7 @@ function ContextualReport({ context, language }) {
           {showVisual && !metrics.length && !entries.length && <section className="reportSection"><p>{summary}</p></section>}
         </>
       )}
+      <footer className="reportFooter"><Link href={returnTarget.href} className="secondaryLink">{returnTarget.label}</Link></footer>
     </article>
   );
 }
@@ -251,6 +253,11 @@ export default function ResearchReport() {
   }).join(", ");
 
   const hasReportData = Boolean(reportContext || analysis || interpretation);
+  const exportModel = reportExportModel(reportContext, analysis);
+  const reportTitle = reportContext
+    ? contextualTitle(reportContext.analysisType, language, reportContext.payload.size)
+    : t("report.title");
+  const returnTarget = reportReturnTarget(reportContext?.sourceTool, language);
 
   const printReport = () => {
     window.print();
@@ -320,6 +327,8 @@ export default function ResearchReport() {
           </aside>
         </section>
 
+        {hasReportData && <div className="sourceIndicator"><DataSourceIndicator language={language} mode="report" /></div>}
+
         {!isClient ? (
           <section className="emptyCard">
             <span className="spark">✦</span>
@@ -336,7 +345,7 @@ export default function ResearchReport() {
             </Link>
           </section>
         ) : reportContext ? (
-          <ContextualReport context={reportContext} language={language} />
+          <ContextualReport context={reportContext} language={language} reportRef={reportRef} view={reportView} setView={setReportView} returnTarget={returnTarget} />
         ) : (
           <article className="report">
             <header className="reportHeader">
@@ -394,8 +403,8 @@ export default function ResearchReport() {
                 <p className="sectionLabel">06</p><h3>{copy.conclusions}</h3><p dir="auto">{nextStep}</p>
               </div>
 
-              <Link href="/tools/analyze" className="secondaryLink">
-                {t("report.return")}
+              <Link href={returnTarget.href} className="secondaryLink">
+                {returnTarget.label}
                 <span aria-hidden="true">↗</span>
               </Link>
             </section>
@@ -498,6 +507,7 @@ export default function ResearchReport() {
           font: inherit;
           cursor: pointer;
         }
+        .sourceIndicator { max-width: 1240px; margin: 0 auto 18px; }
 
         .hero {
           max-width: 1240px;

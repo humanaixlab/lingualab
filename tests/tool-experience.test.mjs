@@ -19,9 +19,9 @@ test("corpus tools share the Analyze return path and bilingual label", () => {
 test("result-producing corpus tools offer optional AI interpretation only in result UI", () => {
   for (const name of ["frequency", "concordance", "ngrams"]) {
     const page = source(`pages/tools/${name}.js`);
-    assert.match(page, /Interpret results with AI/);
-    assert.match(page, /فسّر النتائج بالذكاء الاصطناعي/);
-    assert.match(page, /href="\/tools\/analyze"/);
+    assert.match(page, /Interpret results/);
+    assert.match(page, /فسّر النتائج/);
+    assert.match(page, /createAnalysisHandoff/);
   }
   assert.doesNotMatch(source("pages/tools/pos.js"), /Interpret results with AI/);
 });

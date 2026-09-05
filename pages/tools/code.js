@@ -21,10 +21,12 @@ export default function CodeTool() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
+  const [handoffSource, setHandoffSource] = useState(false);
   const router = useRouter();
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
       const handoff = readToolHandoff("code", window.location.search);
+      setHandoffSource(Boolean(handoff));
       if (handoff) setTask(codeTask(handoff));
     });
     return () => window.cancelAnimationFrame(frame);
@@ -46,6 +48,7 @@ export default function CodeTool() {
     setError("");
     setGeneratedCode("");
     setCopied(false);
+    setHandoffSource(false);
 
     try {
       const response = await fetch("/api/code-ai", {
@@ -105,7 +108,7 @@ export default function CodeTool() {
   };
 
   return (
-    <Layout title={copy.title} description={copy.description} backHref="/ar-tools#build-tools" backLabel={uiLanguage === "ar" ? "العودة إلى البناء" : "Back to Build"}>
+    <Layout title={copy.title} description={copy.description} backHref="/ar-tools#build-tools" backLabel={uiLanguage === "ar" ? "العودة إلى البناء" : "Back to Build"} dataSource={handoffSource ? "transferred" : "standalone"}>
       <div style={{ ...styles.page, direction, textAlign: "start" }}>
         <p style={styles.intro}>
           {copy.intro}
@@ -158,7 +161,10 @@ export default function CodeTool() {
             <textarea
               id="research-code-task"
               value={task}
-              onChange={(event) => setTask(event.target.value)}
+              onChange={(event) => {
+                setTask(event.target.value);
+                setHandoffSource(false);
+              }}
               placeholder={copy.placeholder}
               style={styles.textarea}
               maxLength={6000}

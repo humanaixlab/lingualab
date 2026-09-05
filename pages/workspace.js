@@ -3,8 +3,9 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import { useLanguage } from "../components/LanguageProvider";
-import { readResearchContext, hubCopilotMetadata } from "../lib/research-context";
+import { readResearchContext, hubCopilotMetadata, researchContextHref } from "../lib/research-context";
 import { createReportContext } from "../lib/report-context";
+import DataSourceIndicator from "../components/DataSourceIndicator";
 import styles from "../styles/Workspace.module.css";
 
 const TEXT_HINTS = [
@@ -682,6 +683,23 @@ export default function WorkspacePage() {
     }
   }
 
+  function openAnalyze(event) {
+    if (!result && !hubCopilotContext) return;
+    event.preventDefault();
+    try {
+      if (!result) {
+        window.location.href = researchContextHref("/tools/analyze", readResearchContext(window.location.search));
+        return;
+      }
+      const handoffId = window.crypto.randomUUID();
+      const copilotMetadata = hubCopilotMetadata(result, datasetRows, selectedTextColumn, selectedLabelColumn);
+      sessionStorage.setItem("lingualab-advisor-context", JSON.stringify({ ...buildAdvisorContext(result), handoffId, copilotMetadata }));
+      window.location.href = `/tools/analyze?from=workspace&handoffId=${encodeURIComponent(handoffId)}`;
+    } catch {
+      window.location.href = "/tools/analyze";
+    }
+  }
+
   async function designMyStudy() {
     if ((!result && !hubCopilotContext) || copilotStatus === "loading") return;
     const currentHubContext = !result ? readResearchContext(window.location.search) : null;
@@ -808,9 +826,11 @@ export default function WorkspacePage() {
         <nav className={styles.nav}>
           <Link href="/" className={styles.brand}><span>L</span>LinguaLab</Link>
           <div className={styles.navActions}>
-            <Link href="/workspace">{t("nav.workspace")}</Link><Link href="/ar-tools" onClick={openResearchHub}>{t("nav.researchHub")}</Link><Link href="/research-advisor">{t("nav.researchAdvisor")}</Link>
+            <Link href="/workspace">{t("nav.workspace")}</Link><Link href="/ar-tools" onClick={openResearchHub}>{t("nav.researchHub")}</Link><Link href="/tools/analyze" onClick={openAnalyze}>{t("nav.analyze")}</Link><Link href="/ar-tools#build-tools">{language === "ar" ? "البناء" : "Build"}</Link>
           </div>
         </nav>
+
+        <div className={styles.sourceIndicator}><DataSourceIndicator language={language} mode="project" /></div>
 
         <section className={styles.hero}>
           <p className={styles.eyebrow}>{t("workspace.step1")}</p><h1>{t("workspace.title")}</h1><p>{t("workspace.lead")}</p>
@@ -962,7 +982,10 @@ export default function WorkspacePage() {
                   </div>
                   <section><h4>{t("workspaceStudy.steps")}</h4><ol dir="auto">{studyDesign.experimentSteps.map((item) => <li key={item.order}><strong>{item.title}</strong><span>{item.action}</span></li>)}</ol></section><section><h4>{t("workspaceStudy.risks")}</h4><ul dir="auto">{studyDesign.risks.map((item) => <li key={`${item.category}-${item.risk}`}><strong>{item.severity}: {item.risk}</strong> — {item.mitigation}</li>)}</ul></section>
                   {studyDesign.notSupported.length > 0 && <section><h4>{t("workspaceStudy.unsupported")}</h4><ul dir="auto">{studyDesign.notSupported.map((item) => <li key={item}>{item}</li>)}</ul></section>}<div className={styles.nextAction}><span>{t("workspaceStudy.next")}</span><strong dir="auto">{studyDesign.immediateNextAction.action}</strong><p dir="auto">{studyDesign.immediateNextAction.reason}</p></div>
-                  <button type="button" className={styles.copilotButton} onClick={generateCopilotReport}>{language === "ar" ? "إنشاء تقرير" : "Generate Report"}</button>
+                  <div className={styles.copilotActions}>
+                    <button type="button" className={styles.copilotButton} onClick={openAnalyze}>{language === "ar" ? "متابعة التحليل" : "Continue analysis"}</button>
+                    <button type="button" className={styles.copilotButton} onClick={generateCopilotReport}>{language === "ar" ? "إنشاء تقرير" : "Generate Report"}</button>
+                  </div>
                   {result && <section className={styles.potentialOutcomes}>
                     <p className={styles.outcomeEyebrow}>{t("workspaceStudy.outcomes")}</p><h4 className={styles.outcomeHeading}>{t("workspaceStudy.outcomesTitle")}</h4><p className={styles.outcomeCaption}>{t("workspaceStudy.outcomesText")}<br />{t("workspaceStudy.notAi")}</p>
                     <div className={styles.outcomeGrid}>

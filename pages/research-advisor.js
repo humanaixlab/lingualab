@@ -5,6 +5,8 @@ import styles from "../styles/ResearchAdvisor.module.css";
 import { useLanguage } from "../components/LanguageProvider";
 import { normalizeAdvisorUiLanguage } from "../lib/advisor-language";
 import { createReportContext } from "../lib/report-context";
+import { readResearchContext, researchContextHref } from "../lib/research-context";
+import DataSourceIndicator from "../components/DataSourceIndicator";
 
 const stages = ["idea", "data", "analysis", "interpretation", "writing"];
 
@@ -57,14 +59,8 @@ export default function ResearchAdvisorPage() {
     let frameId;
 
     try {
-      const query = new URLSearchParams(window.location.search);
-      const handoffId = query.get("handoffId");
-      if (query.get("from") !== "workspace" || !handoffId) return undefined;
-      const saved = sessionStorage.getItem("lingualab-advisor-context");
-      if (!saved) return undefined;
-
-      const context = JSON.parse(saved);
-      if (!context || context.handoffId !== handoffId) return undefined;
+      const context = readResearchContext(window.location.search);
+      if (!context) return undefined;
       frameId = window.requestAnimationFrame(() => {
         setDatasetContext(context);
         setForm((current) => ({
@@ -189,6 +185,10 @@ export default function ResearchAdvisorPage() {
             <Link href="/research-advisor">{t("nav.researchAdvisor")}</Link>
           </div>
         </nav>
+
+        <div style={{ width: "min(1180px, calc(100% - 40px))", margin: "16px auto 0" }}>
+          <DataSourceIndicator language={language} mode={datasetContext ? "projectContext" : "standalone"} />
+        </div>
 
         <section className={styles.hero}>
           <div>
@@ -330,7 +330,7 @@ export default function ResearchAdvisorPage() {
                   <div>
                     <span>{t("advisor.doNext")}</span><strong dir="auto">{advisor.nextAction}</strong>
                   </div>
-                  <Link href="/workspace">{t("advisor.openWorkspace")}</Link>
+                  <Link href={researchContextHref("/tools/analyze", datasetContext)}>{language === "ar" ? "متابعة التحليل" : "Continue analysis"}</Link>
                 </section>
 
                 <p className={styles.caution} dir="auto"><strong>{t("advisor.caution")}</strong> {advisor.caution}</p>

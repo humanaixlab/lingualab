@@ -13,6 +13,7 @@ export default function POS() {
       backHref="/tools/analyze"
       backLabel={language === "ar" ? "العودة إلى مركز التحليل" : "Back to Analyze"}
       description={language === "ar" ? "استكشف الأنماط الأولية لأقسام الكلام في النص المدخل." : "Explore preliminary parts-of-speech patterns in the supplied text."}
+      dataSource="standalone"
     >
 
       <textarea

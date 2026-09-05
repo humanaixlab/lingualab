@@ -85,7 +85,7 @@ export default function PromptTool() {
   };
 
   return (
-    <Layout title={copy.title} description={copy.description} backHref="/ar-tools#writing-tools" backLabel={language === "ar" ? "العودة إلى دعم الكتابة البحثية" : "Back to Research Writing Support"}>
+    <Layout title={copy.title} description={copy.description} backHref="/ar-tools#build-tools" backLabel={language === "ar" ? "العودة إلى البناء" : "Back to Build"} dataSource="standalone">
       <div style={{ direction }}>
         <p style={styles.intro}>
           {copy.intro}

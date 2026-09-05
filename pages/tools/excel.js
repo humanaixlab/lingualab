@@ -190,7 +190,7 @@ export default function ExcelTool() {
   };
 
   return (
-    <Layout title={copy.title} description={copy.description} backHref="/ar-tools#build-tools" backLabel={language === "ar" ? "العودة إلى البناء" : "Back to Build"}>
+    <Layout title={copy.title} description={copy.description} backHref="/ar-tools#build-tools" backLabel={language === "ar" ? "العودة إلى البناء" : "Back to Build"} dataSource="standalone">
       <div style={{ ...styles.page, direction, textAlign: "start" }}>
         <p style={styles.intro}>
           {copy.intro}
