@@ -2,15 +2,18 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useLanguage } from "./LanguageProvider";
 import DataSourceIndicator from "./DataSourceIndicator";
+import { readResearchPathContext, researchPathNavigation } from "../lib/research-path-context";
 
 export default function Layout({ title, children, backHref = "/ar-tools#all-tools", backLabel, description, dataSource }) {
   const { direction, language, t } = useLanguage();
   const router = useRouter();
   const fromLearn = router.query?.from === "learn";
-  const effectiveBackHref = fromLearn ? "/student-dashboard" : backHref;
-  const effectiveBackLabel = fromLearn
+  const pathContext = readResearchPathContext(router.asPath, router.pathname);
+  const pathNavigation = researchPathNavigation(pathContext, language, title);
+  const effectiveBackHref = pathNavigation?.href || (fromLearn ? "/student-dashboard" : backHref);
+  const effectiveBackLabel = pathNavigation?.backLabel || (fromLearn
     ? language === "ar" ? "العودة إلى مركز التعلّم" : "Back to Learn"
-    : backLabel || t("common.backToAllTools");
+    : backLabel || t("common.backToAllTools"));
   return (
     <div
       style={{
@@ -23,6 +26,11 @@ export default function Layout({ title, children, backHref = "/ar-tools#all-tool
       }}
     >
       <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
+        {pathNavigation && (
+          <nav aria-label={language === "ar" ? "سياق المسار البحثي" : "Research path context"} style={{ marginBottom: "12px", color: "#94a3b8", fontSize: "var(--text-meta)", lineHeight: 1.7 }}>
+            {pathNavigation.crumbs.map((crumb, index) => <span key={`${crumb}-${index}`}>{index > 0 && <span aria-hidden="true"> ← </span>}{crumb}</span>)}
+          </nav>
+        )}
         <Link href={effectiveBackHref} style={{ textDecoration: "none" }}>
           <button
             style={{

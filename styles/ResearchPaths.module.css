@@ -101,6 +101,20 @@
   text-decoration: none;
 }
 
+.tools .contextualTool {
+  border-style: dashed;
+  background: transparent;
+  color: #625d78;
+}
+
+.contextualTool small {
+  display: block;
+  margin-top: 4px;
+  color: #777386;
+  font-size: var(--text-meta);
+  font-weight: 400;
+}
+
 .coming {
   background: #f7f7fb;
 }

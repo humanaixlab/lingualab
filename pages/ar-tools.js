@@ -487,7 +487,7 @@ export default function ArabicToolsPage() {
                 </p>
                 {section.key === "workflows" && (
                   <p style={{ width: "100%", margin: "12px 0 0", color: "#4c43ce", fontSize: "var(--text-helper)", fontWeight: 600 }}>
-                    {language === "ar" ? "جهّز البيانات ← أنشئ الشفرة ← شغّلها في Colab" : "Prepare data → Generate code → Run in Colab"}
+                    {language === "ar" ? "جهّز البيانات ← أنشئ الشفرة وراجعها ← شغّلها وأعد إنتاجها ← قيّم النتائج" : "Prepare data → Generate / review code → Run / reproduce → Evaluate"}
                   </p>
                 )}
               </div>

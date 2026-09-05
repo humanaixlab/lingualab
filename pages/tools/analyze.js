@@ -322,6 +322,17 @@ const interpretResults = async () => {
           </div>
         </section>
 
+        <section className={styles.toolDirectory} aria-labelledby="research-path-entry-title">
+          <div>
+            <p className={styles.sectionLabel}>{language === "ar" ? "المسارات البحثية" : "RESEARCH PATHS"}</p>
+            <h2 id="research-path-entry-title">{language === "ar" ? "استكشف حسب المسار البحثي" : "Explore by Research Path"}</h2>
+            <p>{language === "ar" ? "اختر مجالًا في اللسانيات الحاسوبية، ثم افتح أدوات التحليل المتاحة ضمنه." : "Choose a computational-linguistics area, then open the analysis tools currently available within it."}</p>
+          </div>
+          <div className={styles.toolLinks}>
+            <Link href="/ar-tools#research-paths">{language === "ar" ? "عرض المسارات البحثية" : "View research paths"} <span aria-hidden="true">↗</span></Link>
+          </div>
+        </section>
+
         <div style={{ maxWidth: "1240px", margin: "0 auto 22px" }}>
           <DataSourceIndicator language={language} mode={sourceAnalysis ? "transferred" : context ? "projectContext" : "standalone"} />
           {sourceAnalysis && (

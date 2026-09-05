@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { RESEARCH_PATHS } from "../lib/research-paths";
+import { researchPathHref } from "../lib/research-path-context";
 import styles from "../styles/ResearchPaths.module.css";
 
 const COPY = {
@@ -18,6 +19,7 @@ const COPY = {
     report: "Report",
     beginner: "Beginner guide",
     advanced: "Advanced details",
+    contextual: "Contextual link · primary home: Research Writing Support",
   },
   ar: {
     eyebrow: "اللسانيات الحاسوبية",
@@ -34,6 +36,7 @@ const COPY = {
     report: "التقرير المتوقع",
     beginner: "للمبتدئ",
     advanced: "تفاصيل متقدمة",
+    contextual: "رابط سياقي · الموطن الأساسي: دعم الكتابة البحثية",
   },
 };
 
@@ -42,7 +45,7 @@ export default function ResearchPaths({ language }) {
   const locale = language === "ar" ? "ar" : "en";
 
   return (
-    <section className={styles.section} aria-labelledby="research-paths-title">
+    <section className={styles.section} id="research-paths" aria-labelledby="research-paths-title">
       <header className={styles.header}>
         <p className={styles.eyebrow}>{copy.eyebrow}</p>
         <h2 id="research-paths-title">{copy.title}</h2>
@@ -64,7 +67,12 @@ export default function ResearchPaths({ language }) {
               <h4>{copy.available}</h4>
               {path.available.length ? (
                 <div className={styles.tools}>
-                  {path.available.map((tool) => <Link href={tool.href} key={tool.href}>{tool[locale]} <span aria-hidden="true">↗</span></Link>)}
+                  {path.available.map((tool) => (
+                    <Link className={tool.contextual ? styles.contextualTool : undefined} href={researchPathHref(tool.href, path.id)} key={tool.href}>
+                      {tool[locale]} <span aria-hidden="true">↗</span>
+                      {tool.contextual && <small>{copy.contextual}</small>}
+                    </Link>
+                  ))}
                 </div>
               ) : <p className={styles.unavailable}>{copy.unavailable}</p>}
             </div>
