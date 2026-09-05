@@ -32,7 +32,7 @@ test("All Tools is the secondary directory and non-analysis tool back links targ
   assert.ok(hub.indexOf("hub.pathTitle") < hub.indexOf('id="all-tools"'));
 
   assert.match(source("components/Layout.js"), /backHref = "\/ar-tools#all-tools"/);
-  assert.match(source("pages/tools/colab.js"), /href="\/ar-tools#all-tools"/);
+  assert.match(source("pages/tools/colab.js"), /backHref="\/ar-tools#build-tools"/);
 
   for (const path of [
     "components/Layout.js",
@@ -104,6 +104,6 @@ test("Frequency, POS, and Colab remain renderable as standalone routes", async (
     vm.createContext(scope);
     vm.runInContext(code, scope);
     const html = renderToStaticMarkup(React.createElement(exports.default));
-    assert.match(html, name === "colab" ? /href="\/ar-tools#all-tools"/ : /href="\/tools\/analyze"/);
+    assert.match(html, name === "colab" ? /href="\/ar-tools#build-tools"/ : /href="\/tools\/analyze"/);
   }
 });

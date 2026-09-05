@@ -2,6 +2,12 @@ import Link from "next/link";
 import { useRef, useState } from "react";
 import Layout from "../../components/Layout";
 import { createToolHandoff } from "../../lib/tool-handoff";
+import { useLanguage } from "../../components/LanguageProvider";
+
+const COPY = {
+  en: { title: "Spreadsheet Explorer", description: "Preview and understand research spreadsheets locally before deeper analysis.", intro: "Preview and understand research datasets before deeper analysis. Files are parsed locally in your browser and raw spreadsheet data is never uploaded to an API.", previewLabel: "LOCAL DATA PREVIEW", open: "Open a research spreadsheet", supports: "Supports XLSX, XLS, and CSV files up to 10 MB.", choose: "Choose file", noFile: "No file chosen", none: "No spreadsheet selected", noneText: "Upload a file to inspect its sheets, dimensions, columns, and sample rows.", reading: "Reading spreadsheet locally…", wait: "Large workbooks may take a moment.", failedTitle: "Spreadsheet could not be opened", another: "Choose another file", overview: "DATASET OVERVIEW", download: "Download original", uploadAnother: "Upload another", remove: "Remove file", fileSize: "File size", fileType: "File type", sheets: "Sheets", rows: "Rows", columns: "Columns", selected: "Selected sheet", workbookSheets: "Workbook sheets", empty: "This sheet has no data rows.", emptyHint: "Select another sheet or upload a different workbook.", bounded: "BOUNDED PREVIEW", firstRows: "First {count} rows", unchanged: "Preview only — the original file is unchanged.", deeper: "READY FOR DEEPER ANALYSIS?", continueWorkspace: "Continue in the LinguaLab Workspace", workspaceText: "Inspect language coverage, missing values, duplicates, labels, and recommended research workflows.", openWorkspace: "Open Workspace →", continueCode: "Continue to Code Generator →", unsupported: "Unsupported format. Upload an .xlsx, .xls, or .csv file.", tooLarge: "This file is larger than the 10 MB demo limit.", fileEmpty: "The selected file is empty.", noSheets: "The workbook does not contain any readable sheets.", malformed: "This spreadsheet is malformed, encrypted, or unreadable. Verify the file and try again.", transfer: "The spreadsheet metadata could not be transferred. Please try again." },
+  ar: { title: "مستكشف الجداول", description: "عاين جداول البحث وافهم بنيتها محليًا قبل الانتقال إلى التحليل المتعمق.", intro: "عاين مجموعات البيانات البحثية وافهمها قبل التحليل المتعمق. تُقرأ الملفات محليًا في متصفحك ولا تُرفع بيانات الجداول الخام إلى أي API.", previewLabel: "معاينة محلية للبيانات", open: "افتح جدولًا بحثيًا", supports: "يدعم ملفات XLSX وXLS وCSV حتى 10 ميجابايت.", choose: "اختر ملفًا", noFile: "لم يتم اختيار ملف", none: "لم يتم تحديد جدول", noneText: "ارفع ملفًا لفحص أوراقه وأبعاده وأعمدته وصفوف المعاينة.", reading: "جارٍ قراءة الجدول محليًا…", wait: "قد تستغرق المصنفات الكبيرة بعض الوقت.", failedTitle: "تعذر فتح الجدول", another: "اختر ملفًا آخر", overview: "نظرة عامة على مجموعة البيانات", download: "تنزيل الملف الأصلي", uploadAnother: "رفع ملف آخر", remove: "إزالة الملف", fileSize: "حجم الملف", fileType: "نوع الملف", sheets: "الأوراق", rows: "الصفوف", columns: "الأعمدة", selected: "الورقة المحددة", workbookSheets: "أوراق المصنف", empty: "لا تحتوي هذه الورقة على صفوف بيانات.", emptyHint: "اختر ورقة أخرى أو ارفع مصنفًا مختلفًا.", bounded: "معاينة محدودة", firstRows: "أول {count} صفوف", unchanged: "معاينة فقط — لم يتغير الملف الأصلي.", deeper: "هل أنت مستعد لتحليل أعمق؟", continueWorkspace: "المتابعة في مساحة عمل LinguaLab", workspaceText: "افحص التغطية اللغوية والقيم المفقودة والتكرارات والتصنيفات ومسارات البحث المقترحة.", openWorkspace: "فتح مساحة العمل ←", continueCode: "المتابعة إلى مولّد الشفرة ←", unsupported: "صيغة غير مدعومة. ارفع ملفًا بصيغة .xlsx أو .xls أو .csv.", tooLarge: "يتجاوز الملف الحد التجريبي البالغ 10 ميجابايت.", fileEmpty: "الملف المحدد فارغ.", noSheets: "لا يحتوي المصنف على أوراق قابلة للقراءة.", malformed: "الجدول تالف أو مشفر أو غير قابل للقراءة. تحقق من الملف وحاول مرة أخرى.", transfer: "تعذر نقل بيانات الجدول الوصفية. حاول مرة أخرى." },
+};
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const PREVIEW_ROW_LIMIT = 15;
@@ -74,6 +80,8 @@ function summarizeSheet(workbook, sheetName, XLSX) {
 }
 
 export default function ExcelTool() {
+  const { language, direction } = useLanguage();
+  const copy = COPY[language];
   const inputRef = useRef(null);
   const workbookRef = useRef(null);
   const parserRef = useRef(null);
@@ -108,19 +116,19 @@ export default function ExcelTool() {
     if (!SUPPORTED_EXTENSIONS.has(extension)) {
       resetTool();
       setStatus("error");
-      setError("Unsupported format. Upload an .xlsx, .xls, or .csv file.");
+      setError(copy.unsupported);
       return;
     }
     if (uploadedFile.size > MAX_FILE_SIZE) {
       resetTool();
       setStatus("error");
-      setError("This file is larger than the 10 MB demo limit.");
+      setError(copy.tooLarge);
       return;
     }
     if (uploadedFile.size === 0) {
       resetTool();
       setStatus("error");
-      setError("The selected file is empty.");
+      setError(copy.fileEmpty);
       return;
     }
 
@@ -138,7 +146,7 @@ export default function ExcelTool() {
       });
       const names = workbook.SheetNames || [];
 
-      if (!names.length) throw new Error("The workbook does not contain any readable sheets.");
+      if (!names.length) throw new Error("NO_READABLE_SHEETS");
 
       const firstSheet = names[0];
       workbookRef.current = workbook;
@@ -153,9 +161,7 @@ export default function ExcelTool() {
       resetTool();
       setStatus("error");
       setError(
-        parseError?.message === "The workbook does not contain any readable sheets."
-          ? parseError.message
-          : "This spreadsheet is malformed, encrypted, or unreadable. Please verify the file and try again."
+        parseError?.message === "NO_READABLE_SHEETS" ? copy.noSheets : copy.malformed
       );
     }
   };
@@ -184,49 +190,50 @@ export default function ExcelTool() {
   };
 
   return (
-    <Layout title="Spreadsheet Explorer">
-      <div style={styles.page}>
+    <Layout title={copy.title} description={copy.description} backHref="/ar-tools#build-tools" backLabel={language === "ar" ? "العودة إلى البناء" : "Back to Build"}>
+      <div style={{ ...styles.page, direction, textAlign: "start" }}>
         <p style={styles.intro}>
-          Preview and understand research datasets before deeper analysis. Files are parsed locally
-          in your browser and raw spreadsheet data is never uploaded to an API.
+          {copy.intro}
         </p>
 
         <section style={styles.uploadCard}>
           <div>
-            <p style={styles.eyebrow}>LOCAL DATA PREVIEW</p>
-            <h2 style={styles.cardTitle}>Open a research spreadsheet</h2>
-            <p style={styles.cardText}>Supports XLSX, XLS, and CSV files up to 10 MB.</p>
+            <p style={styles.eyebrow}>{copy.previewLabel}</p>
+            <h2 style={styles.cardTitle}>{copy.open}</h2>
+            <p style={styles.cardText}>{copy.supports}</p>
           </div>
           <input
             ref={inputRef}
             type="file"
             accept=".xlsx,.xls,.csv"
             onChange={handleUpload}
-            style={styles.fileInput}
+            style={styles.hiddenFileInput}
             disabled={status === "loading"}
           />
+          <button type="button" onClick={() => inputRef.current?.click()} style={styles.secondaryButton} disabled={status === "loading"}>{copy.choose}</button>
+          <span style={styles.fileName} dir="auto">{file?.name || copy.noFile}</span>
         </section>
 
         {status === "empty" && (
           <div style={styles.emptyState}>
             <span aria-hidden="true" style={styles.emptyIcon}>▦</span>
-            <strong>No spreadsheet selected</strong>
-            <span>Upload a file to inspect its sheets, dimensions, columns, and sample rows.</span>
+            <strong>{copy.none}</strong>
+            <span>{copy.noneText}</span>
           </div>
         )}
 
         {status === "loading" && (
           <div role="status" aria-live="polite" style={styles.loadingState}>
             <span style={styles.spinner} />
-            <div><strong>Reading spreadsheet locally…</strong><span style={styles.loadingText}> Large workbooks may take a moment.</span></div>
+            <div><strong>{copy.reading}</strong><span style={styles.loadingText}> {copy.wait}</span></div>
           </div>
         )}
 
         {status === "error" && (
           <div role="alert" style={styles.errorState}>
-            <strong>Spreadsheet could not be opened</strong>
+            <strong>{copy.failedTitle}</strong>
             <span>{error}</span>
-            <button type="button" onClick={() => inputRef.current?.click()} style={styles.errorButton}>Choose another file</button>
+            <button type="button" onClick={() => inputRef.current?.click()} style={styles.errorButton}>{copy.another}</button>
           </div>
         )}
 
@@ -235,50 +242,50 @@ export default function ExcelTool() {
             <section style={styles.detailsCard}>
               <div style={styles.detailsHeader}>
                 <div>
-                  <p style={styles.eyebrow}>DATASET OVERVIEW</p>
+                  <p style={styles.eyebrow}>{copy.overview}</p>
                   <h2 style={styles.cardTitle}>{file.name}</h2>
                 </div>
                 <div style={styles.actions}>
-                  <button type="button" onClick={handleDownload} style={styles.primaryButton}>Download original</button>
-                  <button type="button" onClick={() => inputRef.current?.click()} style={styles.secondaryButton}>Upload another</button>
-                  <button type="button" onClick={resetTool} style={styles.removeButton}>Remove file</button>
+                  <button type="button" onClick={handleDownload} style={styles.primaryButton}>{copy.download}</button>
+                  <button type="button" onClick={() => inputRef.current?.click()} style={styles.secondaryButton}>{copy.uploadAnother}</button>
+                  <button type="button" onClick={resetTool} style={styles.removeButton}>{copy.remove}</button>
                 </div>
               </div>
 
               <div style={styles.metricsGrid}>
-                <Metric label="File size" value={formatFileSize(file.size)} />
-                <Metric label="File type" value={fileType} />
-                <Metric label="Sheets" value={String(sheetNames.length)} />
-                <Metric label="Rows" value={sheetSummary.empty ? "0" : sheetSummary.rowCount.toLocaleString()} />
-                <Metric label="Columns" value={sheetSummary.columnCount.toLocaleString()} />
+                <Metric label={copy.fileSize} value={formatFileSize(file.size)} />
+                <Metric label={copy.fileType} value={fileType} />
+                <Metric label={copy.sheets} value={String(sheetNames.length)} />
+                <Metric label={copy.rows} value={sheetSummary.empty ? "0" : sheetSummary.rowCount.toLocaleString(language)} />
+                <Metric label={copy.columns} value={sheetSummary.columnCount.toLocaleString(language)} />
               </div>
 
               <div style={styles.sheetControl}>
-                <label htmlFor="sheet-selector" style={styles.label}>Selected sheet</label>
+                <label htmlFor="sheet-selector" style={styles.label}>{copy.selected}</label>
                 <select id="sheet-selector" value={selectedSheet} onChange={handleSheetChange} style={styles.select}>
                   {sheetNames.map((name) => <option key={name}>{name}</option>)}
                 </select>
-                <p style={styles.sheetNames}><strong>Workbook sheets:</strong> {sheetNames.join(", ")}</p>
+                <p style={styles.sheetNames}><strong>{copy.workbookSheets}:</strong> <span dir="auto">{sheetNames.join(", ")}</span></p>
               </div>
             </section>
 
             {sheetSummary.empty ? (
               <div style={styles.emptySheet}>
-                <strong>This sheet has no data rows.</strong>
-                <span>Select another sheet or upload a different workbook.</span>
+                <strong>{copy.empty}</strong>
+                <span>{copy.emptyHint}</span>
               </div>
             ) : (
               <section style={styles.previewCard}>
                 <div style={styles.previewHeader}>
                   <div>
-                    <p style={styles.eyebrow}>BOUNDED PREVIEW</p>
-                    <h2 style={styles.cardTitle}>First {Math.min(PREVIEW_ROW_LIMIT, sheetSummary.rowCount)} rows</h2>
+                    <p style={styles.eyebrow}>{copy.bounded}</p>
+                    <h2 style={styles.cardTitle}>{copy.firstRows.replace("{count}", Math.min(PREVIEW_ROW_LIMIT, sheetSummary.rowCount).toLocaleString(language))}</h2>
                   </div>
-                  <span style={styles.previewNote}>Preview only — the original file is unchanged.</span>
+                  <span style={styles.previewNote}>{copy.unchanged}</span>
                 </div>
 
                 <div style={styles.columnList}>
-                  <strong>Columns</strong>
+                  <strong>{copy.columns}</strong>
                   <div style={styles.chips}>{sheetSummary.headers.map((header) => <span key={header} style={styles.chip}>{header}</span>)}</div>
                 </div>
 
@@ -297,11 +304,11 @@ export default function ExcelTool() {
 
             <section style={styles.ctaCard}>
               <div>
-                <p style={styles.eyebrow}>READY FOR DEEPER ANALYSIS?</p>
-                <h2 style={styles.ctaTitle}>Continue in the LinguaLab Workspace</h2>
-                <p style={styles.cardText}>Inspect language coverage, missing values, duplicates, labels, and recommended research workflows.</p>
+                <p style={styles.eyebrow}>{copy.deeper}</p>
+                <h2 style={styles.ctaTitle}>{copy.continueWorkspace}</h2>
+                <p style={styles.cardText}>{copy.workspaceText}</p>
               </div>
-              <Link href="/workspace" style={styles.ctaButton}>Open Workspace →</Link>
+              <Link href="/workspace" style={styles.ctaButton}>{copy.openWorkspace}</Link>
               <button type="button" style={styles.ctaButton} onClick={() => {
                 setHandoffError("");
                 try {
@@ -309,8 +316,8 @@ export default function ExcelTool() {
                     filename: file?.name || "", sheet: selectedSheet,
                     headers: sheetSummary.headers, rowCount: sheetSummary.rowCount, columnCount: sheetSummary.columnCount,
                   });
-                } catch (transferError) { setHandoffError(transferError.message); }
-              }}>Continue to Code Generator →</button>
+                } catch { setHandoffError(copy.transfer); }
+              }}>{copy.continueCode}</button>
               {handoffError && <p role="alert">{handoffError}</p>}
             </section>
           </>
@@ -331,7 +338,8 @@ const styles = {
   eyebrow: { margin: "0 0 7px", color: "#6366f1", fontSize: "11px", letterSpacing: ".1em", fontWeight: 800 },
   cardTitle: { margin: 0, color: "#111827", fontSize: "22px", lineHeight: 1.3, overflowWrap: "anywhere" },
   cardText: { margin: "8px 0 0", color: "#667085", lineHeight: 1.7 },
-  fileInput: { maxWidth: "100%", padding: "10px", border: "1px solid #d0d5dd", borderRadius: "12px", backgroundColor: "#f9fafb", color: "#344054" },
+  hiddenFileInput: { position: "absolute", width: "1px", height: "1px", overflow: "hidden", clip: "rect(0 0 0 0)", whiteSpace: "nowrap" },
+  fileName: { color: "#667085", fontSize: "13px" },
   emptyState: { display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", padding: "34px 22px", color: "#667085", textAlign: "center", border: "1px dashed #cbd5e1", borderRadius: "18px", backgroundColor: "#f8fafc" },
   emptyIcon: { fontSize: "30px", color: "#6366f1" },
   loadingState: { display: "flex", alignItems: "center", gap: "12px", padding: "20px", border: "1px solid #dddff7", borderRadius: "16px", backgroundColor: "#f5f3ff", color: "#344054" },

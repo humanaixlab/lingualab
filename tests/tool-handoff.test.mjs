@@ -128,13 +128,13 @@ test("Code → Colab preserves the response for deliberate copying without execu
   assert.equal(JSON.parse(code.storage.getItem("lingualab-tool-handoff:colab")).payload.response, generatedResponse);
   const colab = page("colab", code.storage, new URL(code.scope.window.location.href, "https://example.test").search); colab.mount();
   const html = renderToStaticMarkup(colab.render());
-  assert.match(html, /Selected language: JavaScript/);
+  assert.match(html, /Selected language:[\s\S]*JavaScript/);
   assert.match(html, /Explanation followed by JavaScript/);
   assert.equal(find(colab.render(), (el) => el.type === "pre").props.children, generatedResponse);
   assert.equal(colab.calls.length, 0); assert.equal(colab.opened.length, 0); assert.equal(colab.copied.length, 0);
   await colab.button("Copy response").props.onClick();
   assert.equal(colab.copied[0], generatedResponse);
-  colab.button("فتح Google Colab").props.onClick();
+  colab.button("Open Google Colab").props.onClick();
   assert.deepEqual(colab.opened[0], ["https://colab.research.google.com/", "_blank"]);
 });
 
@@ -227,7 +227,7 @@ test("Excel clears stale transfer errors on reset, file replacement and sheet ch
     excel.storage.setItem = () => { throw new Error("Storage unavailable"); };
     excel.button("Continue to Code").props.onClick();
     const error = find(excel.render(), (el) => el.props.role === "alert").props.children;
-    assert.match(error, /transfer could not be saved/);
+    assert.match(error, /could not be transferred/);
     if (action === "reset") excel.button("Remove file").props.onClick();
     if (action === "file") { upload("replacement.xlsx"); await setImmediate(); }
     if (action === "sheet") excel.input("sheet-selector").props.onChange({ target: { value: "Sheet2" } });

@@ -4,8 +4,8 @@ import { createToolHandoff } from "../../lib/tool-handoff";
 import { useLanguage } from "../../components/LanguageProvider";
 
 const COPY = {
-  en: { title: "Prompt Assistant", description: "Create clear, structured instructions for research, analysis, and writing tasks.", intro: "Build an editable prompt from your task, topic, audience, and preferred writing style.", task: "Task type", topic: "Topic", topicPlaceholder: "Example: Sentiment patterns in customer reviews", audience: "Target audience", audiencePlaceholder: "Example: Undergraduate researchers", style: "Writing style", generate: "Generate prompt with GPT-5.6", generating: "Generating with GPT-5.6…", clear: "Clear", output: "GENERATED OUTPUT", yours: "Your prompt", copied: "Copied", copy: "Copy prompt", continue: "Continue to Code Generator →", guide: "HOW TO USE THIS TOOL", guideTitle: "Create a stronger starting prompt.", guideText: "Choose a task, describe the topic and audience, then generate a reusable prompt for analysis, explanation, summarization, academic writing, or learning activities.", tasks: ["Text analysis", "Summarization", "Simplified explanation", "Academic writing", "Data classification", "Learning activity design"], styles: ["Academic", "Simple", "Formal", "Creative"] },
-  ar: { title: "مساعد التعليمات", description: "أنشئ تعليمات واضحة ومنظمة لمهام البحث والتحليل والكتابة.", intro: "أنشئ تعليمات قابلة للمراجعة انطلاقًا من المهمة والموضوع والجمهور وأسلوب الكتابة.", task: "نوع المهمة", topic: "الموضوع", topicPlaceholder: "مثال: أنماط المشاعر في مراجعات العملاء", audience: "الجمهور المستهدف", audiencePlaceholder: "مثال: باحثون في المرحلة الجامعية", style: "أسلوب الكتابة", generate: "أنشئ التعليمات باستخدام GPT-5.6", generating: "جارٍ إنشاء التعليمات باستخدام GPT-5.6…", clear: "مسح", output: "الناتج المنشأ", yours: "تعليماتك", copied: "تم النسخ", copy: "نسخ التعليمات", continue: "المتابعة إلى مولّد الشفرة ←", guide: "طريقة استخدام الأداة", guideTitle: "أنشئ نقطة بداية أكثر وضوحًا.", guideText: "اختر المهمة، وحدد الموضوع والجمهور، ثم أنشئ تعليمات قابلة لإعادة الاستخدام في التحليل أو الشرح أو التلخيص أو الكتابة الأكاديمية أو أنشطة التعلم.", tasks: ["تحليل النص", "التلخيص", "شرح مبسط", "الكتابة الأكاديمية", "تصنيف البيانات", "تصميم نشاط تعليمي"], styles: ["أكاديمي", "مبسّط", "رسمي", "إبداعي"] },
+  en: { title: "Prompt Assistant", description: "Create clear, structured instructions for research, analysis, and writing tasks.", intro: "Build an editable prompt from your task, topic, audience, and preferred writing style.", task: "Task type", topic: "Topic", topicPlaceholder: "Example: Sentiment patterns in customer reviews", audience: "Target audience", audiencePlaceholder: "Example: Undergraduate researchers", style: "Writing style", generate: "Generate prompt with GPT-5.6", generating: "Generating with GPT-5.6…", clear: "Clear", output: "GENERATED OUTPUT", yours: "Your prompt", copied: "Copied", copy: "Copy prompt", continue: "Continue to Code Generator →", guide: "HOW TO USE THIS TOOL", guideTitle: "Create a stronger starting prompt.", guideText: "Choose a task, describe the topic and audience, then generate a reusable prompt for analysis, explanation, summarization, academic writing, or learning activities.", timeout: "Prompt generation timed out. Please try again.", failed: "Prompt generation failed. Please try again.", unavailable: "The model did not return a usable prompt.", transfer: "The prompt could not be transferred. Please try again.", tasks: ["Text analysis", "Summarization", "Simplified explanation", "Academic writing", "Data classification", "Learning activity design"], styles: ["Academic", "Simple", "Formal", "Creative"] },
+  ar: { title: "مساعد التعليمات", description: "أنشئ تعليمات واضحة ومنظمة لمهام البحث والتحليل والكتابة.", intro: "أنشئ تعليمات قابلة للمراجعة انطلاقًا من المهمة والموضوع والجمهور وأسلوب الكتابة.", task: "نوع المهمة", topic: "الموضوع", topicPlaceholder: "مثال: أنماط المشاعر في مراجعات العملاء", audience: "الجمهور المستهدف", audiencePlaceholder: "مثال: باحثون في المرحلة الجامعية", style: "أسلوب الكتابة", generate: "أنشئ التعليمات باستخدام GPT-5.6", generating: "جارٍ إنشاء التعليمات باستخدام GPT-5.6…", clear: "مسح", output: "الناتج المنشأ", yours: "تعليماتك", copied: "تم النسخ", copy: "نسخ التعليمات", continue: "المتابعة إلى مولّد الشفرة ←", guide: "طريقة استخدام الأداة", guideTitle: "أنشئ نقطة بداية أكثر وضوحًا.", guideText: "اختر المهمة، وحدد الموضوع والجمهور، ثم أنشئ تعليمات قابلة لإعادة الاستخدام في التحليل أو الشرح أو التلخيص أو الكتابة الأكاديمية أو أنشطة التعلم.", timeout: "انتهت مهلة إنشاء التعليمات. حاول مرة أخرى.", failed: "تعذر إنشاء التعليمات. حاول مرة أخرى.", unavailable: "لم يُرجع النموذج تعليمات قابلة للاستخدام.", transfer: "تعذر نقل التعليمات. حاول مرة أخرى.", tasks: ["تحليل النص", "التلخيص", "شرح مبسط", "الكتابة الأكاديمية", "تصنيف البيانات", "تصميم نشاط تعليمي"], styles: ["أكاديمي", "مبسّط", "رسمي", "إبداعي"] },
 };
 
 const TASK_VALUES = ["Text analysis", "Summarization", "Simplified explanation", "Academic writing", "Data classification", "Learning activity design"];
@@ -42,19 +42,19 @@ export default function PromptTool() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data?.error || "Prompt generation failed.");
+        throw new Error(language === "ar" ? copy.failed : data?.error || copy.failed);
       }
 
       if (!data?.result) {
-        throw new Error("GPT-5.6 did not return a usable prompt.");
+        throw new Error(copy.unavailable);
       }
 
       setGeneratedPrompt(data.result);
     } catch (requestError) {
       setError(
         requestError?.name === "AbortError"
-          ? "Prompt generation timed out. Please try again."
-          : requestError?.message || "Prompt generation failed. Please try again."
+          ? copy.timeout
+          : requestError?.message || copy.failed
       );
     } finally {
       window.clearTimeout(timeout);
@@ -85,7 +85,7 @@ export default function PromptTool() {
   };
 
   return (
-    <Layout title={copy.title} description={copy.description}>
+    <Layout title={copy.title} description={copy.description} backHref="/ar-tools#writing-tools" backLabel={language === "ar" ? "العودة إلى دعم الكتابة البحثية" : "Back to Research Writing Support"}>
       <div style={{ direction }}>
         <p style={styles.intro}>
           {copy.intro}
@@ -187,7 +187,7 @@ export default function PromptTool() {
             <button type="button" style={styles.secondaryButton} onClick={() => {
               try {
                 window.location.href = createToolHandoff("prompt", "code", { prompt: generatedPrompt });
-              } catch (transferError) { setError(transferError.message); }
+              } catch { setError(copy.transfer); }
             }}>{copy.continue}</button>
           </div>
         )}
