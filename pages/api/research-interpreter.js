@@ -180,7 +180,10 @@ ANALYTICAL AWARENESS
 - Appropriate next steps may include concordance analysis, normalized frequency comparison, keyword analysis, collocation analysis, POS tagging, dependency parsing, discourse analysis, metaphor analysis, terminology extraction, semantic clustering, topic modeling, or comparison against a reference corpus.
 
 WRITING STANDARD
-- Write every response value directly in ${uiLanguage === "ar" ? "natural, publication-quality academic Arabic" : "concise, publication-quality academic English"}.
+- Write every response value directly in ${uiLanguage === "ar" ? "native, publication-quality academic Arabic" : "concise, publication-quality academic English"}.
+${uiLanguage === "ar" ? `- Compose the interpretation naturally in Arabic from the outset. Do not translate literally, mirror English sentence order, or retain English syntactic structure; reformulate the meaning as clear, cohesive, unforced academic Arabic.
+- Use the established Arabic technical term first. Add the English term in parentheses only when it has genuine scholarly value, for example: التصنيف الخاضع للإشراف (Supervised Classification)، درجة F1 الكلية (Macro-F1)، مصفوفة الالتباس، تمثيل TF-IDF، والمتتاليات اللفظية (N-grams).
+- Keep standard technical abbreviations such as TF-IDF, LDA, POS, and Macro-F1 unchanged. Integrate metrics into complete Arabic sentences rather than colon-separated translated fragments.` : ""}
 - Keep JSON field names exactly as specified in English. Do not translate field names, quoted source material, dataset content, filenames, column names, or original citations.
 - Sound like a careful discussion section in a peer-reviewed article, not a generic chatbot.
 - Avoid filler, repetition, inflated claims, and unnecessary technical jargon.
@@ -240,4 +243,3 @@ Use exactly this structure:
     });
   }
 }
-

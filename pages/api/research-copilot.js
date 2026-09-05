@@ -168,6 +168,9 @@ Rules:
 - Prefer transparent baselines and include realistic validation, error analysis, limitations, and ethics risks.
 - If the metadata cannot support a strong study, mark feasibility conditional or exploratory and say what is missing.
 - Write all descriptive response values directly in ${uiLanguage === "ar" ? "natural, academically appropriate Arabic" : "clear academic English"}.
+${uiLanguage === "ar" ? `- Compose native, publication-quality academic Arabic from the outset. Do not translate literally, mirror English sentence order, or retain English syntactic structure; express the meaning in clear, cohesive, unforced Arabic prose.
+- Use the established Arabic technical term first. Add the English term in parentheses only when it has genuine scholarly value, for example: التصنيف الخاضع للإشراف (Supervised Classification)، درجة F1 الكلية (Macro-F1)، مصفوفة الالتباس، تمثيل TF-IDF، والمتتاليات اللفظية (N-grams).
+- Keep standard technical abbreviations such as TF-IDF, LDA, POS, and Macro-F1 unchanged. Integrate metrics and methods into complete Arabic sentences rather than colon-separated translated fragments.` : ""}
 - Keep schema field names and enum values exactly as defined in English. Do not translate dataset content, filenames, column names, label values, original quotations, or citations.
 - Keep every field concise, specific, and suitable for display in a research workspace.
 

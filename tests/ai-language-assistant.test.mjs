@@ -21,7 +21,7 @@ test("research AI requests carry the selected UI language without changing user 
 test("Arabic Advisor UI sends ar and selects the mandatory Arabic output instruction", () => {
   const uiLanguage = normalizeAdvisorUiLanguage("ar");
   assert.equal(uiLanguage, "ar");
-  assert.match(advisorOutputLanguageInstruction(uiLanguage), /MANDATORY.*natural academic Arabic/);
+  assert.match(advisorOutputLanguageInstruction(uiLanguage), /MANDATORY.*native, publication-quality academic Arabic/);
   assert.doesNotMatch(advisorOutputLanguageInstruction(uiLanguage), /academic English/);
 
   assert.equal(normalizeAdvisorUiLanguage("en"), "en");
@@ -51,6 +51,25 @@ test("research APIs generate directly in the selected academic language while pr
   assert.match(copilot, /Keep schema field names and enum values exactly as defined in English/);
   assert.match(copilot, /enum: \["strong", "conditional", "exploratory"\]/);
   assert.match(copilot, /enum: \["supervised_classification", "corpus_exploration", "qualitative_exploration"\]/);
+});
+
+test("Arabic research output instructions require native non-literal prose and Arabic-first terminology", () => {
+  const advisorInstruction = advisorOutputLanguageInstruction("ar");
+  const copilot = source("pages/api/research-copilot.js");
+  const interpreter = source("pages/api/research-interpreter.js");
+
+  for (const instruction of [advisorInstruction, copilot, interpreter]) {
+    assert.match(instruction, /native, publication-quality academic Arabic/);
+    assert.match(instruction, /Do not translate literally/);
+    assert.match(instruction, /English sentence order/);
+    assert.match(instruction, /Arabic technical term first/);
+    assert.match(instruction, /English term in parentheses only when it has genuine scholarly value/);
+    assert.match(instruction, /TF-IDF, LDA, POS, and Macro-F1 unchanged/);
+  }
+
+  assert.match(advisorInstruction, /درجة F1 الكلية \(Macro-F1\)/);
+  assert.match(interpreter, /مصفوفة الالتباس/);
+  assert.match(copilot, /المتتاليات اللفظية \(N-grams\)/);
 });
 
 test("Research Report presents stored AI output unchanged rather than translating it", () => {
