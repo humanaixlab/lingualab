@@ -65,12 +65,17 @@ test("Research Hub retains context-aware research destinations", () => {
 });
 
 test("main Research Hub navigation uses one consistent name", () => {
-  for (const path of ["pages/workspace.js", "pages/research-advisor.js"]) {
+  for (const path of ["pages/research-advisor.js"]) {
     const page = source(path);
     const navigation = page.slice(page.indexOf("<nav"), page.indexOf("</nav>"));
     assert.match(navigation, /href="\/ar-tools"[^>]*>\{t\("nav\.researchHub"\)\}<\/Link>/);
     assert.doesNotMatch(navigation, /Research Tools/);
   }
+  const workspace = source("pages/workspace.js");
+  const workspaceNavigation = workspace.slice(workspace.indexOf("<nav"), workspace.indexOf("</nav>"));
+  assert.doesNotMatch(workspaceNavigation, /navActions|nav\.workspace|nav\.researchHub|nav\.analyze/);
+  assert.match(workspace, /ابدأ بمجموعة بياناتك البحثية/);
+  assert.match(workspace, /Start with your research dataset/);
 });
 
 test("Learning Hub identifies operational links as learning paths", () => {

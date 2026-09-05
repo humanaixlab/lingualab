@@ -13,6 +13,16 @@ const TEXT_HINTS = [
   "النص", "محتوى", "الجملة", "تغريدة", "تعليق", "رسالة", "مراجعة"
 ];
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const WORKSPACE_HERO_COPY = {
+  ar: {
+    title: "ابدأ بمجموعة بياناتك البحثية",
+    description: "استكشف بنية بياناتك، وحدد الأعمدة المهمة، وافحص الجودة والتصنيفات، ثم انتقل إلى التحليل المناسب.",
+  },
+  en: {
+    title: "Start with your research dataset",
+    description: "Explore your data structure, identify key columns, assess quality and labels, then continue to the appropriate analysis.",
+  },
+};
 
 function decodeExcelCell(value) {
   if (typeof value !== "string") return value ?? "";
@@ -825,15 +835,12 @@ export default function WorkspacePage() {
       <main className={styles.page}>
         <nav className={styles.nav}>
           <Link href="/" className={styles.brand}><span>L</span>LinguaLab</Link>
-          <div className={styles.navActions}>
-            <Link href="/workspace">{t("nav.workspace")}</Link><Link href="/ar-tools" onClick={openResearchHub}>{t("nav.researchHub")}</Link><Link href="/tools/analyze" onClick={openAnalyze}>{t("nav.analyze")}</Link><Link href="/ar-tools#build-tools">{language === "ar" ? "البناء" : "Build"}</Link>
-          </div>
         </nav>
 
         <div className={styles.sourceIndicator}><DataSourceIndicator language={language} mode="project" /></div>
 
         <section className={styles.hero}>
-          <p className={styles.eyebrow}>{t("workspace.step1")}</p><h1>{t("workspace.title")}</h1><p>{t("workspace.lead")}</p>
+          <p className={styles.eyebrow}>{t("workspace.step1")}</p><h1>{WORKSPACE_HERO_COPY[language].title}</h1><p>{WORKSPACE_HERO_COPY[language].description}</p>
         </section>
 
         <div className={styles.journeyBar} aria-label={t("workspace.progress")}>
