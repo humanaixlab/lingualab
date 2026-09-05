@@ -2,6 +2,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Layout from "../../components/Layout";
 import { useLanguage } from "../../components/LanguageProvider";
+import { createReportContext } from "../../lib/report-context";
 import styles from "../../styles/AnalysisTool.module.css";
 
 export default function Frequency() {
@@ -20,6 +21,16 @@ export default function Frequency() {
     setResult(JSON.stringify(freq, null, 2));
   };
 
+  const generateReport = () => {
+    const frequencies = Object.entries(JSON.parse(result)).sort((a, b) => b[1] - a[1]);
+    const url = createReportContext("frequency", "frequency", {
+      wordCount: text.split(/\s+/).filter(Boolean).length,
+      frequencies,
+      summary: language === "ar" ? "يعرض التقرير توزيع الكلمات المرصود في النص المدخل." : "This report presents the observed word distribution in the submitted text.",
+    });
+    if (url) window.location.href = url;
+  };
+
   return (
     <Layout
       title={language === "ar" ? "تحليل التكرار" : "Frequency Analysis"}
@@ -36,7 +47,7 @@ export default function Frequency() {
         className={styles.control}
       />
       <div className={styles.actions}><button className={styles.button} onClick={analyze}>{language === "ar" ? "ابدأ التحليل" : "Run analysis"}</button></div>
-      {result && <section className={styles.result}><h2>{language === "ar" ? "النتائج" : "Results"}</h2><pre>{result}</pre><Link className={`${styles.button} ${styles.next}`} href="/tools/analyze">{language === "ar" ? "فسّر النتائج بالذكاء الاصطناعي" : "Interpret results with AI"}</Link></section>}
+      {result && <section className={styles.result}><h2>{language === "ar" ? "النتائج" : "Results"}</h2><pre>{result}</pre><div className={styles.actions}><button className={`${styles.button} ${styles.next}`} type="button" onClick={generateReport}>{language === "ar" ? "إنشاء تقرير" : "Generate Report"}</button><Link className={`${styles.button} ${styles.next}`} href="/tools/analyze">{language === "ar" ? "فسّر النتائج بالذكاء الاصطناعي" : "Interpret results with AI"}</Link></div></section>}
     </Layout>
   );
 }

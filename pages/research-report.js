@@ -2,6 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useState, useSyncExternalStore } from "react";
 import { useLanguage } from "../components/LanguageProvider";
+import { readReportContext } from "../lib/report-context";
 
 function subscribe() {
   return () => {};
@@ -87,6 +88,81 @@ const REPORT_COPY = {
   ar: { metrics: "المقاييس الرئيسة", visuals: "النتائج البصرية", frequencyChart: "أكثر المفردات تكرارًا", distributionChart: "توزيع الفئات", regenerate: "إعادة توليد التفسير بالعربية", regenerating: "جارٍ إعادة توليد التفسير…", mismatch: "أُنشئ التفسير المحفوظ بلغة أخرى. أعد توليده ليتوافق مع الواجهة العربية.", regenerateError: "تعذرت إعادة توليد التفسير. حاول مرة أخرى.", interpretation: "تفسير الذكاء الاصطناعي", conclusions: "الاستنتاجات والخطوات التالية" },
 };
 
+const CONTEXT_COPY = {
+  en: { standard: "Standard", visual: "Visual", diagram: "Diagram", unavailable: "Diagram unavailable", source: "Report source", generated: "Generated", metrics: "Key Metrics", visuals: "Visual Results", interpretation: "AI Interpretation", summary: "Summary", limitations: "Limitations", next: "Conclusions / Next Steps", workflow: "Methodological sequence", words: "Words", sentences: "Sentences", contexts: "Contexts", items: "Reported items", target: "Target expression", method: "Recommended method", design: "Study design", questions: "Research questions", frequency: "Frequency", distribution: "Distribution", noDiagram: "No structured workflow is available for this report." },
+  ar: { standard: "قياسي", visual: "مرئي", diagram: "مخطط", unavailable: "المخطط غير متاح", source: "مصدر التقرير", generated: "تاريخ الإنشاء", metrics: "المؤشرات الرئيسة", visuals: "النتائج المرئية", interpretation: "التفسير البحثي", summary: "الملخص", limitations: "القيود", next: "الاستنتاجات والخطوات التالية", workflow: "المسار المنهجي", words: "الكلمات", sentences: "الجمل", contexts: "السياقات", items: "العناصر المعروضة", target: "العبارة المستهدفة", method: "المنهج المقترح", design: "تصميم الدراسة", questions: "أسئلة البحث", frequency: "التكرار", distribution: "التوزيع", noDiagram: "لا يتضمن هذا التقرير مسارًا بنيويًا يمكن تمثيله بمخطط." },
+};
+
+function contextualTitle(type, language, size) {
+  const titles = {
+    frequency: ["Frequency report", "تقرير التكرارات"],
+    concordance: ["Contexts report", "تقرير السياقات"],
+    ngrams: [size === 3 ? "Trigram report" : "Bigram report", size === 3 ? "تقرير الثلاثيات" : "تقرير الثنائيات"],
+    pos: ["Parts-of-speech report", "تقرير أقسام الكلام"],
+    interpretation: ["Research interpretation report", "تقرير التفسير البحثي"],
+    methodology: ["Research methodology report", "التقرير المنهجي للبحث"],
+  };
+  return titles[type]?.[language === "ar" ? 1 : 0] || (language === "ar" ? "تقرير بحثي" : "Research report");
+}
+
+function ContextualReport({ context, language }) {
+  const [view, setView] = useState("standard");
+  const copy = CONTEXT_COPY[language];
+  const payload = context.payload;
+  const interpretation = payload.interpretation;
+  const entries = context.analysisType === "frequency" ? payload.frequencies : context.analysisType === "ngrams" ? payload.results : context.analysisType === "pos" ? payload.distribution : [];
+  const maxValue = Math.max(0, ...entries.map(([, count]) => count));
+  const total = entries.reduce((sum, [, count]) => sum + count, 0);
+  const gradient = entries.map(([, count], index) => {
+    const start = entries.slice(0, index).reduce((sum, [, value]) => sum + value, 0) / total * 100;
+    const end = start + count / total * 100;
+    return `${["#7c6cf2", "#4da7d8", "#55b89f", "#e6a85c", "#d96f91"][index % 5]} ${start}% ${end}%`;
+  }).join(", ");
+  const metrics = [
+    Number.isFinite(payload.wordCount) && [copy.words, payload.wordCount],
+    Number.isFinite(payload.sentenceCount) && [copy.sentences, payload.sentenceCount],
+    payload.contexts?.length > 0 && [copy.contexts, payload.contexts.length],
+    entries.length > 0 && [copy.items, entries.length],
+  ].filter(Boolean);
+  const summary = payload.summary || interpretation?.summary || interpretation?.interpretation;
+  const limitations = payload.limitations || interpretation?.limitations;
+  const nextSteps = payload.nextSteps || [interpretation?.nextStep || interpretation?.recommendedNextStep].filter(Boolean);
+  const workflow = payload.workflow || [];
+  const showStandard = view === "standard";
+  const showVisual = view === "visual";
+
+  return (
+    <article className="report contextualReport">
+      <header className="reportHeader">
+        <div><p className="sectionLabel">{copy.source}: {context.sourceTool}</p><h2>{contextualTitle(context.analysisType, language, payload.size)}</h2></div>
+        <div className="reportMeta"><span>{copy.generated}</span><strong>{new Date(context.timestamp).toLocaleString(language)}</strong></div>
+      </header>
+      <div className="viewTabs" role="group" aria-label={language === "ar" ? "نمط عرض التقرير" : "Report view"}>
+        <button type="button" aria-pressed={view === "standard"} onClick={() => setView("standard")}>{copy.standard}</button>
+        <button type="button" aria-pressed={view === "visual"} onClick={() => setView("visual")}>{copy.visual}</button>
+        <button type="button" aria-pressed={view === "diagram"} disabled={!context.availableWorkflow} onClick={() => setView("diagram")}>{context.availableWorkflow ? copy.diagram : copy.unavailable}</button>
+      </div>
+
+      {view === "diagram" ? (
+        <section className="reportSection"><p className="sectionLabel">01</p><h3>{copy.workflow}</h3><div className="workflowDiagram">{workflow.map((step, index) => <div className="workflowNode" key={`${index}-${step}`}><span>{String(index + 1).padStart(2, "0")}</span><p dir="auto">{step}</p></div>)}</div></section>
+      ) : (
+        <>
+          {summary && <section className="reportSection"><p className="sectionLabel">01</p><h3>{copy.summary}</h3><p dir="auto">{summary}</p></section>}
+          {metrics.length > 0 && <section className="reportSection"><p className="sectionLabel">02</p><h3>{copy.metrics}</h3><div className="stats">{metrics.map(([label, value]) => <div className="stat" key={label}><span>{label}</span><strong>{Number(value).toLocaleString(language)}</strong></div>)}</div></section>}
+          {context.analysisType === "concordance" && <section className="reportSection"><p className="sectionLabel">03</p><h3>{copy.contexts}</h3><p><strong>{copy.target}:</strong> <span dir="auto">{payload.target}</span></p><ol className="contextList">{payload.contexts.map((item, index) => <li key={index} dir="auto">{item}</li>)}</ol></section>}
+          {entries.length > 0 && <section className="reportSection"><p className="sectionLabel">03</p><h3>{copy.visuals}</h3><div className="visualGrid"><figure className="chartCard"><figcaption>{copy.frequency}</figcaption><div className="barChart">{entries.slice(0, 15).map(([label, count]) => <div className="barRow" key={`${label}-${count}`}><span dir="auto">{label}</span><div><i style={{ width: `${maxValue ? Math.max(4, count / maxValue * 100) : 0}%` }} /></div><strong>{count}</strong></div>)}</div></figure>{context.analysisType === "pos" && total > 0 && <figure className="chartCard"><figcaption>{copy.distribution}</figcaption><div className="donutLayout"><div className="donut" style={{ background: `conic-gradient(${gradient})` }} /><ul>{entries.map(([label, count], index) => <li key={`${label}-${count}`}><i style={{ background: ["#7c6cf2", "#4da7d8", "#55b89f", "#e6a85c", "#d96f91"][index % 5] }} /><span dir="auto">{label}</span><strong>{count}</strong></li>)}</ul></div></figure>}</div></section>}
+          {showStandard && context.analysisType === "methodology" && <section className="reportSection"><p className="sectionLabel">04</p><h3>{copy.method}</h3><p dir="auto">{payload.recommendedMethod}</p>{payload.studyDesign && <><h4>{copy.design}</h4><p dir="auto">{payload.studyDesign}</p></>}{payload.questions?.length > 0 && <><h4>{copy.questions}</h4><ul>{payload.questions.map((item) => <li key={item} dir="auto">{item}</li>)}</ul></>}</section>}
+          {showStandard && workflow.length > 0 && <section className="reportSection"><p className="sectionLabel">05</p><h3>{copy.workflow}</h3><div className="workflowDiagram">{workflow.map((step, index) => <div className="workflowNode" key={`${index}-${step}`}><span>{String(index + 1).padStart(2, "0")}</span><p dir="auto">{step}</p></div>)}</div></section>}
+          {showStandard && interpretation && <section className="reportSection"><h3>{copy.interpretation}</h3><p dir="auto">{interpretation.interpretation || interpretation.summary}</p></section>}
+          {showStandard && limitations && <section className="reportSection limitationCard"><h3>{copy.limitations}</h3><p dir="auto">{limitations}</p></section>}
+          {showStandard && nextSteps.length > 0 && <section className="reportSection"><h3>{copy.next}</h3><ul>{nextSteps.map((item) => <li key={item} dir="auto">{item}</li>)}</ul></section>}
+          {showVisual && !metrics.length && !entries.length && <section className="reportSection"><p>{summary}</p></section>}
+        </>
+      )}
+    </article>
+  );
+}
+
 export default function ResearchReport() {
   const { language, t } = useLanguage();
   const copy = REPORT_COPY[language];
@@ -99,11 +175,16 @@ export default function ResearchReport() {
     getServerSnapshot
   );
 
-  const analysis = isClient
+  const reportContext = isClient
+    ? readReportContext(window.location.search)
+    : null;
+  const hasContextRequest = isClient && new URLSearchParams(window.location.search).has("reportId");
+
+  const analysis = isClient && !hasContextRequest
     ? readStoredJson("lingualab-analysis-result")
     : null;
 
-  const storedInterpretation = isClient
+  const storedInterpretation = isClient && !hasContextRequest
     ? readStoredJson("lingualab-interpretation")
     : null;
 
@@ -169,7 +250,7 @@ export default function ResearchReport() {
     return `${["#7c6cf2", "#4da7d8", "#55b89f", "#e6a85c", "#d96f91"][index % 5]} ${start}% ${end}%`;
   }).join(", ");
 
-  const hasReportData = Boolean(analysis || interpretation);
+  const hasReportData = Boolean(reportContext || analysis || interpretation);
 
   const printReport = () => {
     window.print();
@@ -254,6 +335,8 @@ export default function ResearchReport() {
               <span aria-hidden="true">↗</span>
             </Link>
           </section>
+        ) : reportContext ? (
+          <ContextualReport context={reportContext} language={language} />
         ) : (
           <article className="report">
             <header className="reportHeader">
@@ -780,6 +863,35 @@ export default function ResearchReport() {
           line-height: 1.6;
         }
 
+        .viewTabs {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px;
+          padding: 20px 52px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .viewTabs button {
+          border: 1px solid rgba(255, 255, 255, 0.18);
+          border-radius: 999px;
+          padding: 10px 17px;
+          background: transparent;
+          color: white;
+          font: inherit;
+          font-size: var(--text-button);
+          font-weight: 600;
+          cursor: pointer;
+        }
+
+        .viewTabs button[aria-pressed="true"] { background: white; color: #17142f; }
+        .viewTabs button:disabled { cursor: not-allowed; opacity: 0.45; }
+        .contextList { display: grid; gap: 12px; padding-inline-start: 24px; }
+        .contextList li { padding: 14px 16px; border-radius: 14px; background: rgba(255, 255, 255, 0.06); color: #d8d4e8; font-size: var(--text-body); line-height: var(--leading-body); }
+        .workflowDiagram { display: grid; gap: 12px; margin-top: 24px; }
+        .workflowNode { display: grid; grid-template-columns: 44px 1fr; align-items: center; gap: 14px; position: relative; padding: 16px 18px; border: 1px solid rgba(255, 255, 255, 0.13); border-radius: 16px; background: rgba(255, 255, 255, 0.06); }
+        .workflowNode span { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: #6554f6; font-size: var(--text-meta); font-weight: 700; }
+        .workflowNode p { margin: 0; }
+
         @media (max-width: 900px) {
           .reportPage {
             padding: 0 18px 45px;
@@ -829,7 +941,8 @@ export default function ResearchReport() {
           .reportSection,
           .draftSection,
           .reportFooter,
-          .sourceDetails {
+          .sourceDetails,
+          .viewTabs {
             padding-left: 26px;
             padding-right: 26px;
           }

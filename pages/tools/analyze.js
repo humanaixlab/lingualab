@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import { readResearchContext, analyzeContext } from "../../lib/research-context";
+import { createReportContext } from "../../lib/report-context";
 import styles from "../../styles/Analyze.module.css";
 import { useLanguage } from "../../components/LanguageProvider";
 
@@ -236,6 +237,17 @@ const interpretResults = async () => {
     setLoadingInterpretation(false);
   }
 };
+
+  const generateInterpretationReport = () => {
+    if (!result || !interpretation) return;
+    const url = createReportContext("interpreter", "interpretation", {
+      wordCount: result.wordCount,
+      sentenceCount: result.sentenceCount,
+      topWords: result.topWords,
+      interpretation,
+    });
+    if (url) window.location.href = url;
+  };
 
   const startWorkflow = () => {
     document
@@ -561,6 +573,10 @@ const interpretResults = async () => {
                     t("analyze.noDraft")}
                 </p>
               </div>
+
+              <button type="button" className={styles.interpreterButton} onClick={generateInterpretationReport}>
+                {language === "ar" ? "إنشاء تقرير" : "Generate Report"}
+              </button>
             </section>
           )}
         </section>

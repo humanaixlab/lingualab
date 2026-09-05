@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import styles from "../styles/ResearchAdvisor.module.css";
 import { useLanguage } from "../components/LanguageProvider";
 import { normalizeAdvisorUiLanguage } from "../lib/advisor-language";
+import { createReportContext } from "../lib/report-context";
 
 const stages = ["idea", "data", "analysis", "interpretation", "writing"];
 
@@ -150,6 +151,20 @@ export default function ResearchAdvisorPage() {
       setError(requestError.message || t("advisor.genericError"));
       setStatus("error");
     }
+  }
+
+  function generateAdvisorReport() {
+    if (!advisor) return;
+    const url = createReportContext("advisor", "methodology", {
+      researchGoal: form.researchGoal,
+      summary: advisor.summary,
+      recommendedMethod: advisor.recommendedMethod,
+      workflow: advisor.steps,
+      limitations: advisor.caution,
+      nextSteps: [advisor.nextAction],
+      questions: advisor.researchQuestions,
+    });
+    if (url) window.location.href = url;
   }
 
   return (
@@ -319,6 +334,9 @@ export default function ResearchAdvisorPage() {
                 </section>
 
                 <p className={styles.caution} dir="auto"><strong>{t("advisor.caution")}</strong> {advisor.caution}</p>
+                <button className={styles.submitButton} type="button" onClick={generateAdvisorReport}>
+                  {language === "ar" ? "إنشاء تقرير" : "Generate Report"}
+                </button>
               </div>
             )}
           </aside>

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import { useLanguage } from "../components/LanguageProvider";
 import { readResearchContext, hubCopilotMetadata } from "../lib/research-context";
+import { createReportContext } from "../lib/report-context";
 import styles from "../styles/Workspace.module.css";
 
 const TEXT_HINTS = [
@@ -745,6 +746,21 @@ export default function WorkspacePage() {
     }
   }
 
+  function generateCopilotReport() {
+    if (!studyDesign) return;
+    const url = createReportContext("copilot", "methodology", {
+      researchGoal: researchGoal.trim(),
+      summary: studyDesign.feasibility?.summary,
+      recommendedMethod: studyDesign.baseline?.method,
+      studyDesign: studyDesign.studyDesign?.description,
+      workflow: studyDesign.experimentSteps?.map((step) => `${step.title}: ${step.action}`),
+      limitations: studyDesign.risks?.map((risk) => risk.risk).join(" · "),
+      nextSteps: [studyDesign.immediateNextAction?.action],
+      questions: [studyDesign.researchQuestion?.primary],
+    });
+    if (url) window.location.href = url;
+  }
+
   function runWorkflow() {
     if (!selectedTextColumn) return;
     setWorkflowError("");
@@ -946,6 +962,7 @@ export default function WorkspacePage() {
                   </div>
                   <section><h4>{t("workspaceStudy.steps")}</h4><ol dir="auto">{studyDesign.experimentSteps.map((item) => <li key={item.order}><strong>{item.title}</strong><span>{item.action}</span></li>)}</ol></section><section><h4>{t("workspaceStudy.risks")}</h4><ul dir="auto">{studyDesign.risks.map((item) => <li key={`${item.category}-${item.risk}`}><strong>{item.severity}: {item.risk}</strong> — {item.mitigation}</li>)}</ul></section>
                   {studyDesign.notSupported.length > 0 && <section><h4>{t("workspaceStudy.unsupported")}</h4><ul dir="auto">{studyDesign.notSupported.map((item) => <li key={item}>{item}</li>)}</ul></section>}<div className={styles.nextAction}><span>{t("workspaceStudy.next")}</span><strong dir="auto">{studyDesign.immediateNextAction.action}</strong><p dir="auto">{studyDesign.immediateNextAction.reason}</p></div>
+                  <button type="button" className={styles.copilotButton} onClick={generateCopilotReport}>{language === "ar" ? "إنشاء تقرير" : "Generate Report"}</button>
                   {result && <section className={styles.potentialOutcomes}>
                     <p className={styles.outcomeEyebrow}>{t("workspaceStudy.outcomes")}</p><h4 className={styles.outcomeHeading}>{t("workspaceStudy.outcomesTitle")}</h4><p className={styles.outcomeCaption}>{t("workspaceStudy.outcomesText")}<br />{t("workspaceStudy.notAi")}</p>
                     <div className={styles.outcomeGrid}>

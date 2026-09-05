@@ -3,6 +3,7 @@ import Layout from "../../components/Layout";
 import Link from "next/link";
 import { useLanguage } from "../../components/LanguageProvider";
 import styles from "../../styles/AnalysisTool.module.css";
+import { createReportContext } from "../../lib/report-context";
 
 export default function ConcordanceTool() {
   const { language } = useLanguage();
@@ -38,6 +39,15 @@ export default function ConcordanceTool() {
     setText("");
     setKeyword("");
     setResults([]);
+  };
+
+  const generateReport = () => {
+    const url = createReportContext("concordance", "concordance", {
+      target: keyword,
+      contexts: results,
+      summary: language === "ar" ? "يعرض التقرير السياقات الفعلية التي ورد فيها العنصر المستهدف." : "This report presents the observed contexts containing the target expression.",
+    });
+    if (url) window.location.href = url;
   };
 
   return (
@@ -99,7 +109,7 @@ export default function ConcordanceTool() {
               {sentence}
             </div>
           ))}</div>
-          <Link className={`${styles.button} ${styles.next}`} href="/tools/analyze">{language === "ar" ? "فسّر النتائج بالذكاء الاصطناعي" : "Interpret results with AI"}</Link>
+          <div className={styles.actions}><button className={`${styles.button} ${styles.next}`} type="button" onClick={generateReport}>{language === "ar" ? "إنشاء تقرير" : "Generate Report"}</button><Link className={`${styles.button} ${styles.next}`} href="/tools/analyze">{language === "ar" ? "فسّر النتائج بالذكاء الاصطناعي" : "Interpret results with AI"}</Link></div>
         </section>
       )}
 

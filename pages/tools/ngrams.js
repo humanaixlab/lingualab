@@ -3,6 +3,7 @@ import Layout from "../../components/Layout";
 import Link from "next/link";
 import { useLanguage } from "../../components/LanguageProvider";
 import styles from "../../styles/AnalysisTool.module.css";
+import { createReportContext } from "../../lib/report-context";
 
 export default function NgramsTool() {
   const { language } = useLanguage();
@@ -41,6 +42,15 @@ export default function NgramsTool() {
   const clearAll = () => {
     setText("");
     setResults([]);
+  };
+
+  const generateReport = () => {
+    const url = createReportContext("ngrams", "ngrams", {
+      size,
+      results,
+      summary: language === "ar" ? "يعرض التقرير المتتاليات اللفظية الأكثر تكرارًا في النص المدخل." : "This report presents the most frequent word sequences in the submitted text.",
+    });
+    if (url) window.location.href = url;
   };
 
   return (
@@ -113,7 +123,7 @@ export default function NgramsTool() {
               ))}
             </tbody>
           </table></div>
-          <Link className={`${styles.button} ${styles.next}`} href="/tools/analyze">{language === "ar" ? "فسّر النتائج بالذكاء الاصطناعي" : "Interpret results with AI"}</Link>
+          <div className={styles.actions}><button className={`${styles.button} ${styles.next}`} type="button" onClick={generateReport}>{language === "ar" ? "إنشاء تقرير" : "Generate Report"}</button><Link className={`${styles.button} ${styles.next}`} href="/tools/analyze">{language === "ar" ? "فسّر النتائج بالذكاء الاصطناعي" : "Interpret results with AI"}</Link></div>
         </section>
       )}
 
