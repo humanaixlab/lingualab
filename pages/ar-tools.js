@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import { readResearchContext, researchContextHref, RESEARCH_CONTEXT_TTL_MS } from "../lib/research-context";
 import { useLanguage } from "../components/LanguageProvider";
 import DataSourceIndicator from "../components/DataSourceIndicator";
+import ResearchPaths from "../components/ResearchPaths";
 
 const sections = [
   {
@@ -272,6 +273,8 @@ export default function ArabicToolsPage() {
             {t("hub.currentDataset", { filename: context.fileName, count: context.rows.toLocaleString(language) })}
           </p>
         )}
+
+        <ResearchPaths language={language} />
 
         <section
           aria-labelledby="recommended-research-path"
