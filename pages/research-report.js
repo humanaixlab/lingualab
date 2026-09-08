@@ -1,10 +1,11 @@
 import Head from "next/head";
 import Link from "next/link";
-import { useState, useSyncExternalStore } from "react";
+import { useRef, useState, useSyncExternalStore } from "react";
 import { useLanguage } from "../components/LanguageProvider";
 import { readReportContext } from "../lib/report-context";
 import { reportReturnTarget } from "../lib/navigation-flow";
 import DataSourceIndicator from "../components/DataSourceIndicator";
+import { buildReportExportModel, createDocxBlob, figureToSvg, tablesToCsv } from "../lib/report-export";
 
 function subscribe() {
   return () => {};
@@ -95,6 +96,11 @@ const CONTEXT_COPY = {
   ar: { standard: "قياسي", visual: "مرئي", diagram: "مخطط", unavailable: "المخطط غير متاح", source: "مصدر التقرير", generated: "تاريخ الإنشاء", metrics: "المؤشرات الرئيسة", visuals: "النتائج المرئية", interpretation: "التفسير البحثي", summary: "الملخص", limitations: "القيود", next: "الاستنتاجات والخطوات التالية", workflow: "المسار المنهجي", words: "الكلمات", sentences: "الجمل", contexts: "السياقات", items: "العناصر المعروضة", target: "العبارة المستهدفة", method: "المنهج المقترح", design: "تصميم الدراسة", questions: "أسئلة البحث", frequency: "التكرار", distribution: "التوزيع", noDiagram: "لا يتضمن هذا التقرير مسارًا بنيويًا يمكن تمثيله بمخطط." },
 };
 
+const EXPORT_COPY = {
+  en: { export: "Export report", pdf: "PDF", docx: "Word / DOCX", figures: "Figures", data: "Data", png: "PNG", svg: "SVG", csv: "CSV", xlsx: "XLSX", error: "The export could not be prepared." },
+  ar: { export: "تصدير التقرير", pdf: "PDF", docx: "Word / DOCX", figures: "الرسوم", data: "البيانات", png: "PNG", svg: "SVG", csv: "CSV", xlsx: "XLSX", error: "تعذر إعداد ملف التصدير." },
+};
+
 function contextualTitle(type, language, size) {
   const titles = {
     frequency: ["Frequency report", "تقرير التكرارات"],
@@ -107,7 +113,7 @@ function contextualTitle(type, language, size) {
   return titles[type]?.[language === "ar" ? 1 : 0] || (language === "ar" ? "تقرير بحثي" : "Research report");
 }
 
-function ContextualReport({ context, language, returnTarget }) {
+function ContextualReport({ context, language, returnTarget, reportRef }) {
   const [view, setView] = useState("standard");
   const copy = CONTEXT_COPY[language];
   const payload = context.payload;
@@ -134,7 +140,7 @@ function ContextualReport({ context, language, returnTarget }) {
   const showVisual = view === "visual";
 
   return (
-    <article className="report contextualReport">
+    <article className="report contextualReport" ref={reportRef}>
       <header className="reportHeader">
         <div><p className="sectionLabel">{copy.source}: {context.sourceTool}</p><h2>{contextualTitle(context.analysisType, language, payload.size)}</h2></div>
         <div className="reportMeta"><span>{copy.generated}</span><strong>{new Date(context.timestamp).toLocaleString(language)}</strong></div>
@@ -172,6 +178,8 @@ export default function ResearchReport() {
   const [regeneratedInterpretation, setRegeneratedInterpretation] = useState(null);
   const [regenerating, setRegenerating] = useState(false);
   const [regenerationError, setRegenerationError] = useState("");
+  const [exportError, setExportError] = useState("");
+  const reportRef = useRef(null);
   const isClient = useSyncExternalStore(
     subscribe,
     getClientSnapshot,
@@ -255,9 +263,99 @@ export default function ResearchReport() {
 
   const hasReportData = Boolean(reportContext || analysis || interpretation);
   const returnTarget = reportReturnTarget(reportContext?.sourceTool, language);
+  const exportModel = buildReportExportModel({ context: reportContext, analysis, language });
+  const exportCopy = EXPORT_COPY[language];
+  const reportTitle = reportContext
+    ? contextualTitle(reportContext.analysisType, language, reportContext.payload.size)
+    : t("report.summary");
+
+  const downloadBlob = (blob, filename) => {
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const reportParagraphs = () => {
+    if (!reportRef.current) return [];
+    const clone = reportRef.current.cloneNode(true);
+    clone.querySelectorAll(".viewTabs, .reportFooter, .sourceDetails").forEach((node) => node.remove());
+    clone.querySelector(".reportHeader h2")?.remove();
+    return String(clone.innerText || clone.textContent || "").split(/\n+/).map((line) => line.trim()).filter(Boolean);
+  };
 
   const printReport = () => {
     window.print();
+  };
+
+  const exportDocx = () => {
+    setExportError("");
+    try {
+      downloadBlob(createDocxBlob(reportTitle, reportParagraphs(), language), "lingualab-report.docx");
+    } catch {
+      setExportError(exportCopy.error);
+    }
+  };
+
+  const exportFigure = async (figure, format) => {
+    setExportError("");
+    try {
+      const svg = figureToSvg(figure, language);
+      if (!svg) return;
+      if (format === "svg") {
+        downloadBlob(new Blob([svg], { type: "image/svg+xml;charset=utf-8" }), `${figure.id}.svg`);
+        return;
+      }
+      const source = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml;charset=utf-8" }));
+      const image = new Image();
+      image.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = image.naturalWidth || 900;
+        canvas.height = image.naturalHeight || 600;
+        const context = canvas.getContext("2d");
+        context.fillStyle = "#ffffff";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(image, 0, 0);
+        canvas.toBlob((blob) => {
+          URL.revokeObjectURL(source);
+          if (blob) downloadBlob(blob, `${figure.id}.png`);
+          else setExportError(exportCopy.error);
+        }, "image/png");
+      };
+      image.onerror = () => { URL.revokeObjectURL(source); setExportError(exportCopy.error); };
+      image.src = source;
+    } catch {
+      setExportError(exportCopy.error);
+    }
+  };
+
+  const exportCsv = () => {
+    setExportError("");
+    try {
+      downloadBlob(new Blob(["\ufeff", tablesToCsv(exportModel.tables)], { type: "text/csv;charset=utf-8" }), "lingualab-report-data.csv");
+    } catch {
+      setExportError(exportCopy.error);
+    }
+  };
+
+  const exportXlsx = async () => {
+    setExportError("");
+    try {
+      const XLSX = await import("xlsx");
+      const workbook = XLSX.utils.book_new();
+      exportModel.tables.forEach((table, index) => {
+        const sheet = XLSX.utils.aoa_to_sheet([table.headers, ...table.rows]);
+        const name = String(table.name || `Data ${index + 1}`).replace(/[\\/?*\[\]:]/g, " ").slice(0, 31) || `Data ${index + 1}`;
+        XLSX.utils.book_append_sheet(workbook, sheet, name);
+      });
+      XLSX.writeFile(workbook, "lingualab-report-data.xlsx");
+    } catch {
+      setExportError(exportCopy.error);
+    }
   };
 
   const regenerateInterpretation = async () => {
@@ -303,15 +401,21 @@ export default function ResearchReport() {
           <div className="navLinks">
             <Link href="/workspace">{t("nav.workspace")}</Link>
             <Link href="/tools/analyze">{t("nav.analyze")}</Link>
-            <button
-              type="button"
-              onClick={printReport}
-              className="exportButton"
-            >
-              {t("report.export")}
-            </button>
+            {hasReportData && (
+              <details className="exportMenu">
+                <summary className="exportButton">{exportCopy.export}</summary>
+                <div className="exportPanel">
+                  <button type="button" onClick={printReport}>{exportCopy.pdf}</button>
+                  <button type="button" onClick={exportDocx}>{exportCopy.docx}</button>
+                  {exportModel.hasFigures && <div className="exportGroup"><strong>{exportCopy.figures}</strong>{exportModel.figures.map((figure) => <span key={figure.id}><small dir="auto">{figure.title}</small><button type="button" onClick={() => exportFigure(figure, "png")}>{exportCopy.png}</button><button type="button" onClick={() => exportFigure(figure, "svg")}>{exportCopy.svg}</button></span>)}</div>}
+                  {exportModel.hasData && <div className="exportGroup"><strong>{exportCopy.data}</strong><span><button type="button" onClick={exportCsv}>{exportCopy.csv}</button><button type="button" onClick={exportXlsx}>{exportCopy.xlsx}</button></span></div>}
+                </div>
+              </details>
+            )}
           </div>
         </nav>
+
+        {exportError && <p className="exportError" role="alert">{exportError}</p>}
 
         <section className="hero">
           <div>
@@ -342,9 +446,9 @@ export default function ResearchReport() {
             </Link>
           </section>
         ) : reportContext ? (
-          <ContextualReport context={reportContext} language={language} returnTarget={returnTarget} />
+          <ContextualReport context={reportContext} language={language} returnTarget={returnTarget} reportRef={reportRef} />
         ) : (
-          <article className="report">
+          <article className="report" ref={reportRef}>
             <header className="reportHeader">
               <div>
                 <p className="sectionLabel">{t("report.generated")}</p><h2>{t("report.summary")}</h2>
@@ -496,6 +600,7 @@ export default function ResearchReport() {
         }
 
         .exportButton {
+          display: block;
           border: 0;
           border-radius: 999px;
           background: #17142f;
@@ -503,6 +608,79 @@ export default function ResearchReport() {
           padding: 13px 20px;
           font: inherit;
           cursor: pointer;
+          list-style: none;
+        }
+
+        .exportButton::-webkit-details-marker { display: none; }
+
+        .exportMenu {
+          position: relative;
+        }
+
+        .exportPanel {
+          position: absolute;
+          z-index: 20;
+          inset-inline-end: 0;
+          top: calc(100% + 10px);
+          width: min(330px, calc(100vw - 36px));
+          padding: 14px;
+          display: grid;
+          gap: 9px;
+          border: 1px solid rgba(23, 20, 47, 0.12);
+          border-radius: 16px;
+          background: #fff;
+          box-shadow: 0 18px 45px rgba(45, 42, 96, 0.16);
+          color: #17142f;
+        }
+
+        .exportPanel button {
+          border: 1px solid rgba(98, 88, 245, 0.18);
+          border-radius: 10px;
+          padding: 9px 11px;
+          background: #f7f5ff;
+          color: #4037bd;
+          font: inherit;
+          font-size: var(--text-helper);
+          font-weight: 600;
+          cursor: pointer;
+        }
+
+        .exportPanel button:hover,
+        .exportPanel button:focus-visible {
+          border-color: rgba(98, 88, 245, 0.48);
+          background: #efedff;
+        }
+
+        .exportGroup {
+          display: grid;
+          gap: 8px;
+          padding-top: 10px;
+          border-top: 1px solid rgba(23, 20, 47, 0.09);
+        }
+
+        .exportGroup > strong,
+        .exportGroup small {
+          font-size: var(--text-meta);
+        }
+
+        .exportGroup span {
+          display: flex;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 7px;
+        }
+
+        .exportGroup small {
+          flex: 1 1 130px;
+          color: #706c88;
+          line-height: var(--leading-helper);
+        }
+
+        .exportError {
+          max-width: 1240px;
+          margin: 14px auto 0;
+          color: #9a2947;
+          font-size: var(--text-helper);
         }
         .sourceIndicator { max-width: 1240px; margin: 0 auto 18px; }
 
@@ -972,7 +1150,8 @@ export default function ResearchReport() {
           .hero,
           .languageNotice,
           .emptyCard,
-          .secondaryLink {
+          .secondaryLink,
+          .exportError {
             display: none !important;
           }
 
