@@ -24,7 +24,7 @@ export default function Profile() {
 
         <div style={{ display: "flex", gap: "15px" }}>
           <Link href="/">الرئيسية</Link>
-          <Link href="/student-dashboard">لوحة الطالبة</Link>
+          <Link href="/student-dashboard">مركز التعلّم</Link>
           <Link href="/projects">المشاريع</Link>
           <Link href="/profile">الملف الشخصي</Link>
         </div>

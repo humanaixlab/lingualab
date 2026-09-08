@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 import { useLanguage } from "../components/LanguageProvider";
 
@@ -99,6 +100,7 @@ export default function LearningHubPage() {
 
   return (
     <main style={styles.page}>
+      <Head><title>{t("learning.title")} | LinguaLab</title></Head>
       <div style={styles.container}>
         <nav style={styles.nav}>
           <Link href="/" style={styles.brand}>

@@ -1,97 +1,77 @@
+import Head from "next/head";
 import Link from "next/link";
+import { useLanguage } from "../components/LanguageProvider";
+import styles from "../styles/Projects.module.css";
+
+const COPY = {
+  en: {
+    pageTitle: "Projects | LinguaLab",
+    home: "Home",
+    learn: "Learning Hub",
+    projects: "Projects",
+    eyebrow: "PROJECT LAUNCHER",
+    title: "Start a new research project",
+    lead: "Begin with your research dataset and move through a connected workspace for exploration, study design, analysis, interpretation, and reporting.",
+    workspaceLabel: "YOUR PROJECT WORKSPACE",
+    workspaceTitle: "Research work starts in Workspace",
+    workspaceText: "Workspace is where you add your files, inspect the data structure, identify important columns, and choose an appropriate next step.",
+    steps: ["Explore the current dataset", "Review quality, columns, and labels", "Continue to research planning or analysis"],
+    note: "This page does not upload or save projects. Files and active work remain in Workspace under the existing privacy controls.",
+    action: "Open Workspace",
+  },
+  ar: {
+    pageTitle: "المشاريع | LinguaLab",
+    home: "الرئيسية",
+    learn: "مركز التعلّم",
+    projects: "المشاريع",
+    eyebrow: "بدء مشروع بحثي",
+    title: "ابدأ مشروعًا بحثيًا جديدًا",
+    lead: "ابدأ ببياناتك البحثية، وانتقل ضمن مساحة عمل مترابطة للاستكشاف وتصميم الدراسة والتحليل والتفسير وإعداد التقرير.",
+    workspaceLabel: "مساحة مشروعك",
+    workspaceTitle: "يبدأ العمل البحثي في مساحة العمل",
+    workspaceText: "مساحة العمل هي المكان المخصص لإضافة الملفات وفحص بنية البيانات وتحديد الأعمدة المهمة واختيار الخطوة التالية المناسبة.",
+    steps: ["استكشف مجموعة البيانات الحالية", "راجع الجودة والأعمدة والتصنيفات", "تابع إلى تخطيط البحث أو التحليل"],
+    note: "لا ترفع هذه الصفحة المشاريع ولا تحفظها. تبقى الملفات والعمل الفعلي داخل مساحة العمل وفق ضوابط الخصوصية الحالية.",
+    action: "افتح مساحة العمل",
+  },
+};
 
 export default function Projects() {
+  const { language } = useLanguage();
+  const copy = COPY[language === "ar" ? "ar" : "en"];
+
   return (
-    <div
-      style={{
-        fontFamily: "Arial",
-        direction: "rtl",
-        background: "#f7f8fc",
-        minHeight: "100vh"
-      }}
-    >
-      <div
-        style={{
-          background: "#fff",
-          padding: "16px 30px",
-          boxShadow: "0 2px 10px rgba(0,0,0,0.06)",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center"
-        }}
-      >
-        <h2 style={{ margin: 0 }}>LinguaLab</h2>
+    <main className={styles.page}>
+      <Head><title>{copy.pageTitle}</title></Head>
 
-        <div style={{ display: "flex", gap: "15px" }}>
-          <Link href="/">الرئيسية</Link>
-          <Link href="/student-dashboard">لوحة الطالبة</Link>
-          <Link href="/projects">المشاريع</Link>
+      <nav className={styles.nav} aria-label={language === "ar" ? "التنقل الرئيسي" : "Primary navigation"}>
+        <Link href="/" className={styles.brand}><span className={styles.brandMark}>L</span><span>LinguaLab</span></Link>
+        <div className={styles.navLinks}>
+          <Link href="/">{copy.home}</Link>
+          <Link href="/student-dashboard">{copy.learn}</Link>
+          <Link href="/projects" aria-current="page">{copy.projects}</Link>
         </div>
-      </div>
+      </nav>
 
-      <div style={{ padding: "40px", maxWidth: "700px", margin: "0 auto" }}>
-        <h1>رفع مشروع</h1>
-        <p style={{ color: "#555", marginBottom: "25px" }}>
-          ارفعي مشروعك بصيغة PDF أو ZIP مع تأكيد الأصالة واحترام الملكية الفكرية.
-        </p>
+      <section className={styles.hero}>
+        <p className={styles.eyebrow}>{copy.eyebrow}</p>
+        <h1>{copy.title}</h1>
+        <p className={styles.lead}>{copy.lead}</p>
+      </section>
 
-        <div
-          style={{
-            background: "#fff",
-            padding: "24px",
-            borderRadius: "16px",
-            boxShadow: "0 4px 14px rgba(0,0,0,0.08)"
-          }}
-        >
-          <label style={{ display: "block", marginBottom: "8px" }}>
-            عنوان المشروع
-          </label>
-          <input
-            type="text"
-            placeholder="مثال: مشروع تحليل نص عربي"
-            style={{
-              width: "100%",
-              padding: "12px",
-              marginBottom: "16px",
-              borderRadius: "10px",
-              border: "1px solid #ddd"
-            }}
-          />
-
-          <label style={{ display: "block", marginBottom: "8px" }}>
-            رفع الملف
-          </label>
-          <input
-            type="file"
-            style={{
-              width: "100%",
-              padding: "12px",
-              marginBottom: "16px",
-              borderRadius: "10px",
-              border: "1px solid #ddd",
-              background: "#fff"
-            }}
-          />
-
-          <label style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-            <input type="checkbox" />
-            <span>
-              أتعهد بأن هذا العمل أصيل وأحترم حقوق الملكية الفكرية.
-            </span>
-          </label>
-
-          <button
-            style={{
-              padding: "12px 20px",
-              border: "none",
-              borderRadius: "10px",
-              cursor: "pointer"
-            }}
-          >
-            رفع المشروع
-          </button>
+      <section className={styles.launcher} aria-labelledby="project-workspace-title">
+        <div className={styles.launcherCopy}>
+          <p className={styles.eyebrow}>{copy.workspaceLabel}</p>
+          <h2 id="project-workspace-title">{copy.workspaceTitle}</h2>
+          <p>{copy.workspaceText}</p>
+          <ol>{copy.steps.map((step) => <li key={step} dir="auto">{step}</li>)}</ol>
         </div>
-      </div>
-    </div>
+
+        <div className={styles.actionPanel}>
+          <p>{copy.note}</p>
+          <Link href="/workspace" className={styles.primaryAction}>{copy.action}<span aria-hidden="true">→</span></Link>
+        </div>
+      </section>
+    </main>
   );
 }
