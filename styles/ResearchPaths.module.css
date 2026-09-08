@@ -84,6 +84,20 @@
   background: #f5f3ff;
 }
 
+.primaryCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 3px 0 4px;
+  padding: 11px 15px;
+  border-radius: 11px;
+  background: #6258f5;
+  color: #fff;
+  font-size: var(--text-button);
+  font-weight: 600;
+  text-decoration: none;
+}
+
 .tools {
   display: flex;
   flex-wrap: wrap;

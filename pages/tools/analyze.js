@@ -43,13 +43,6 @@ const DEFAULT_PLAN = {
   ],
 };
 
-const CORPUS_TOOLS = [
-  { href: "/tools/frequency", en: "Frequency Analysis", ar: "تحليل التكرار" },
-  { href: "/tools/concordance", en: "Contexts", ar: "السياقات" },
-  { href: "/tools/ngrams", en: "N-grams", ar: "المتتاليات اللفظية" },
-  { href: "/tools/pos", en: "Parts of Speech Analysis (POS)", ar: "تحليل أقسام الكلام (POS)" },
-];
-
 const SOURCE_ROUTES = {
   frequency: "/tools/frequency",
   concordance: "/tools/concordance",
@@ -346,11 +339,11 @@ const interpretResults = async () => {
         <section className={styles.toolDirectory} aria-labelledby="corpus-tools-title">
           <div>
             <p className={styles.sectionLabel}>{language === "ar" ? "أدوات التحليل" : "ANALYSIS TOOLS"}</p>
-            <h2 id="corpus-tools-title">{language === "ar" ? "استكشف النص بأدوات المدونة" : "Explore text with corpus tools"}</h2>
-            <p>{language === "ar" ? "ابدأ بأداة وصفية، ثم استخدم مفسّر النتائج البحثية كمرحلة مستقلة عند الحاجة." : "Start with a descriptive tool, then use the AI Research Interpreter as a separate next stage when needed."}</p>
+            <h2 id="corpus-tools-title">{language === "ar" ? "لسانيات المدونات (Corpus Linguistics)" : "Corpus Linguistics"}</h2>
+            <p>{language === "ar" ? "افتح مركز المسار لاختيار تحليل التكرار أو السياقات أو المتتاليات اللفظية، ثم استخدم مفسّر النتائج البحثية كمرحلة لاحقة عند الحاجة." : "Open the path hub to choose Frequency Analysis, Concordance / Contexts, or N-grams, then use the AI Research Interpreter as a later stage when needed."}</p>
           </div>
           <div className={styles.toolLinks}>
-            {CORPUS_TOOLS.map((tool) => <Link key={tool.href} href={tool.href}>{tool[language]} <span aria-hidden="true">↗</span></Link>)}
+            <Link href="/research-paths/corpus-linguistics">{language === "ar" ? "استكشف مسار لسانيات المدونات" : "Explore Corpus Linguistics"} <span aria-hidden="true">↗</span></Link>
           </div>
         </section>
 

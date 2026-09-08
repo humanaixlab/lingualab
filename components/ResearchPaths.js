@@ -63,6 +63,12 @@ export default function ResearchPaths({ language }) {
               <div><dt>{copy.data}</dt><dd>{path.data[locale]}</dd></div>
             </dl>
 
+            {path.hubHref && (
+              <Link className={styles.primaryCta} href={path.hubHref}>
+                {path.cta[locale]} <span aria-hidden="true">→</span>
+              </Link>
+            )}
+
             <div className={styles.toolBlock}>
               <h4>{copy.available}</h4>
               {path.available.length ? (

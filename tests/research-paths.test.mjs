@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import { RESEARCH_PATHS } from "../lib/research-paths.js";
-import { readResearchPathContext, researchPathHref, researchPathNavigation } from "../lib/research-path-context.js";
+import { CORPUS_PATH_HUB_SECTION, readResearchPathContext, researchPathHref, researchPathNavigation } from "../lib/research-path-context.js";
 
 const source = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
@@ -74,6 +74,19 @@ test("path-aware back navigation accepts only the canonical tool and path pairin
   assert.equal(readResearchPathContext("/tools/frequency?from=research-path&pathId=semantics&sourcePath=semantics&sourceSection=research-paths", "/tools/frequency"), null);
 });
 
+test("the Corpus Linguistics hub preserves lightweight path context and returns to the hub", () => {
+  const href = researchPathHref("/tools/frequency", "corpus-linguistics", CORPUS_PATH_HUB_SECTION);
+  const context = readResearchPathContext(href, "/tools/frequency");
+  assert.deepEqual(context, { pathId: "corpus-linguistics", sourcePath: "corpus-linguistics", sourceSection: "corpus-path-hub" });
+  assert.deepEqual(researchPathNavigation(context, "ar", "تحليل التكرار"), {
+    href: "/research-paths/corpus-linguistics",
+    backLabel: "العودة إلى لسانيات المدونات (Corpus Linguistics)",
+    crumbs: ["المسار البحثي", "لسانيات المدونات (Corpus Linguistics)", "تحليل التكرار"],
+  });
+  const invalid = "/tools/pos?from=research-path&pathId=morphology-syntax&sourcePath=morphology-syntax&sourceSection=corpus-path-hub";
+  assert.equal(readResearchPathContext(invalid, "/tools/pos"), null);
+});
+
 test("Coming next capabilities are non-interactive and never receive routes", () => {
   for (const path of RESEARCH_PATHS) {
     for (const item of [...path.coming.en, ...path.coming.ar]) assert.equal(typeof item, "string");
@@ -88,13 +101,42 @@ test("canonical homes remain separated across Analyze, Build, Research, Workspac
   const hub = source("pages/ar-tools.js");
   const analyze = source("pages/tools/analyze.js");
   assert.match(analyze, /href="\/ar-tools#research-paths"/);
-  assert.equal((analyze.match(/CORPUS_TOOLS\.map/g) || []).length, 1);
+  assert.doesNotMatch(analyze, /href="\/tools\/(frequency|concordance|ngrams|pos)"/);
+  assert.match(analyze, /href="\/research-paths\/corpus-linguistics"/);
   assert.match(hub, /Prepare data → Generate \/ review code → Run \/ reproduce → Evaluate/);
   assert.match(hub, /section\.key === "writing" \? "writing-tools"/);
   assert.match(source("lib/research-paths.js"), /href: "\/tools\/prompt"[^\n]+contextual: true/);
   assert.doesNotMatch(source("pages/workspace.js"), /<ResearchPaths|RESEARCH_PATHS\.map/);
   assert.doesNotMatch(source("pages/student-dashboard.js"), /<ResearchPaths|RESEARCH_PATHS\.map/);
   assert.match(source("pages/_app.js"), /<SmartAssistant \/>/);
+});
+
+test("Corpus Linguistics keeps its educational card and adds a dedicated executable hub", () => {
+  const corpus = RESEARCH_PATHS.find((path) => path.id === "corpus-linguistics");
+  for (const field of ["overview", "question", "data", "available", "coming", "output", "report", "beginner", "advanced"])
+    assert.ok(corpus[field], `Corpus educational field ${field} must remain`);
+  assert.equal(corpus.hubHref, "/research-paths/corpus-linguistics");
+  assert.deepEqual(corpus.cta, { en: "Explore Corpus Linguistics", ar: "استكشف مسار لسانيات المدونات" });
+  assert.match(source("components/ResearchPaths.js"), /className=\{styles\.primaryCta\}[\s\S]*path\.hubHref/);
+
+  const hub = source("pages/research-paths/corpus-linguistics.js");
+  for (const route of ["frequency", "concordance", "ngrams"])
+    assert.match(hub, new RegExp(`href: "\\/tools\\/${route}"`));
+  assert.doesNotMatch(hub, /\/tools\/pos|Parts of Speech|أقسام الكلام/);
+  assert.match(hub, /COMING\[locale\]\.map\(\(item\) => <li/);
+  assert.doesNotMatch(hub, /COMING[\s\S]{0,180}<Link/);
+});
+
+test("POS remains owned by Morphology & Syntax and Arabic path labels include scientific English", () => {
+  const corpus = RESEARCH_PATHS.find((path) => path.id === "corpus-linguistics");
+  const morphology = RESEARCH_PATHS.find((path) => path.id === "morphology-syntax");
+  assert.equal(corpus.available.some((tool) => tool.href === "/tools/pos"), false);
+  assert.equal(morphology.available.some((tool) => tool.href === "/tools/pos"), true);
+  assert.equal(corpus.name.ar, "لسانيات المدونات (Corpus Linguistics)");
+  assert.match(corpus.available[0].ar, /\(Frequency Analysis\)/);
+  assert.match(corpus.available[1].ar, /\(Concordance \/ Contexts\)/);
+  assert.match(corpus.available[2].ar, /\(N-grams\)/);
+  for (const path of RESEARCH_PATHS) assert.match(path.name.ar, /\([^)]+\)/);
 });
 
 test("Research Paths layer preserves the existing assistant and Workspace role", () => {
