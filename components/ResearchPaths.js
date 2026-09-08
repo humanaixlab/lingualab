@@ -56,11 +56,13 @@ export default function ResearchPaths({ language }) {
       <div className={styles.grid}>
         {RESEARCH_PATHS.map((path) => (
           <article className={styles.card} id={path.id} key={path.id}>
-            <h3>{path.name[locale]}</h3>
-            <dl className={styles.details}>
-              <div><dt>{copy.overview}</dt><dd>{path.overview[locale]}</dd></div>
-              <div><dt>{copy.question}</dt><dd>{path.question[locale]}</dd></div>
-              <div><dt>{copy.data}</dt><dd>{path.data[locale]}</dd></div>
+            <header className={styles.pathHeader}>
+              <h3>{path.name[locale]}</h3>
+            </header>
+            <dl className={`${styles.details} ${styles.introDetails}`}>
+              <div className={styles.overview}><dt>{copy.overview}</dt><dd>{path.overview[locale]}</dd></div>
+              <div className={styles.researchQuestion}><dt>{copy.question}</dt><dd>{path.question[locale]}</dd></div>
+              <div className={styles.dataNeeded}><dt>{copy.data}</dt><dd>{path.data[locale]}</dd></div>
             </dl>
 
             {(path.hubHref || path.ctaHref) && (
@@ -69,7 +71,7 @@ export default function ResearchPaths({ language }) {
               </Link>
             )}
 
-            <div className={styles.toolBlock}>
+            <div className={`${styles.toolBlock} ${path.available.length ? styles.availableBlock : styles.unavailableBlock}`}>
               <h4>{copy.available}</h4>
               {path.available.length ? (
                 <div className={styles.tools}>
@@ -88,7 +90,7 @@ export default function ResearchPaths({ language }) {
               <ul>{path.coming[locale].map((item) => <li key={item}>{item}</li>)}</ul>
             </div>
 
-            <dl className={styles.details}>
+            <dl className={`${styles.details} ${styles.outcomeDetails}`}>
               <div><dt>{copy.output}</dt><dd>{path.output[locale]}</dd></div>
               <div><dt>{copy.report}</dt><dd>{path.report[locale]}</dd></div>
             </dl>

@@ -187,3 +187,37 @@ test("Research Paths layer preserves the existing assistant and Workspace role",
   const workspace = source("pages/workspace.js");
   assert.doesNotMatch(workspace, /ResearchPaths|RESEARCH_PATHS|Explore by Research Path|استكشف حسب المسار البحثي/);
 });
+
+test("visual hierarchy preserves every educational field, link, CTA, and collapsible guide", () => {
+  const component = source("components/ResearchPaths.js");
+  const css = source("styles/ResearchPaths.module.css");
+
+  for (const field of ["overview", "question", "data", "coming", "output", "report", "beginner", "advanced"])
+    assert.match(component, new RegExp(`path\\.${field}\\[locale\\]`), `${field} remains visible`);
+  assert.match(component, /path\.available\.map/);
+  assert.equal((component.match(/<details className=\{styles\.guide\}>/g) || []).length, 2);
+  assert.match(component, /className=\{styles\.researchQuestion\}/);
+  assert.match(component, /path\.available\.length \? styles\.availableBlock : styles\.unavailableBlock/);
+  assert.match(css, /\.primaryCta:focus-visible/);
+  assert.match(css, /\.unavailableBlock/);
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
+
+  const routes = Object.fromEntries(RESEARCH_PATHS.map((path) => [
+    path.id,
+    path.available.map((tool) => tool.href),
+  ]));
+  assert.deepEqual(routes, {
+    "corpus-linguistics": ["/tools/frequency", "/tools/concordance", "/tools/ngrams"],
+    "text-classification": ["/workspace"],
+    "morphology-syntax": ["/tools/pos"],
+    semantics: [],
+    "discourse-pragmatics": [],
+    "information-extraction": [],
+    "language-technology": ["/tools/excel", "/tools/code", "/tools/colab", "/tools/prompt"],
+  });
+  assert.deepEqual(Object.fromEntries(RESEARCH_PATHS.filter((path) => path.cta).map((path) => [path.id, path.hubHref || path.ctaHref])), {
+    "corpus-linguistics": "/research-paths/corpus-linguistics",
+    "text-classification": "/workspace",
+    "language-technology": "/ar-tools#build-tools",
+  });
+});
