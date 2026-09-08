@@ -63,8 +63,8 @@ export default function ResearchPaths({ language }) {
               <div><dt>{copy.data}</dt><dd>{path.data[locale]}</dd></div>
             </dl>
 
-            {path.hubHref && (
-              <Link className={styles.primaryCta} href={path.hubHref}>
+            {(path.hubHref || path.ctaHref) && (
+              <Link className={styles.primaryCta} href={path.hubHref || path.ctaHref}>
                 {path.cta[locale]} <span aria-hidden="true">→</span>
               </Link>
             )}

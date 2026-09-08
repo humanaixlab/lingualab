@@ -117,7 +117,7 @@ test("Corpus Linguistics keeps its educational card and adds a dedicated executa
     assert.ok(corpus[field], `Corpus educational field ${field} must remain`);
   assert.equal(corpus.hubHref, "/research-paths/corpus-linguistics");
   assert.deepEqual(corpus.cta, { en: "Explore Corpus Linguistics", ar: "استكشف مسار لسانيات المدونات" });
-  assert.match(source("components/ResearchPaths.js"), /className=\{styles\.primaryCta\}[\s\S]*path\.hubHref/);
+  assert.match(source("components/ResearchPaths.js"), /className=\{styles\.primaryCta\}[\s\S]*path\.hubHref \|\| path\.ctaHref/);
 
   const hub = source("pages/research-paths/corpus-linguistics.js");
   for (const route of ["frequency", "concordance", "ngrams"])
@@ -137,6 +137,48 @@ test("POS remains owned by Morphology & Syntax and Arabic path labels include sc
   assert.match(corpus.available[1].ar, /\(Concordance \/ Contexts\)/);
   assert.match(corpus.available[2].ar, /\(N-grams\)/);
   for (const path of RESEARCH_PATHS) assert.match(path.name.ar, /\([^)]+\)/);
+});
+
+test("ready paths use their existing canonical homes without duplicate hubs", () => {
+  const classification = RESEARCH_PATHS.find((path) => path.id === "text-classification");
+  assert.equal(classification.ctaHref, "/workspace");
+  assert.equal(classification.hubHref, undefined);
+  assert.equal(classification.cta.en, "Start Text Classification Workflow");
+  assert.deepEqual(classification.available.map((tool) => tool.href), ["/workspace"]);
+  assert.equal(classification.available.some((tool) => /sentiment|logistic|svm/i.test(tool.href)), false);
+
+  const technology = RESEARCH_PATHS.find((path) => path.id === "language-technology");
+  assert.equal(technology.ctaHref, "/ar-tools#build-tools");
+  assert.equal(technology.hubHref, undefined);
+  assert.deepEqual(technology.available.filter((tool) => !tool.contextual).map((tool) => tool.href), [
+    "/tools/excel",
+    "/tools/code",
+    "/tools/colab",
+  ]);
+  assert.deepEqual(technology.available.filter((tool) => tool.contextual).map((tool) => tool.href), ["/tools/prompt"]);
+});
+
+test("unavailable paths have no executable CTA or fake routes", () => {
+  for (const id of ["semantics", "discourse-pragmatics", "information-extraction"]) {
+    const path = RESEARCH_PATHS.find((item) => item.id === id);
+    assert.deepEqual(path.available, []);
+    assert.equal(path.hubHref, undefined);
+    assert.equal(path.ctaHref, undefined);
+    assert.ok(path.coming.en.every((item) => typeof item === "string"));
+    assert.ok(path.coming.ar.every((item) => typeof item === "string"));
+  }
+});
+
+test("secondary paths retain bilingual scientific tool terminology", () => {
+  const morphology = RESEARCH_PATHS.find((path) => path.id === "morphology-syntax");
+  assert.equal(morphology.available.length, 1);
+  assert.equal(morphology.available[0].href, "/tools/pos");
+  assert.equal(morphology.available[0].ar, "تحليل أقسام الكلام (Part-of-Speech Analysis, POS)");
+
+  const technology = RESEARCH_PATHS.find((path) => path.id === "language-technology");
+  assert.match(technology.available.find((tool) => tool.href === "/tools/excel").ar, /\(Spreadsheet Explorer\)$/);
+  assert.match(technology.available.find((tool) => tool.href === "/tools/code").ar, /\(AI Code Assistant\)$/);
+  assert.match(technology.available.find((tool) => tool.href === "/tools/prompt").ar, /\(Prompt Assistant\)$/);
 });
 
 test("Research Paths layer preserves the existing assistant and Workspace role", () => {
