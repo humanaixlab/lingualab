@@ -35,10 +35,10 @@ Integrated corpus analysis tools for exploring Arabic-language datasets and supp
   ## AI capabilities
 
 LinguaLab integrates GPT-5.6 through secure server-side OpenAI endpoints to support research workflows without exposing API keys.
-Built-in corpus linguistics tools including Concordance, KWIC, Frequency Lists, N-grams, Collocations, POS Tagging, Lemmatization, and Corpus Query Language
+Built-in corpus tools currently include Frequency Analysis, Concordance / Contexts, and N-grams. POS is available as an experimental preview. Additional methods such as collocation analysis, lemmatization, and corpus query functionality are not currently implemented as production tools.
 Current AI features include:
 
-- AGPT-5.6 complements the built-in corpus analysis workflow by reasoning over dataset characteristics and corpus analysis outputs to support research planning, interpretation, and reporting
+- GPT-5.6 complements the built-in corpus analysis workflow by reasoning over dataset characteristics and corpus analysis outputs to support research planning, interpretation, and reporting
 - AI Research Advisor for research planning and question refinement.
 - AI Code Assistant for programming support.
 - AI Prompt Builder for creating reusable research prompts.
