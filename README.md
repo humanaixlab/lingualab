@@ -29,7 +29,7 @@ Integrated corpus analysis tools for exploring Arabic-language datasets and supp
 - Run a browser-based text-classification baseline when labels are available.
 - Explore document, token, vocabulary, word-frequency, and bigram statistics for unlabeled corpora.
 - Convert results into dataset-specific insights, limitations, and suggested next steps.
-- Download a self-contained HTML research report that can be printed to PDF.
+- Generate research reports and export supported outputs as PDF, DOCX, CSV/XLSX, and PNG/SVG when the corresponding report data or figures are available.
 - Use optional server-side OpenAI endpoints for text and code assistance.
 
   ## AI capabilities
@@ -63,6 +63,7 @@ Read the detailed architecture notes in [`docs/ARCHITECTURE.md`](docs/ARCHITECTU
 - OpenAI JavaScript SDK
 - read-excel-file for modern XLSX parsing
 - Browser-side JavaScript for dataset understanding, baseline analysis, insights, and report generation
+- SheetJS (`xlsx`) for supported spreadsheet export workflows
   
 ## Quick start
 
