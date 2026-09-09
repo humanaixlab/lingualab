@@ -186,6 +186,7 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md). The release-candidate priority is stab
 LinguaLab's original source code is released under the [MIT License](LICENSE).
 
 Third-party libraries, fonts, APIs, and external services used by LinguaLab remain subject to their respective licenses and terms of use.
+
 ## Creator
 
 ** Jawharah Alasmari**  
