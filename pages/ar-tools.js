@@ -54,6 +54,17 @@ const sections = [
     ],
   },
   {
+    key: "discourse",
+    tools: [
+      {
+        key: "discoursePreview",
+        link: "/tools/discourse-analysis",
+        icon: "DA",
+        preserveContext: false,
+      },
+    ],
+  },
+  {
     key: "workflows",
     tools: [
       {
@@ -431,7 +442,7 @@ export default function ArabicToolsPage() {
           {sections.map((section) => (
             <section
               key={section.key}
-              id={section.key === "workflows" ? "build-tools" : section.key === "writing" ? "writing-tools" : undefined}
+              id={section.key === "workflows" ? "build-tools" : section.key === "writing" ? "writing-tools" : section.key === "discourse" ? "discourse-analysis" : undefined}
               style={{
                 padding: "26px",
                 border: "1px solid rgba(73, 67, 137, 0.13)",
@@ -502,7 +513,7 @@ export default function ArabicToolsPage() {
                 {section.tools.map((tool) => (
                   <Link
                     key={tool.key}
-                    href={contextHref(tool.link)}
+                    href={tool.preserveContext === false ? tool.link : contextHref(tool.link)}
                     style={{
                       color: "inherit",
                       textDecoration: "none",

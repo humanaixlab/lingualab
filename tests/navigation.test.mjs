@@ -61,7 +61,8 @@ test("Research Hub retains context-aware research destinations", () => {
   assert.match(hub, /contextHref\("\/research-advisor"\)/);
   assert.match(hub, /"\/workspace\?copilot=1"/);
   assert.match(hub, /link\.copilot/);
-  assert.match(hub, /href=\{contextHref\(tool\.link\)\}/);
+  assert.match(hub, /tool\.preserveContext === false \? tool\.link : contextHref\(tool\.link\)/);
+  assert.match(hub, /preserveContext: false/);
 });
 
 test("main Research Hub navigation uses one consistent name", () => {
