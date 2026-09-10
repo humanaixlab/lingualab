@@ -20,10 +20,19 @@ const { code } = await swc.transform(hubSource, {
 const current = { source: "dataset-understanding", handoffId: "current-five", fileName: "current.csv", rows: 5, createdAt: new Date().toISOString() };
 const query = "?from=workspace&handoffId=current-five";
 const hubCopy = {
-  "nav.openWorkspace": "Open Workspace", "nav.researchAdvisor": "Research Advisor", "hub.pageName": "Research Hub", "hub.heroTitle": "Choose the next step in your research workflow.", "hub.heroText": "Research journey", "hub.currentDataset": "Current dataset: {filename} · {count} records", "hub.guidanceLabel": "GENERAL WORKFLOW GUIDANCE", "hub.pathTitle": "Recommended Research Path", "hub.pathText": "General path", "hub.allToolsLabel": "SECONDARY DIRECTORY", "hub.allToolsTitle": "All Tools", "hub.allToolsText": "Browse tools", "hub.featured": "Featured",
+  "nav.openWorkspace": "Open Workspace", "nav.researchAdvisor": "Research Advisor", "hub.pageName": "Research Hub", "hub.heroTitle": "Choose the next step in your research workflow.", "hub.heroText": "Research journey", "hub.currentDataset": "Current dataset: {filename} · {count} records",
+  "hub.architecture.computational.eyebrow": "02 · COMPUTATIONAL WORK", "hub.architecture.computational.title": "Data & Computational Workflows", "hub.architecture.computational.subtitle": "What task do I perform on the data?", "hub.architecture.computational.text": "Computational work", "hub.architecture.computational.sequence": "Prepare data to evaluation",
+  "hub.architecture.study.eyebrow": "03 · RESEARCH WORKFLOW", "hub.architecture.study.title": "Build Your Study", "hub.architecture.study.subtitle": "How do I design and complete the research study?", "hub.architecture.study.text": "Study workflow", "hub.architecture.guidance.title": "Choose your starting point",
 };
-for (const [key, title] of Object.entries({ understand: "Understand your dataset", design: "Design your study", explore: "Explore linguistic patterns", run: "Run or prepare analysis", report: "Review and report" })) { hubCopy[`hub.stages.${key}.title`] = title; hubCopy[`hub.stages.${key}.description`] = "Description"; }
-for (const [key, label] of Object.entries({ workspace: "Open Workspace", copilot: "Use Research Copilot", advisor: "Research Advisor", frequency: "Frequency", concordance: "Concordance", ngrams: "N-grams", analyze: "Analyze", code: "Code", excel: "Excel", colab: "Colab", report: "Research Report" })) for (const stage of ["understand", "design", "explore", "run", "report"]) hubCopy[`hub.stages.${stage}.${key}`] = label;
+for (const [key, title] of Object.entries({ advisor: "Research Advisor", assistant: "Recommended path and research assistant", analysis: "Analysis with LinguaLab tools", interpretation: "Interpretation", report: "Research Report", writing: "Writing support" })) {
+  hubCopy[`hub.architecture.study.steps.${key}.title`] = title;
+  hubCopy[`hub.architecture.study.steps.${key}.action`] = `Open ${title}`;
+}
+for (const key of ["phenomenon", "task", "unsure", "after"]) hubCopy[`hub.architecture.guidance.${key}`] = "Guidance";
+for (const [key, title] of Object.entries({ classification: "Text Classification", excel: "Excel", code: "Code", colab: "Colab" })) {
+  hubCopy[`hub.tools.${key}.title`] = title;
+  hubCopy[`hub.tools.${key}.description`] = "Description";
+}
 const testTranslate = (key, variables = {}) => String(hubCopy[key] || key).replace(/\{(\w+)\}/g, (_, name) => variables[name]);
 
 function harness(saved = null, search = "") {
@@ -65,11 +74,11 @@ function harness(saved = null, search = "") {
   };
 }
 
-test("no-context Hub retains its independent five-stage navigation", () => {
+test("no-context Hub retains the independent study workflow", () => {
   const h = harness(); h.mount();
   const html = h.render();
   assert.doesNotMatch(html, /Current dataset:|handoffId=/);
-  for (const stage of ["Understand your dataset", "Design your study", "Explore linguistic patterns", "Run or prepare analysis", "Review and report"]) assert.ok(html.includes(stage));
+  for (const stage of ["Research Advisor", "Recommended path and research assistant", "Analysis with LinguaLab tools", "Interpretation", "Research Report", "Writing support"]) assert.ok(html.includes(stage));
   for (const href of ["/workspace", "/research-advisor", "/tools/analyze", "/tools/code", "/tools/excel", "/tools/colab", "/tools/prompt"]) assert.ok(html.includes(`href="${href}"`));
 });
 
@@ -79,7 +88,7 @@ test("current metadata is shown and only supported destinations receive it", () 
   assert.match(html, /Current dataset: current.csv · 5 records/);
   for (const href of ["/research-advisor", "/tools/analyze"]) assert.ok(html.includes(`href="${href}?from=workspace&amp;handoffId=current-five"`));
   assert.ok(html.includes('href="/workspace?copilot=1&amp;from=workspace&amp;handoffId=current-five"'));
-  for (const href of ["/workspace", "/tools/code", "/tools/excel", "/tools/colab", "/tools/prompt", "/tools/frequency", "/tools/concordance", "/tools/ngrams"]) assert.ok(html.includes(`href="${href}"`));
+  for (const href of ["/workspace", "/tools/code", "/tools/excel", "/tools/colab", "/tools/prompt"]) assert.ok(html.includes(`href="${href}"`));
   h.invalidate();
   assert.doesNotMatch(h.render(), /Current dataset:|handoffId=/);
 });

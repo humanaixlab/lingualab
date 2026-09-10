@@ -41,12 +41,12 @@ test("Home gives researchers exactly four bilingual onboarding steps without exp
     assert.doesNotMatch(home, new RegExp(hidden.replaceAll("/", "\\/")));
 });
 
-test("All Tools is the secondary directory and non-analysis tool back links target it", () => {
+test("the computational workflow section retains compatible directory anchors and tool returns", () => {
   const hub = source("pages/ar-tools.js");
   assert.match(hub, /id="all-tools"/);
-  assert.match(hub, /aria-labelledby="all-tools-title"/);
-  assert.match(hub, /hub\.allToolsLabel/);
-  assert.ok(hub.indexOf("hub.pathTitle") < hub.indexOf('id="all-tools"'));
+  assert.match(hub, /id="build-tools"/);
+  assert.match(hub, /aria-labelledby="computational-workflows-title"/);
+  assert.ok(hub.indexOf('mode="linguistic"') < hub.indexOf('id="all-tools"'));
 
   assert.match(source("components/Layout.js"), /backHref = "\/ar-tools#all-tools"/);
   assert.match(source("pages/tools/colab.js"), /backHref="\/ar-tools#build-tools"/);
@@ -77,9 +77,22 @@ test("Research Hub retains context-aware research destinations", () => {
   assert.match(hub, /researchContextHref\(href, context\)/);
   assert.match(hub, /contextHref\("\/research-advisor"\)/);
   assert.match(hub, /"\/workspace\?copilot=1"/);
-  assert.match(hub, /link\.copilot/);
-  assert.match(hub, /tool\.preserveContext === false \? tool\.link : contextHref\(tool\.link\)/);
-  assert.match(hub, /<ResearchPaths language=\{language\} \/>/);
+  assert.match(hub, /step\.copilot/);
+  assert.match(hub, /contextHref\(tool\.link\)/);
+  assert.match(hub, /<ResearchPaths language=\{language\} mode="linguistic" \/>/);
+});
+
+test("Research Hub separates linguistic paths, computational work, and study completion", () => {
+  const hub = source("pages/ar-tools.js");
+  const paths = source("components/ResearchPaths.js");
+  assert.match(paths, /Linguistic Research Paths/);
+  assert.match(paths, /المسارات اللغوية/);
+  assert.match(paths, /LINGUISTIC_PATH_IDS = new Set\(\["corpus-linguistics", "morphology-syntax", "semantics", "discourse-pragmatics"\]\)/);
+  assert.match(hub, /hub\.architecture\.computational\.title/);
+  assert.match(hub, /hub\.architecture\.study\.title/);
+  assert.doesNotMatch(hub, /const recommendedPath|hub\.pathTitle|hub\.sections\.corpus/);
+  for (const hidden of ["/tools/semantics", "/tools/information-extraction", "/tools/nlp-experiments", "/tools/text-classification-research"])
+    assert.doesNotMatch(hub, new RegExp(hidden.replaceAll("/", "\\/")));
 });
 
 test("main Research Hub navigation uses one consistent name", () => {

@@ -5,8 +5,12 @@ import styles from "../styles/ResearchPaths.module.css";
 
 const COPY = {
   en: {
-    eyebrow: "COMPUTATIONAL LINGUISTICS",
-    title: "Explore by Research Path",
+    eyebrow: "WHAT DO I ANALYZE IN LANGUAGE?",
+    title: "Linguistic Research Paths",
+    subtitle: "What do I analyze in language?",
+    allEyebrow: "COMPUTATIONAL LINGUISTICS",
+    allTitle: "Explore by Research Path",
+    allSubtitle: "Choose a research path",
     positioning: "LinguaLab is an AI-supported research workspace for computational linguistics.",
     support: "Deterministic tools perform the available analyses. AI supports guidance, study design, interpretation, reporting, and research assistance.",
     overview: "What is this path?",
@@ -22,8 +26,12 @@ const COPY = {
     contextual: "Contextual link · primary home: Research Writing Support",
   },
   ar: {
-    eyebrow: "اللسانيات الحاسوبية",
-    title: "استكشف حسب المسار البحثي",
+    eyebrow: "ماذا أحلل في اللغة؟",
+    title: "المسارات اللغوية",
+    subtitle: "ماذا أحلل في اللغة؟",
+    allEyebrow: "اللسانيات الحاسوبية",
+    allTitle: "استكشف حسب المسار البحثي",
+    allSubtitle: "اختر مسارًا بحثيًا",
     positioning: "LinguaLab مساحة بحث ذكية مدعومة بالذكاء الاصطناعي للباحثين في اللسانيات الحاسوبية.",
     support: "تنفذ الأدوات الحتمية التحليلات المتاحة، بينما يدعم الذكاء الاصطناعي الإرشاد وتصميم الدراسة والتفسير وإعداد التقارير والمساعدة البحثية.",
     overview: "ما هذا المسار؟",
@@ -40,21 +48,28 @@ const COPY = {
   },
 };
 
-export default function ResearchPaths({ language }) {
+const LINGUISTIC_PATH_IDS = new Set(["corpus-linguistics", "morphology-syntax", "semantics", "discourse-pragmatics"]);
+
+export default function ResearchPaths({ language, mode = "all" }) {
   const copy = COPY[language === "ar" ? "ar" : "en"];
   const locale = language === "ar" ? "ar" : "en";
+  const paths = mode === "linguistic" ? RESEARCH_PATHS.filter((path) => LINGUISTIC_PATH_IDS.has(path.id)) : RESEARCH_PATHS;
+  const heading = mode === "linguistic"
+    ? { eyebrow: copy.eyebrow, title: copy.title, subtitle: copy.subtitle }
+    : { eyebrow: copy.allEyebrow, title: copy.allTitle, subtitle: copy.allSubtitle };
 
   return (
     <section className={styles.section} id="research-paths" aria-labelledby="research-paths-title">
       <header className={styles.header}>
-        <p className={styles.eyebrow}>{copy.eyebrow}</p>
-        <h2 id="research-paths-title">{copy.title}</h2>
+        <p className={styles.eyebrow}>{heading.eyebrow}</p>
+        <h2 id="research-paths-title">{heading.title}</h2>
+        <p className={styles.subtitle}>{heading.subtitle}</p>
         <p>{copy.positioning}</p>
         <p className={styles.support}>{copy.support}</p>
       </header>
 
       <div className={styles.grid}>
-        {RESEARCH_PATHS.map((path) => (
+        {paths.map((path) => (
           <article className={styles.card} id={path.id} key={path.id}>
             <header className={styles.pathHeader}>
               <h3>{path.name[locale]}</h3>

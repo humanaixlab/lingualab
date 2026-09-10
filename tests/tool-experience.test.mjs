@@ -52,6 +52,6 @@ test("Analyze is the single corpus-tool hub and Build shows a coherent sequence"
   for (const name of corpusPages) assert.ok(analyze.includes(`/tools/${name}`));
   assert.match(analyze, /AI Research Interpreter as a later stage/);
   const hub = source("pages/ar-tools.js");
-  assert.match(hub, /Prepare data → Generate \/ review code → Run \/ reproduce → Evaluate/);
+  assert.match(source("lib/i18n/en.js"), /Prepare data → Generate and review code → Run and reproduce → Evaluate/);
   assert.match(hub, /language === "ar" \? "فتح الأداة" : "Open tool"/);
 });

@@ -29,8 +29,8 @@ test("display translations preserve Code and Prompt internal option values", () 
 
 test("tool homes use dedicated Research Hub anchors", () => {
   const hub = source("pages/ar-tools.js");
-  assert.match(hub, /"workflows" \? "build-tools"/);
-  assert.match(hub, /"writing" \? "writing-tools"/);
+  assert.match(hub, /id="build-tools"/);
+  assert.match(hub, /id="writing-tools"/);
   for (const path of ["pages/tools/code.js", "pages/tools/excel.js", "pages/tools/colab.js"]) assert.match(source(path), /backHref="\/ar-tools#build-tools"/);
   assert.match(source("pages/tools/prompt.js"), /backHref="\/ar-tools#build-tools"/);
   for (const path of ["frequency", "concordance", "ngrams", "pos"]) assert.match(source(`pages/tools/${path}.js`), /backHref="\/tools\/analyze"/);

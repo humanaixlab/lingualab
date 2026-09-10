@@ -105,8 +105,8 @@ test("canonical homes remain separated across Analyze, Build, Research, Workspac
   assert.match(analyze, /href="\/ar-tools#research-paths"/);
   assert.doesNotMatch(analyze, /href="\/tools\/(frequency|concordance|ngrams|pos)"/);
   assert.match(analyze, /href="\/research-paths\/corpus-linguistics"/);
-  assert.match(hub, /Prepare data → Generate \/ review code → Run \/ reproduce → Evaluate/);
-  assert.match(hub, /section\.key === "writing" \? "writing-tools"/);
+  assert.match(source("lib/i18n/en.js"), /Prepare data → Generate and review code → Run and reproduce → Evaluate/);
+  assert.match(hub, /id="writing-tools"/);
   assert.match(source("lib/research-paths.js"), /href: "\/tools\/prompt"[^\n]+contextual: true/);
   assert.doesNotMatch(source("pages/workspace.js"), /<ResearchPaths|RESEARCH_PATHS\.map/);
   assert.doesNotMatch(source("pages/student-dashboard.js"), /<ResearchPaths|RESEARCH_PATHS\.map/);
@@ -184,10 +184,19 @@ test("secondary paths retain bilingual scientific tool terminology", () => {
 });
 
 test("Research Paths layer preserves the existing assistant and Workspace role", () => {
-  assert.match(source("pages/ar-tools.js"), /<ResearchPaths language=\{language\} \/>/);
+  assert.match(source("pages/ar-tools.js"), /<ResearchPaths language=\{language\} mode="linguistic" \/>/);
   assert.match(source("pages/_app.js"), /<SmartAssistant \/>/);
   const workspace = source("pages/workspace.js");
   assert.doesNotMatch(workspace, /ResearchPaths|RESEARCH_PATHS|Explore by Research Path|استكشف حسب المسار البحثي/);
+});
+
+test("Research Hub renders only the four canonical linguistic paths", () => {
+  const component = source("components/ResearchPaths.js");
+  const hub = source("pages/ar-tools.js");
+  assert.match(component, /LINGUISTIC_PATH_IDS = new Set\(\["corpus-linguistics", "morphology-syntax", "semantics", "discourse-pragmatics"\]\)/);
+  assert.match(component, /mode === "linguistic" \? RESEARCH_PATHS\.filter/);
+  assert.match(hub, /mode="linguistic"/);
+  assert.doesNotMatch(hub, /text-classification|information-extraction|language-technology/);
 });
 
 test("visual hierarchy preserves every educational field, link, CTA, and collapsible guide", () => {

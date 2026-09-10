@@ -24,6 +24,12 @@
   font-size: var(--text-helper);
 }
 
+.header .subtitle {
+  color: #312c54;
+  font-size: var(--text-card);
+  font-weight: 600;
+}
+
 .eyebrow {
   color: #6258f5 !important;
   font-size: var(--text-meta) !important;
