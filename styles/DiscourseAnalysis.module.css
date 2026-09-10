@@ -31,7 +31,7 @@
 .cardHeading h2 { margin: 0; font-size: var(--text-card); }
 .inputCard label, .editFields label { display: grid; gap: 7px; margin-bottom: 16px; color: #494367; font-size: var(--text-helper); font-weight: 600; }
 .inputCard textarea, .editFields textarea { min-height: 150px; resize: vertical; }
-.inputCard input, .inputCard textarea, .editFields textarea, .editFields select, .summary select { width: 100%; box-sizing: border-box; padding: 11px 12px; border: 1px solid #d9d7e6; border-radius: 10px; background: #fff; color: #29263f; }
+.inputCard input, .inputCard textarea, .editFields input, .editFields textarea, .editFields select, .summary select { width: 100%; box-sizing: border-box; padding: 11px 12px; border: 1px solid #d9d7e6; border-radius: 10px; background: #fff; color: #29263f; }
 .primaryButton { width: 100%; padding: 12px 15px; border: 0; border-radius: 10px; background: #6258f5; color: #fff; cursor: pointer; }
 .primaryButton:disabled { opacity: .55; cursor: not-allowed; }
 
