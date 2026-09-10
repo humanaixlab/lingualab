@@ -71,12 +71,12 @@ test("review state uses guarded bounded localStorage only", () => {
   assert.equal(saveInformationExtractionReview(review, blocked).ok, false);
 });
 
-test("build-only tool remains absent from navigation and runs AI only after explicit submission", () => {
+test("tool is activated in computational workflows and runs AI only after explicit submission", () => {
   const page = source("pages/tools/information-extraction.js");
   assert.match(page, /href="\/ar-tools#build"/);
   assert.match(page, /onSubmit=\{analyze\}/);
   assert.doesNotMatch(page, /useEffect|confidence|chart/i);
-  assert.doesNotMatch(source("pages/ar-tools.js"), /\/tools\/information-extraction/);
+  assert.match(source("pages/ar-tools.js"), /link: "\/tools\/information-extraction"[^\n]+preview: true/);
   assert.doesNotMatch(source("lib/research-paths.js"), /\/tools\/information-extraction/);
 });
 

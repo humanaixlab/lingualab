@@ -91,8 +91,23 @@ test("Research Hub separates linguistic paths, computational work, and study com
   assert.match(hub, /hub\.architecture\.computational\.title/);
   assert.match(hub, /hub\.architecture\.study\.title/);
   assert.doesNotMatch(hub, /const recommendedPath|hub\.pathTitle|hub\.sections\.corpus/);
-  for (const hidden of ["/tools/semantics", "/tools/information-extraction", "/tools/nlp-experiments", "/tools/text-classification-research"])
-    assert.doesNotMatch(hub, new RegExp(hidden.replaceAll("/", "\\/")));
+  for (const active of ["/tools/information-extraction", "/tools/nlp-experiments", "/tools/text-classification-research"])
+    assert.match(hub, new RegExp(active.replaceAll("/", "\\/")));
+  assert.doesNotMatch(hub, /\/tools\/(semantics|morphology-syntax|corpus-research|discourse-analysis|pragmatics)/);
+});
+
+test("completed previews are activated once in their canonical Hub locations", () => {
+  const hub = source("pages/ar-tools.js");
+  const paths = source("lib/research-paths.js");
+  for (const route of ["corpus-research", "morphology-syntax", "semantics", "discourse-analysis", "pragmatics"])
+    assert.equal((paths.match(new RegExp(`href: "\\/tools\\/${route}"`, "g")) || []).length, 1);
+  for (const route of ["text-classification-research", "information-extraction", "nlp-experiments"])
+    assert.equal((hub.match(new RegExp(`link: "\\/tools\\/${route}"`, "g")) || []).length, 1);
+  assert.equal((hub.match(/preview: true/g) || []).length, 3);
+  assert.match(hub, /Research Preview/);
+  assert.match(hub, /تجريب بحثي/);
+  for (const route of ["semantics", "morphology-syntax", "corpus-research", "discourse-analysis", "pragmatics"])
+    assert.doesNotMatch(hub, new RegExp(`link: "\\/tools\\/${route}"`));
 });
 
 test("main Research Hub navigation uses one consistent name", () => {

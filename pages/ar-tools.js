@@ -7,7 +7,9 @@ import DataSourceIndicator from "../components/DataSourceIndicator";
 import ResearchPaths from "../components/ResearchPaths";
 
 const computationalTools = [
-  { key: "classification", link: "/workspace", icon: "01" },
+  { key: "classificationPreview", link: "/tools/text-classification-research", icon: "TC", preview: true },
+  { key: "informationExtraction", link: "/tools/information-extraction", icon: "IE", preview: true },
+  { key: "nlpExperiments", link: "/tools/nlp-experiments", icon: "NLP", preview: true },
   { key: "excel", link: "/tools/excel", icon: "X" },
   { key: "code", link: "/tools/code", icon: "</>" },
   { key: "colab", link: "/tools/colab", icon: "C" },
@@ -85,6 +87,7 @@ export default function ArabicToolsPage() {
                 <Link key={tool.key} href={contextHref(tool.link)} style={{ color: "inherit", textDecoration: "none", minHeight: "180px" }}>
                   <article style={{ height: "100%", boxSizing: "border-box", padding: "22px", borderRadius: "20px", border: "1px solid rgba(73, 67, 137, 0.13)", background: "#fff", boxShadow: "0 10px 26px rgba(45, 42, 96, 0.05)", display: "flex", flexDirection: "column" }}>
                     <span style={{ width: "42px", height: "42px", borderRadius: "13px", display: "grid", placeItems: "center", color: "#5e51ea", background: "#efedff", fontSize: "var(--text-meta)", fontWeight: 600 }}>{tool.icon}</span>
+                    {tool.preview && <small style={{ width: "fit-content", marginTop: "14px", padding: "5px 9px", borderRadius: "999px", color: "#594ac9", background: "#eeeaff", fontSize: "var(--text-meta)", fontWeight: 600 }}>{language === "ar" ? "تجريب بحثي" : "Research Preview"}</small>}
                     <h3 style={{ margin: "20px 0 9px", fontSize: "var(--text-card)", lineHeight: 1.3 }}>{t(`hub.tools.${tool.key}.title`)}</h3>
                     <p style={{ margin: 0, color: "#716d86", lineHeight: 1.7, fontSize: "var(--text-helper)" }}>{t(`hub.tools.${tool.key}.description`)}</p>
                     <span style={{ marginTop: "auto", paddingTop: "20px", color: "#4c43ce", fontSize: "var(--text-button)", fontWeight: 600 }}>{language === "ar" ? "فتح الأداة" : "Open tool"} ↗</span>

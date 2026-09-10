@@ -80,14 +80,14 @@ test("review persistence is guarded, local-only, and bounded to 100 cases", () =
   assert.equal(saveNlpExperimentReview(review, blocked).ok, false);
 });
 
-test("build-only route is not exposed and AI actions require explicit form submission", () => {
+test("route is activated in computational workflows and AI actions require explicit form submission", () => {
   const page = source("pages/tools/nlp-experiments.js");
   assert.match(page, /href="\/ar-tools#build"/);
   assert.match(page, /onSubmit=\{runPrompt\}/);
   assert.match(page, /onSubmit=\{runComparison\}/);
   assert.match(page, /onSubmit=\{runSandbox\}/);
   assert.doesNotMatch(page, /useEffect\s*\(|confidence|chart/i);
-  assert.doesNotMatch(source("pages/ar-tools.js"), /\/tools\/nlp-experiments/);
+  assert.match(source("pages/ar-tools.js"), /link: "\/tools\/nlp-experiments"[^\n]+preview: true/);
   assert.doesNotMatch(source("lib/research-paths.js"), /\/tools\/nlp-experiments/);
 });
 

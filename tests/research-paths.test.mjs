@@ -30,7 +30,10 @@ test("available tools map only to routes that exist in the current product", () 
     "/tools/frequency",
     "/tools/concordance",
     "/tools/ngrams",
+    "/tools/corpus-research",
     "/tools/pos",
+    "/tools/morphology-syntax",
+    "/tools/semantics",
     "/tools/discourse-analysis",
     "/tools/pragmatics",
     "/tools/prompt",
@@ -44,7 +47,7 @@ test("available tools map only to routes that exist in the current product", () 
       assert.ok(tool.en && tool.ar);
     }
   }
-  assert.deepEqual(RESEARCH_PATHS.find((path) => path.id === "semantics").available, []);
+  assert.deepEqual(RESEARCH_PATHS.find((path) => path.id === "semantics").available.map((tool) => tool.href), ["/tools/semantics"]);
   assert.deepEqual(RESEARCH_PATHS.find((path) => path.id === "discourse-pragmatics").available.map((tool) => tool.href), ["/tools/discourse-analysis", "/tools/pragmatics"]);
   assert.deepEqual(RESEARCH_PATHS.find((path) => path.id === "information-extraction").available, []);
 });
@@ -135,9 +138,9 @@ test("POS remains owned by Morphology & Syntax and Arabic path labels include sc
   assert.equal(corpus.available.some((tool) => tool.href === "/tools/pos"), false);
   assert.equal(morphology.available.some((tool) => tool.href === "/tools/pos"), true);
   assert.equal(corpus.name.ar, "لسانيات المدونات (Corpus Linguistics)");
-  assert.match(corpus.available[0].ar, /\(Frequency Analysis\)/);
-  assert.match(corpus.available[1].ar, /\(Concordance \/ Contexts\)/);
-  assert.match(corpus.available[2].ar, /\(N-grams\)/);
+  assert.match(corpus.available.find((tool) => tool.href === "/tools/frequency").ar, /\(Frequency Analysis\)/);
+  assert.match(corpus.available.find((tool) => tool.href === "/tools/concordance").ar, /\(Concordance \/ Contexts\)/);
+  assert.match(corpus.available.find((tool) => tool.href === "/tools/ngrams").ar, /\(N-grams\)/);
   for (const path of RESEARCH_PATHS) assert.match(path.name.ar, /\([^)]+\)/);
 });
 
@@ -160,8 +163,8 @@ test("ready paths use their existing canonical homes without duplicate hubs", ()
   assert.deepEqual(technology.available.filter((tool) => tool.contextual).map((tool) => tool.href), ["/tools/prompt"]);
 });
 
-test("unavailable paths have no executable CTA or fake routes", () => {
-  for (const id of ["semantics", "information-extraction"]) {
+test("non-linguistic inactive path definitions retain no executable CTA or fake routes", () => {
+  for (const id of ["information-extraction"]) {
     const path = RESEARCH_PATHS.find((item) => item.id === id);
     assert.deepEqual(path.available, []);
     assert.equal(path.hubHref, undefined);
@@ -173,7 +176,7 @@ test("unavailable paths have no executable CTA or fake routes", () => {
 
 test("secondary paths retain bilingual scientific tool terminology", () => {
   const morphology = RESEARCH_PATHS.find((path) => path.id === "morphology-syntax");
-  assert.equal(morphology.available.length, 1);
+  assert.equal(morphology.available.length, 2);
   assert.equal(morphology.available[0].href, "/tools/pos");
   assert.equal(morphology.available[0].ar, "تحليل أقسام الكلام (Part-of-Speech Analysis, POS)");
 
@@ -196,7 +199,7 @@ test("Research Hub renders only the four canonical linguistic paths", () => {
   assert.match(component, /LINGUISTIC_PATH_IDS = new Set\(\["corpus-linguistics", "morphology-syntax", "semantics", "discourse-pragmatics"\]\)/);
   assert.match(component, /mode === "linguistic" \? RESEARCH_PATHS\.filter/);
   assert.match(hub, /mode="linguistic"/);
-  assert.doesNotMatch(hub, /text-classification|information-extraction|language-technology/);
+  assert.doesNotMatch(hub, /<ResearchPaths[^>]+mode="all"/);
 });
 
 test("visual hierarchy preserves every educational field, link, CTA, and collapsible guide", () => {
@@ -218,10 +221,10 @@ test("visual hierarchy preserves every educational field, link, CTA, and collaps
     path.available.map((tool) => tool.href),
   ]));
   assert.deepEqual(routes, {
-    "corpus-linguistics": ["/tools/frequency", "/tools/concordance", "/tools/ngrams"],
+    "corpus-linguistics": ["/tools/corpus-research", "/tools/frequency", "/tools/concordance", "/tools/ngrams"],
     "text-classification": ["/workspace"],
-    "morphology-syntax": ["/tools/pos"],
-    semantics: [],
+    "morphology-syntax": ["/tools/pos", "/tools/morphology-syntax"],
+    semantics: ["/tools/semantics"],
     "discourse-pragmatics": ["/tools/discourse-analysis", "/tools/pragmatics"],
     "information-extraction": [],
     "language-technology": ["/tools/excel", "/tools/code", "/tools/colab", "/tools/prompt"],

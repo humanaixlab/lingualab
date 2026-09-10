@@ -72,9 +72,9 @@ test("reviewed cases use guarded bounded localStorage only", () => {
   assert.equal(saveMorphologySyntaxReview(review, blocked).ok, false);
 });
 
-test("build-only route remains absent from navigation and existing POS stays independent", () => {
+test("preview is activated only inside Morphology & Syntax and existing POS stays independent", () => {
   assert.doesNotMatch(source("pages/ar-tools.js"), /\/tools\/morphology-syntax/);
-  assert.doesNotMatch(source("lib/research-paths.js"), /\/tools\/morphology-syntax/);
+  assert.match(source("lib/research-paths.js"), /href: "\/tools\/morphology-syntax"[^\n]+Research Preview[^\n]+تجريب بحثي/);
   assert.match(source("pages/tools/pos.js"), /backHref="\/tools\/analyze"/);
   const page = source("pages/tools/morphology-syntax.js");
   assert.doesNotMatch(page, /useEffect|confidence|chart/i);

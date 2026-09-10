@@ -18,12 +18,12 @@ const source = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "u
 function memoryStorage() { const data = new Map(); return { getItem: (key) => data.get(key) ?? null, setItem: (key, value) => data.set(key, value) }; }
 function response() { return { statusCode: 200, headers: {}, setHeader(key, value) { this.headers[key] = value; }, status(code) { this.statusCode = code; return this; }, json(value) { this.body = value; return this; } }; }
 
-test("corpus research exposes exactly the create and analyze preview modules", () => {
+test("corpus research exposes exactly the create and analyze preview modules in its canonical path", () => {
   assert.deepEqual(CORPUS_MODULES, ["create", "analyze"]);
   const page = source("pages/tools/corpus-research.js");
   for (const label of ["إنشاء مدونة جديدة", "تحليل المدونة", "Create Corpus", "Corpus Analysis", "تجريب بحثي", "Research Preview", "يظل الباحث مسؤولًا"]) assert.match(page, new RegExp(label));
   assert.doesNotMatch(source("pages/ar-tools.js"), /\/tools\/corpus-research/);
-  assert.doesNotMatch(source("lib/research-paths.js"), /\/tools\/corpus-research/);
+  assert.match(source("lib/research-paths.js"), /href: "\/tools\/corpus-research"[^\n]+Research Preview[^\n]+تجريب بحثي/);
 });
 
 test("corpus readiness detects missing metadata and exact duplicate texts without fabrication", () => {
