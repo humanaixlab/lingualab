@@ -32,6 +32,7 @@ test("available tools map only to routes that exist in the current product", () 
     "/tools/ngrams",
     "/tools/pos",
     "/tools/discourse-analysis",
+    "/tools/pragmatics",
     "/tools/prompt",
     "/tools/code",
     "/tools/excel",
@@ -44,7 +45,7 @@ test("available tools map only to routes that exist in the current product", () 
     }
   }
   assert.deepEqual(RESEARCH_PATHS.find((path) => path.id === "semantics").available, []);
-  assert.deepEqual(RESEARCH_PATHS.find((path) => path.id === "discourse-pragmatics").available.map((tool) => tool.href), ["/tools/discourse-analysis"]);
+  assert.deepEqual(RESEARCH_PATHS.find((path) => path.id === "discourse-pragmatics").available.map((tool) => tool.href), ["/tools/discourse-analysis", "/tools/pragmatics"]);
   assert.deepEqual(RESEARCH_PATHS.find((path) => path.id === "information-extraction").available, []);
 });
 
@@ -212,7 +213,7 @@ test("visual hierarchy preserves every educational field, link, CTA, and collaps
     "text-classification": ["/workspace"],
     "morphology-syntax": ["/tools/pos"],
     semantics: [],
-    "discourse-pragmatics": ["/tools/discourse-analysis"],
+    "discourse-pragmatics": ["/tools/discourse-analysis", "/tools/pragmatics"],
     "information-extraction": [],
     "language-technology": ["/tools/excel", "/tools/code", "/tools/colab", "/tools/prompt"],
   });
