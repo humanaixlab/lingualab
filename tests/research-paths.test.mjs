@@ -31,6 +31,7 @@ test("available tools map only to routes that exist in the current product", () 
     "/tools/concordance",
     "/tools/ngrams",
     "/tools/pos",
+    "/tools/discourse-analysis",
     "/tools/prompt",
     "/tools/code",
     "/tools/excel",
@@ -43,7 +44,7 @@ test("available tools map only to routes that exist in the current product", () 
     }
   }
   assert.deepEqual(RESEARCH_PATHS.find((path) => path.id === "semantics").available, []);
-  assert.deepEqual(RESEARCH_PATHS.find((path) => path.id === "discourse-pragmatics").available, []);
+  assert.deepEqual(RESEARCH_PATHS.find((path) => path.id === "discourse-pragmatics").available.map((tool) => tool.href), ["/tools/discourse-analysis"]);
   assert.deepEqual(RESEARCH_PATHS.find((path) => path.id === "information-extraction").available, []);
 });
 
@@ -159,7 +160,7 @@ test("ready paths use their existing canonical homes without duplicate hubs", ()
 });
 
 test("unavailable paths have no executable CTA or fake routes", () => {
-  for (const id of ["semantics", "discourse-pragmatics", "information-extraction"]) {
+  for (const id of ["semantics", "information-extraction"]) {
     const path = RESEARCH_PATHS.find((item) => item.id === id);
     assert.deepEqual(path.available, []);
     assert.equal(path.hubHref, undefined);
@@ -211,7 +212,7 @@ test("visual hierarchy preserves every educational field, link, CTA, and collaps
     "text-classification": ["/workspace"],
     "morphology-syntax": ["/tools/pos"],
     semantics: [],
-    "discourse-pragmatics": [],
+    "discourse-pragmatics": ["/tools/discourse-analysis"],
     "information-extraction": [],
     "language-technology": ["/tools/excel", "/tools/code", "/tools/colab", "/tools/prompt"],
   });

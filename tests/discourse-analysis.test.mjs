@@ -79,14 +79,17 @@ test("reviewed cases use guarded localStorage and retain at most 100 records", (
   assert.equal(saveReviewedCase(createReviewedCase({ toolId: "stance", text, target: "القرار", aiOutput, decision: "accept", finalOutput: aiOutput }), blocked).ok, false);
 });
 
-test("current Research Hub exposes the standalone research-preview route without legacy paths", () => {
+test("Discourse & Pragmatics is the single canonical path for the research preview", () => {
   const page = source("pages/tools/discourse-analysis.js");
   const hub = source("pages/ar-tools.js");
+  const paths = source("lib/research-paths.js");
   const api = source("pages/api/discourse-analysis.js");
   for (const label of ["تحليل الموقف", "التحفظ والتوكيد", "العلاقات الخطابية", "تجريب بحثي", "قبول", "تعديل", "رفض"])
     assert.match(page, new RegExp(label));
-  assert.match(hub, /link: "\/tools\/discourse-analysis"/);
-  assert.match(hub, /key: "discoursePreview"/);
+  assert.doesNotMatch(hub, /key: "discourse"|key: "discoursePreview"|link: "\/tools\/discourse-analysis"/);
+  assert.match(paths, /id: "discourse-pragmatics"[\s\S]*?href: "\/tools\/discourse-analysis"/);
+  assert.match(paths, /Discourse Analysis · Research Preview/);
+  assert.match(paths, /تحليل الخطاب · تجريب بحثي/);
   assert.match(api, /type: "json_schema"/);
   assert.match(api, /validateDiscourseAiOutput/);
   assert.doesNotMatch(page, /validated|production-ready|academically approved/i);

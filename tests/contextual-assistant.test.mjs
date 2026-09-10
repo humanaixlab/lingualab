@@ -109,11 +109,14 @@ test("known visible terms add only page-safe technical context", () => {
 });
 
 test("unavailable paths never suggest launching nonexistent tools", () => {
-  for (const pathId of ["semantics", "discourse-pragmatics", "information-extraction"]) {
+  for (const pathId of ["semantics", "information-extraction"]) {
     const result = getAssistantGuidance("/ar-tools", "en", { pathId });
     assert.match(result.suggestions.map((item) => item.answer).join(" "), /no dedicated|No dedicated|not runnable|cannot be launched|Coming next/i);
     assert.ok(result.suggestions.every((item) => !("href" in item)));
   }
+  const discourse = getAssistantGuidance("/ar-tools", "en", { pathId: "discourse-pragmatics" });
+  assert.match(discourse.suggestions.map((item) => item.answer).join(" "), /Discourse Analysis research preview/);
+  assert.doesNotMatch(discourse.suggestions.map((item) => item.answer).join(" "), /No dedicated tool/);
 });
 
 test("assistant level storage is isolated and guidance has no automatic actions or raw data", () => {
