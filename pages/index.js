@@ -28,6 +28,13 @@ const goals = [
 
 const workflow = ["upload", "understand", "choose", "analyze", "interpret", "report"];
 
+const onboardingSteps = [
+  { key: "linguistic", href: "/ar-tools#research-paths" },
+  { key: "computational", href: "/ar-tools#build-tools" },
+  { key: "study", href: "/research-advisor" },
+  { key: "output", href: "/research-report" },
+];
+
 const capabilities = [
   "corpus", "frequency", "concordance", "ngrams", "pos", "semantic", "code", "assistant",
 ];
@@ -187,6 +194,37 @@ export default function HomePage() {
                 </span>
               </Link>
             ))}
+          </div>
+        </section>
+
+        <section className={`${styles.section} ${styles.onboardingSection}`} aria-labelledby="research-onboarding-title">
+          <div className={styles.sectionHeading}>
+            <p className={styles.eyebrow}>{t("home.onboarding.eyebrow")}</p>
+            <h2 id="research-onboarding-title">{t("home.onboarding.title")}</h2>
+            <p>{t("home.onboarding.intro")}</p>
+          </div>
+
+          <div className={styles.onboardingGrid}>
+            {onboardingSteps.map((step, index) => (
+              <article className={styles.onboardingCard} key={step.key}>
+                <span className={styles.onboardingNumber}>{String(index + 1).padStart(2, "0")}</span>
+                <h3>{t(`home.onboarding.steps.${step.key}.title`)}</h3>
+                <p>{t(`home.onboarding.steps.${step.key}.description`)}</p>
+                <p className={styles.onboardingExamples}>{t(`home.onboarding.steps.${step.key}.examples`)}</p>
+                <Link href={step.href} className={styles.onboardingLink}>
+                  {t(`home.onboarding.steps.${step.key}.action`)} <ArrowIcon />
+                </Link>
+              </article>
+            ))}
+          </div>
+
+          <div className={styles.startingGuide}>
+            <strong>{t("home.onboarding.guideTitle")}</strong>
+            <ul>
+              {["phenomenon", "task", "unsure", "after"].map((item) => (
+                <li key={item}>{t(`home.onboarding.guide.${item}`)}</li>
+              ))}
+            </ul>
           </div>
         </section>
 

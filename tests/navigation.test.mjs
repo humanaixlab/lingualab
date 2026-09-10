@@ -24,6 +24,23 @@ test("Home exposes exactly the four canonical intent destinations", () => {
   assert.match(home, /href="\/ar-tools#all-tools"/);
 });
 
+test("Home gives researchers exactly four bilingual onboarding steps without exposing hidden previews", () => {
+  const home = source("pages/index.js");
+  const steps = home.slice(home.indexOf("const onboardingSteps = ["), home.indexOf("const capabilities = ["));
+  assert.equal((steps.match(/key: /g) || []).length, 4);
+  for (const [key, href] of [
+    ["linguistic", "/ar-tools#research-paths"],
+    ["computational", "/ar-tools#build-tools"],
+    ["study", "/research-advisor"],
+    ["output", "/research-report"],
+  ]) assert.match(steps, new RegExp(`key: "${key}"[\\s\\S]*?href: "${href.replaceAll("/", "\\/")}"`));
+  assert.match(home, /aria-labelledby="research-onboarding-title"/);
+  assert.match(source("lib/i18n/en.js"), /How do I start my research in LinguaLab\?/);
+  assert.match(source("lib/i18n/ar.js"), /كيف أبدأ بحثي في LinguaLab؟/);
+  for (const hidden of ["/tools/semantics", "/tools/information-extraction", "/tools/nlp-experiments", "/tools/text-classification-research"])
+    assert.doesNotMatch(home, new RegExp(hidden.replaceAll("/", "\\/")));
+});
+
 test("All Tools is the secondary directory and non-analysis tool back links target it", () => {
   const hub = source("pages/ar-tools.js");
   assert.match(hub, /id="all-tools"/);

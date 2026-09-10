@@ -460,6 +460,93 @@
   font-weight: 800;
 }
 
+.onboardingSection {
+  padding-top: 72px;
+}
+
+.onboardingGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.onboardingCard {
+  min-height: 290px;
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.onboardingNumber {
+  color: var(--purple);
+  font-size: var(--text-meta);
+  font-weight: 600;
+}
+
+.onboardingCard h3 {
+  margin: 18px 0 10px;
+  font-size: var(--text-card);
+  line-height: var(--leading-heading);
+  letter-spacing: var(--tracking-heading);
+}
+
+.onboardingCard > p {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+}
+
+.onboardingExamples {
+  margin-top: 14px !important;
+  color: #3f4d65 !important;
+  font-size: var(--text-helper) !important;
+  font-weight: 500;
+}
+
+.onboardingLink {
+  margin-top: auto;
+  padding-top: 22px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--ink);
+  font-size: var(--text-button);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.onboardingLink:hover,
+.onboardingLink:focus-visible {
+  color: var(--purple);
+}
+
+.startingGuide {
+  margin-top: 14px;
+  padding: 22px 24px;
+  border: 1px solid rgba(109, 80, 230, 0.18);
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(109, 80, 230, 0.07), rgba(54, 121, 236, 0.06));
+}
+
+.startingGuide strong {
+  font-size: var(--text-card);
+}
+
+.startingGuide ul {
+  margin: 13px 0 0;
+  padding-inline-start: 20px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 32px;
+  color: var(--muted);
+  font-size: var(--text-helper);
+  line-height: var(--leading-helper);
+}
+
 .workflowSection {
   width: min(1280px, calc(100% - 40px));
   padding: 72px clamp(28px, 5vw, 72px);
@@ -723,7 +810,8 @@
   }
 
   .goalsGrid,
-  .capabilitiesGrid {
+  .capabilitiesGrid,
+  .onboardingGrid {
     grid-template-columns: repeat(2, 1fr);
   }
 
@@ -774,7 +862,9 @@
 
   .findingsGrid,
   .goalsGrid,
-  .capabilitiesGrid {
+  .capabilitiesGrid,
+  .onboardingGrid,
+  .startingGuide ul {
     grid-template-columns: 1fr;
   }
 
