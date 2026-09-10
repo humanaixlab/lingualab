@@ -6,6 +6,11 @@ import styles from "../../styles/CorpusPath.module.css";
 
 const TOOLS = [
   {
+    href: "/tools/corpus-research",
+    title: { en: "Corpus Research · Research Preview", ar: "إنشاء وتحليل المدونة · تجريب بحثي" },
+    description: { en: "Create and review a corpus, then explore its observed patterns in a researcher-led workflow.", ar: "أنشئ مدونة وراجعها، ثم استكشف أنماطها المرصودة ضمن مسار يقوده الباحث." },
+  },
+  {
     href: "/tools/frequency",
     title: { en: "Frequency Analysis", ar: "تحليل التكرار (Frequency Analysis)" },
     description: { en: "Count recurring words and inspect the strongest lexical signals.", ar: "احسب الكلمات المتكررة وافحص أبرز المؤشرات المعجمية." },
@@ -36,7 +41,7 @@ export default function CorpusLinguisticsPath() {
     description: "اختر الأداة المناسبة لما تريد تنفيذه الآن، ثم انتقل من الوصف إلى السياق والمتتاليات وفق سؤالك البحثي.",
     available: "الأدوات المتاحة الآن",
     coming: "قدرات قادمة",
-    sequence: "ابدأ بتحليل التكرار لرؤية الأنماط العامة، واستخدم السياقات لفهم الاستعمال، ثم افحص المتتاليات اللفظية لاكتشاف العبارات المتكررة.",
+    sequence: "أنشئ مدونة جديدة عند الحاجة، أو ابدأ بتحليل التكرار لرؤية الأنماط العامة، ثم استخدم السياقات والمتتاليات اللفظية وفق سؤالك البحثي.",
     back: "العودة إلى المسارات البحثية",
   } : {
     eyebrow: "RESEARCH PATH",
@@ -44,7 +49,7 @@ export default function CorpusLinguisticsPath() {
     description: "Choose the tool that matches what you need to do now, then move from description to context and sequences according to your research question.",
     available: "Available now",
     coming: "Coming next",
-    sequence: "Start with frequency to see broad patterns, use contexts to understand usage, then inspect N-grams to discover recurring phrases.",
+    sequence: "Create a corpus when needed, or start with frequency to see broad patterns, then use contexts and N-grams according to your research question.",
     back: "Back to Research Paths",
   };
 

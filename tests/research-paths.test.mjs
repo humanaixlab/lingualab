@@ -125,8 +125,10 @@ test("Corpus Linguistics keeps its educational card and adds a dedicated executa
   assert.match(source("components/ResearchPaths.js"), /className=\{styles\.primaryCta\}[\s\S]*path\.hubHref \|\| path\.ctaHref/);
 
   const hub = source("pages/research-paths/corpus-linguistics.js");
-  for (const route of ["frequency", "concordance", "ngrams"])
+  for (const route of ["corpus-research", "frequency", "concordance", "ngrams"])
     assert.match(hub, new RegExp(`href: "\\/tools\\/${route}"`));
+  assert.match(hub, /Corpus Research · Research Preview/);
+  assert.match(hub, /إنشاء وتحليل المدونة · تجريب بحثي/);
   assert.doesNotMatch(hub, /\/tools\/pos|Parts of Speech|أقسام الكلام/);
   assert.match(hub, /COMING\[locale\]\.map\(\(item\) => <li/);
   assert.doesNotMatch(hub, /COMING[\s\S]{0,180}<Link/);
