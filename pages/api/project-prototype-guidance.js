@@ -51,6 +51,13 @@ NLP task: ${handoff.reviewed.nlpTask}
 Annotation schema: ${handoff.reviewed.annotationSchema}
 Expected social impact: ${handoff.reviewed.expectedSocialImpact}
 Risks and limitations: ${handoff.reviewed.risksAndLimitations}` : ""}
+${handoff.reviewed.sector ? `Possible applied sector: ${handoff.reviewed.sector}
+Practical need: ${handoff.reviewed.practicalNeed}
+Applied language problem: ${handoff.reviewed.appliedLanguageProblem}
+Applied NLP task: ${handoff.reviewed.appliedNlpTask}
+Possible application: ${handoff.reviewed.possibleApplication}
+Expected practical value: ${handoff.reviewed.expectedPracticalValue}
+Applied limitations: ${handoff.reviewed.appliedLimitations}` : ""}
 Proposed solution: ${localized(context.solution)}
 Intended users: ${localized(context.users)}
 Inputs: ${localized(context.inputs)}
