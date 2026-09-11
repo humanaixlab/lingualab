@@ -41,6 +41,26 @@ test("Home gives researchers exactly four bilingual onboarding steps without exp
     assert.doesNotMatch(home, new RegExp(hidden.replaceAll("/", "\\/")));
 });
 
+test("Home explains the complete bilingual computational research journey before tools", () => {
+  const home = source("pages/index.js");
+  const en = source("lib/i18n/en.js");
+  const ar = source("lib/i18n/ar.js");
+  const journey = home.slice(home.indexOf('id="workflow"'), home.indexOf('id="capabilities"'));
+  const workflowKeys = home.match(/const workflow = \[([^\]]+)\]/)[1].match(/"[^"]+"/g).map((item) => item.slice(1, -1));
+
+  assert.deepEqual(workflowKeys, ["understand", "prepare", "choose", "apply", "view", "evaluate", "interpret", "errors", "improve"]);
+  assert.match(journey, /home\.computationalJourney\.steps/);
+  assert.match(journey, /href="\/ar-tools#build-tools"/);
+  for (const label of ["Understand Data", "Prepare Data", "Choose Task", "Apply Method", "View Results", "Evaluate", "Interpret", "Analyze Errors", "Improve"])
+    assert.match(en, new RegExp(label));
+  for (const label of ["أفهم البيانات", "أجهزها", "أختار المهمة", "أطبق الطريقة", "أرى النتائج", "أقيّمها", "أفسرها", "أحلل الأخطاء", "أحسن التجربة"])
+    assert.match(ar, new RegExp(label));
+  assert.match(en, /Confusion matrices · Human-reference comparison/);
+  assert.match(ar, /مصفوفات الالتباس · المقارنة بالمرجع البشري/);
+  assert.match(en, /You do not need to be an advanced programmer/);
+  assert.match(ar, /لا تحتاج إلى خبرة متقدمة في البرمجة/);
+});
+
 test("the computational workflow section retains compatible directory anchors and tool returns", () => {
   const hub = source("pages/ar-tools.js");
   assert.match(hub, /id="all-tools"/);

@@ -573,28 +573,20 @@
 .workflowTrack {
   margin-top: 46px;
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .workflowStep {
   position: relative;
-  padding: 25px 15px 5px 0;
+  min-height: 100px;
+  padding: 17px 14px;
   display: flex;
   flex-direction: column;
   gap: 9px;
-}
-
-.workflowStep::before {
-  content: "";
-  position: absolute;
-  top: -5px;
-  left: 0;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #9a88ff;
-  box-shadow: 0 0 0 5px rgba(154, 136, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.045);
 }
 
 .workflowStep span {
@@ -605,6 +597,80 @@
 
 .workflowStep strong {
   font-size: 13px;
+  line-height: 1.45;
+}
+
+.journeyArrow {
+  position: absolute;
+  inset-inline-end: -8px;
+  top: 50%;
+  z-index: 1;
+  color: #a99bff;
+  font-style: normal;
+  transform: translate(50%, -50%);
+}
+
+:global(html[dir="rtl"]) .journeyArrow {
+  transform: translate(-50%, -50%) rotate(180deg);
+}
+
+.computationalAreas {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.computationalArea {
+  padding: 18px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.computationalArea h3 {
+  margin: 0 0 8px;
+  font-size: var(--text-helper);
+  line-height: 1.45;
+}
+
+.computationalArea p {
+  margin: 0;
+  color: #b9c4d6;
+  font-size: var(--text-meta);
+  line-height: 1.75;
+}
+
+.computationalMessage {
+  margin-top: 18px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  border: 1px solid rgba(169, 155, 255, 0.24);
+  border-radius: 16px;
+  background: rgba(13, 23, 43, 0.38);
+}
+
+.computationalMessage p {
+  max-width: 820px;
+  margin: 0;
+  color: #d9e0ec;
+  font-size: var(--text-helper);
+  line-height: 1.75;
+}
+
+.computationalLink {
+  flex: 0 0 auto;
+  color: #fff;
+  font-size: var(--text-button);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.computationalLink:hover,
+.computationalLink:focus-visible {
+  color: #c4baff;
 }
 
 .capabilitiesGrid {
@@ -820,6 +886,14 @@
     row-gap: 22px;
   }
 
+  .journeyArrow {
+    display: none;
+  }
+
+  .computationalAreas {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .partnerSection {
     grid-template-columns: 1fr;
     gap: 42px;
@@ -888,6 +962,15 @@
 
   .workflowTrack {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .computationalAreas {
+    grid-template-columns: 1fr;
+  }
+
+  .computationalMessage {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .finalCta {

@@ -26,7 +26,9 @@ const goals = [
   },
 ];
 
-const workflow = ["upload", "understand", "choose", "analyze", "interpret", "report"];
+const workflow = ["understand", "prepare", "choose", "apply", "view", "evaluate", "interpret", "errors", "improve"];
+
+const computationalAreas = ["data", "preparation", "results", "improvement"];
 
 const onboardingSteps = [
   { key: "linguistic", href: "/ar-tools#research-paths" },
@@ -230,18 +232,35 @@ export default function HomePage() {
 
         <section className={`${styles.section} ${styles.workflowSection}`} id="workflow">
           <div className={styles.workflowIntro}>
-            <p className={styles.eyebrow}>{t("home.workflowEyebrow")}</p>
-            <h2>{t("home.workflowTitle")}</h2>
-            <p>{t("home.workflowText")}</p>
+            <p className={styles.eyebrow}>{t("home.computationalJourney.eyebrow")}</p>
+            <h2>{t("home.computationalJourney.title")}</h2>
+            <p>{t("home.computationalJourney.intro")}</p>
           </div>
 
           <div className={styles.workflowTrack}>
             {workflow.map((step, index) => (
               <div className={styles.workflowStep} key={step}>
                 <span>{String(index + 1).padStart(2, "0")}</span>
-                <strong>{t(`home.workflow.${step}`)}</strong>
+                <strong>{t(`home.computationalJourney.steps.${step}`)}</strong>
+                {index < workflow.length - 1 && <i className={styles.journeyArrow} aria-hidden="true">→</i>}
               </div>
             ))}
+          </div>
+
+          <div className={styles.computationalAreas}>
+            {computationalAreas.map((area) => (
+              <article className={styles.computationalArea} key={area}>
+                <h3>{t(`home.computationalJourney.areas.${area}.title`)}</h3>
+                <p>{t(`home.computationalJourney.areas.${area}.items`)}</p>
+              </article>
+            ))}
+          </div>
+
+          <div className={styles.computationalMessage}>
+            <p>{t("home.computationalJourney.message")}</p>
+            <Link href="/ar-tools#build-tools" className={styles.computationalLink}>
+              {t("home.computationalJourney.action")} <ArrowIcon />
+            </Link>
           </div>
         </section>
 
