@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import { PROJECT_CATALOG } from "../lib/project-catalog.js";
-import { GUIDE_MEDIA, PROTOTYPE_PROFILES, RESEARCH_GUIDES, buildPrototypeRoadmap, getProjectGuides, getPrototypeLinks, getPrototypeProfile } from "../lib/project-guides.js";
+import { GUIDE_MEDIA, PROTOTYPE_HANDOFF_FIELDS, PROTOTYPE_PROFILES, RESEARCH_GUIDES, buildPrototypeHandoff, buildPrototypeRoadmap, getProjectGuides, getPrototypeLinks, getPrototypeProfile } from "../lib/project-guides.js";
 
 const source = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
@@ -49,14 +49,45 @@ test("Projects requests guidance only by explicit action and sends no research d
   assert.match(page, /Generate prototype guidance/);
   assert.match(page, /ولّد إرشاد النموذج الأولي/);
   assert.match(page, /onClick=\{requestGuidance\}/);
-  assert.match(page, /JSON\.stringify\(\{ projectId: project\.id, uiLanguage: language \}\)/);
+  assert.match(page, /JSON\.stringify\(\{ projectId: project\.id, uiLanguage: language, researcherEdits: current\.researcherEdits \}\)/);
   assert.doesNotMatch(page, /useEffect/);
   assert.doesNotMatch(page, /JSON\.stringify\([^)]*(?:dataset|rawText|fileContent)/);
+});
+
+test("prototype handoff inherits every required project field and preserves researcher edits separately", () => {
+  assert.deepEqual(PROTOTYPE_HANDOFF_FIELDS.map((field) => field.id), ["idea", "problem", "impact", "path", "tools", "requiredData", "expectedOutputs", "evaluation", "applicationPotential"]);
+  const project = PROJECT_CATALOG.find((item) => item.id === "arabic-terminology");
+  const initial = buildPrototypeHandoff(project, "en");
+  assert.deepEqual(initial.missing, []);
+  assert.equal(initial.inherited.idea, project.title.en);
+  assert.equal(initial.inherited.impact, project.impact.en);
+  assert.equal(initial.inherited.tools, project.tools.join(", "));
+  assert.equal(initial.inherited.expectedOutputs, project.expectedResults.en);
+  assert.equal(initial.inherited.applicationPotential, project.applicationPotential.en);
+  assert.equal(initial.researcherEdits.problem, "");
+  const edited = buildPrototypeHandoff(project, "en", { problem: "Researcher-refined problem" });
+  assert.equal(edited.inherited.problem, project.problem.en);
+  assert.equal(edited.researcherEdits.problem, "Researcher-refined problem");
+  assert.equal(edited.reviewed.problem, "Researcher-refined problem");
+});
+
+test("prototype handoff action opens review before AI guidance and asks only for missing fields", () => {
+  const page = source("pages/projects.js");
+  assert.match(page, /Turn this project into a prototype/);
+  assert.match(page, /حوّل هذا المشروع إلى نموذج أولي/);
+  assert.match(page, /Inherited project information/);
+  assert.match(page, /Researcher edits \/ additions/);
+  assert.match(page, /disabled=\{!contextReviewed \|\| guidanceStatus === "loading"\}/);
+  assert.match(page, /missingFields\.includes\(field\.id\)/);
+  assert.match(page, /requestAnimationFrame/);
+  assert.doesNotMatch(page, /router\.push|window\.location|useEffect/);
 });
 
 test("server-side AI prompt preserves research, code, and licensing safeguards", () => {
   const api = source("pages/api/project-prototype-guidance.js");
   assert.match(api, /process\.env\.OPENAI_API_KEY/);
+  assert.match(api, /buildPrototypeHandoff\(project, language, researcherEdits\)/);
+  assert.match(api, /missing: handoff\.missing/);
   assert.match(api, /guidance, not measured evidence/);
   assert.match(api, /Do not invent data, results, metrics/);
   assert.match(api, /Do not copy code from repositories/);

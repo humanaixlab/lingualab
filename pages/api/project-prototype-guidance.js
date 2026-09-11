@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import { PROJECT_CATALOG } from "../../lib/project-catalog";
-import { getPrototypePromptContext } from "../../lib/project-guides";
+import { PROTOTYPE_HANDOFF_FIELDS, buildPrototypeHandoff, getPrototypePromptContext } from "../../lib/project-guides";
 
 const cleanLanguage = (value) => value === "ar" ? "ar" : "en";
 
@@ -24,6 +24,10 @@ export default async function handler(req, res) {
   const project = PROJECT_CATALOG.find((item) => item.id === projectId);
   const context = project ? getPrototypePromptContext(project) : null;
   if (!context) return res.status(400).json({ error: "This project does not support prototype guidance." });
+  const rawEdits = req.body?.researcherEdits && typeof req.body.researcherEdits === "object" ? req.body.researcherEdits : {};
+  const researcherEdits = Object.fromEntries(PROTOTYPE_HANDOFF_FIELDS.map(({ id }) => [id, typeof rawEdits[id] === "string" ? rawEdits[id].trim().slice(0, 2000) : ""]));
+  const handoff = buildPrototypeHandoff(project, language, researcherEdits);
+  if (handoff.missing.length) return res.status(400).json({ error: "Complete the missing project context before requesting guidance.", missing: handoff.missing });
   if (!process.env.OPENAI_API_KEY) return res.status(503).json({ error: "AI prototype guidance is not configured on this deployment." });
 
   const localized = (value) => value[language];
@@ -31,9 +35,15 @@ export default async function handler(req, res) {
   const prompt = `${languageRule}
 You are providing bounded, AI-supported prototype guidance for a computational-linguistics research project. This is guidance, not measured evidence, definitive engineering advice, or production-ready software.
 
-Project: ${project.id}
-Path: ${localized(context.path)}
-Research problem: ${localized(context.problem)}
+Project: ${handoff.reviewed.idea}
+Research problem: ${handoff.reviewed.problem}
+Expected impact: ${handoff.reviewed.impact}
+Path: ${handoff.reviewed.path}
+LinguaLab tools: ${handoff.reviewed.tools}
+Required data: ${handoff.reviewed.requiredData}
+Expected research outputs: ${handoff.reviewed.expectedOutputs}
+Evaluation approach: ${handoff.reviewed.evaluation}
+Application potential: ${handoff.reviewed.applicationPotential}
 Proposed solution: ${localized(context.solution)}
 Intended users: ${localized(context.users)}
 Inputs: ${localized(context.inputs)}
