@@ -64,6 +64,6 @@ test("Projects exposes the fourth pathway, detail ethics, and no new destination
   assert.match(page, /SocialImpactDetail/);
   assert.match(page, /getPrototypeHandoffFields/);
   assert.match(page, /Educational\/research use only/);
-  assert.doesNotMatch(page, /router\.push|window\.location|useEffect|localStorage|sessionStorage/);
+  assert.doesNotMatch(page, /useEffect|localStorage|sessionStorage/);
   assert.doesNotMatch(source("lib/social-impact-projects.js"), /href|router|\/api\//);
 });

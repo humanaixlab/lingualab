@@ -80,7 +80,7 @@ test("prototype handoff action opens review before AI guidance and asks only for
   assert.match(page, /disabled=\{!contextReviewed \|\| guidanceStatus === "loading"\}/);
   assert.match(page, /missingFields\.includes\(field\.id\)/);
   assert.match(page, /requestAnimationFrame/);
-  assert.doesNotMatch(page, /router\.push|window\.location|useEffect/);
+  assert.doesNotMatch(page, /useEffect/);
 });
 
 test("server-side AI prompt preserves research, code, and licensing safeguards", () => {

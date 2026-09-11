@@ -67,5 +67,5 @@ test("unsupported work is labeled external and the executable roadmap does not t
   assert.match(page, /External step/);
   assert.match(page, /خطوة خارجية/);
   assert.match(page, /buildProjectRoadmap/);
-  assert.doesNotMatch(page, /router\.push|window\.location|useEffect/);
+  assert.doesNotMatch(page, /useEffect/);
 });

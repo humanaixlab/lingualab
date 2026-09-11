@@ -15,12 +15,16 @@ const require = createRequire(import.meta.url);
 const swc = require("next/dist/build/swc");
 await swc.loadBindings();
 const source = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
+const transformedPages = new Map();
 
-async function renderPage(path, language) {
-  const { code } = await swc.transform(source(path), {
-    jsc: { parser: { syntax: "ecmascript", jsx: true }, transform: { react: { runtime: "automatic" } } },
-    module: { type: "commonjs" },
-  });
+async function renderPage(path, language, router = { query: {}, isReady: true, push() {} }) {
+  if (!transformedPages.has(path)) {
+    const { code } = await swc.transform(source(path), {
+      jsc: { parser: { syntax: "ecmascript", jsx: true }, transform: { react: { runtime: "automatic" } } },
+      module: { type: "commonjs" },
+    });
+    transformedPages.set(path, code);
+  }
   const exports = {};
   const scope = {
     exports,
@@ -29,6 +33,7 @@ async function renderPage(path, language) {
       if (module === "react/jsx-runtime") return awaitImportJsxRuntime;
       if (module === "next/head") return function MockHead() { return null; };
       if (module === "next/link") return function MockLink({ children, ...props }) { return React.createElement("a", props, children); };
+      if (module === "next/router") return { useRouter: () => router };
       if (module === "../components/LanguageProvider") return { useLanguage: () => ({ language, t: (key, variables) => translate(language, key, variables) }) };
       if (module === "../lib/project-catalog") return { PATH_GUIDANCE, PROJECT_CATALOG, PROJECT_PATH_ROUTES, PROJECT_TOOL_ROUTES, buildProjectRoadmap, recommendProjects };
       if (module === "../lib/project-guides") return { buildPrototypeHandoff, buildPrototypeRoadmap, getProjectGuides, getPrototypeHandoffFields, getPrototypeLinks, getPrototypeProfile };
@@ -39,7 +44,7 @@ async function renderPage(path, language) {
       throw new Error(`Unexpected module: ${module}`);
     },
   };
-  Function("exports", "require", code)(scope.exports, scope.require);
+  Function("exports", "require", transformedPages.get(path))(scope.exports, scope.require);
   return renderToStaticMarkup(React.createElement(scope.exports.default));
 }
 
@@ -74,6 +79,37 @@ test("Projects is a bilingual research navigator without persistence or fake upl
   assert.match(source("styles/Projects.module.css"), /font-family:\s*var\(--font-ui\)/);
   assert.doesNotMatch(source("styles/Projects.module.css"), /font-family:\s*Arial/);
 });
+
+test("Projects deep links render every canonical project and fail safely for unknown IDs", async () => {
+  assert.equal(new Set(PROJECT_CATALOG.map((project) => project.id)).size, PROJECT_CATALOG.length);
+  for (const project of PROJECT_CATALOG) {
+    const html = await renderPage("pages/projects.js", "en", { query: { project: project.id }, isReady: true, push() {} });
+    assert.match(html, new RegExp(localizedForTest(project.title.en)));
+  }
+
+  const arabic = await renderPage("pages/projects.js", "ar", { query: { project: "arabic-stance-reference" }, isReady: true, push() {} });
+  const social = await renderPage("pages/projects.js", "en", { query: { project: "social-pragmatics-assistant" }, isReady: true, push() {} });
+  const applied = await renderPage("pages/projects.js", "en", { query: { project: "heritage-description-assistant" }, isReady: true, push() {} });
+  const invalid = await renderPage("pages/projects.js", "en", { query: { project: "unknown-project" }, isReady: true, push() {} });
+  assert.match(arabic, /نسخ رابط المشروع/);
+  assert.match(social, /Copy project link/);
+  assert.match(applied, /Copy project link/);
+  assert.match(invalid, /The requested project could not be found/);
+  assert.match(invalid, /Project suggestions/);
+});
+
+test("Projects opens and closes plans through the router query as the only selection source", () => {
+  const page = source("pages/projects.js");
+  assert.match(page, /router\.push\(\{ pathname: "\/projects", query: \{ project: projectId \} \}/);
+  assert.match(page, /router\.push\("\/projects"/);
+  assert.match(page, /typeof router\.query\?\.project === "string"/);
+  assert.doesNotMatch(page, /selectedId|setSelectedId/);
+  assert.match(page, /navigator\.clipboard\?\.writeText/);
+});
+
+function localizedForTest(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
 test("visible learning navigation no longer uses the Student Dashboard identity", () => {
   for (const path of ["pages/projects.js", "pages/profile.js", "pages/student-dashboard.js"])
