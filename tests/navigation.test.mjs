@@ -24,6 +24,15 @@ test("Home exposes exactly the four canonical intent destinations", () => {
   assert.match(home, /href="\/ar-tools#all-tools"/);
 });
 
+test("Home describes Semantic Lab as semantic analysis in both languages", () => {
+  const en = source("lib/i18n/en.js");
+  const ar = source("lib/i18n/ar.js");
+  assert.match(en, /semantic: \{ name: "Semantic Lab", detail: "Explore semantic similarity, topic discovery, and meaning-based grouping in Arabic text\." \}/);
+  assert.match(ar, /semantic: \{ name: "مختبر الدلالة", detail: "استكشف التشابه الدلالي، واكتشاف الموضوعات، وتجميع النصوص وفق المعنى\." \}/);
+  assert.doesNotMatch(en, /semantic: \{[^\n]+text-classification experiments/);
+  assert.doesNotMatch(ar, /semantic: \{[^\n]+تجارب تصنيف النصوص/);
+});
+
 test("Home gives researchers exactly four bilingual onboarding steps without exposing hidden previews", () => {
   const home = source("pages/index.js");
   const steps = home.slice(home.indexOf("const onboardingSteps = ["), home.indexOf("const capabilities = ["));
