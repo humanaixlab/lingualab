@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import { CHALLENGE_BY_ID } from "../lib/arabic-challenges.js";
-import { PROJECT_CATALOG, PROJECT_TOOL_ROUTES, recommendProjects } from "../lib/project-catalog.js";
+import { PROJECT_CATALOG, PROJECT_PATH_ROUTES, PROJECT_TOOL_ROUTES, recommendProjects } from "../lib/project-catalog.js";
 import { buildPrototypeHandoff, getPrototypeHandoffFields, getPrototypeProfile } from "../lib/project-guides.js";
 import { SOCIAL_IMPACT_DOMAINS, SOCIAL_IMPACT_PROJECTS, SOCIAL_PROBLEM_MAPPINGS, filterSocialImpactProjects } from "../lib/social-impact-projects.js";
 
@@ -12,9 +12,12 @@ test("social impact layer defines ten bilingual domains and ten reusable project
   assert.equal(SOCIAL_IMPACT_DOMAINS.length, 10);
   assert.equal(SOCIAL_IMPACT_PROJECTS.length, 10);
   assert.deepEqual(SOCIAL_IMPACT_DOMAINS.map((item) => item.id), ["transport", "tourism", "sustainability", "recreation", "public-services", "accessibility", "health", "social-integration", "education", "local-services"]);
+  const domainIds = new Set(SOCIAL_IMPACT_DOMAINS.map((domain) => domain.id));
   for (const project of SOCIAL_IMPACT_PROJECTS) {
     assert.ok(PROJECT_CATALOG.includes(project));
     assert.ok(project.title.en && project.title.ar);
+    assert.ok(domainIds.has(project.socialImpact.domain), `${project.id} has an unknown domain ${project.socialImpact.domain}`);
+    assert.ok(PROJECT_PATH_ROUTES[project.path], `${project.id} has an unknown project path ${project.path}`);
     assert.ok(project.tools.every((tool) => PROJECT_TOOL_ROUTES[tool]), `${project.id} has an unknown tool`);
     assert.ok(project.challengeIds.every((id) => CHALLENGE_BY_ID[id]), `${project.id} has an unknown Arabic challenge`);
     for (const field of ["id", "titleAr", "titleEn", "domain", "problemAr", "problemEn", "affectedUsers", "languageProblem", "whyItMatters", "nlpTasks", "suitablePaths", "suitableTools", "dataNeeds", "annotationSchema", "humanReferenceNeeds", "externalSteps", "evaluationApproaches", "errorAnalysisFocus", "prototypeIdea", "expectedSocialImpact", "risksAndLimitations", "privacyConsiderations", "complexity", "individualOrTeam", "needsAnnotators", "tags"]) assert.notEqual(project[field], undefined, `${project.id} missing ${field}`);
