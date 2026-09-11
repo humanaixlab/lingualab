@@ -6,8 +6,9 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { translate } from "../lib/i18n/translate.js";
 import { PATH_GUIDANCE, PROJECT_CATALOG, PROJECT_PATH_ROUTES, PROJECT_TOOL_ROUTES, buildProjectRoadmap, recommendProjects } from "../lib/project-catalog.js";
-import { buildPrototypeRoadmap, getProjectGuides, getPrototypeLinks, getPrototypeProfile } from "../lib/project-guides.js";
+import { buildPrototypeHandoff, buildPrototypeRoadmap, getProjectGuides, getPrototypeHandoffFields, getPrototypeLinks, getPrototypeProfile } from "../lib/project-guides.js";
 import { ARABIC_CHALLENGE_FAMILIES, CHALLENGE_BY_ID } from "../lib/arabic-challenges.js";
+import { SOCIAL_IMPACT_DOMAINS, SOCIAL_IMPACT_PROJECTS, SOCIAL_PROBLEM_MAPPINGS, filterSocialImpactProjects } from "../lib/social-impact-projects.js";
 
 const require = createRequire(import.meta.url);
 const swc = require("next/dist/build/swc");
@@ -29,8 +30,9 @@ async function renderPage(path, language) {
       if (module === "next/link") return function MockLink({ children, ...props }) { return React.createElement("a", props, children); };
       if (module === "../components/LanguageProvider") return { useLanguage: () => ({ language, t: (key, variables) => translate(language, key, variables) }) };
       if (module === "../lib/project-catalog") return { PATH_GUIDANCE, PROJECT_CATALOG, PROJECT_PATH_ROUTES, PROJECT_TOOL_ROUTES, buildProjectRoadmap, recommendProjects };
-      if (module === "../lib/project-guides") return { buildPrototypeRoadmap, getProjectGuides, getPrototypeLinks, getPrototypeProfile };
+      if (module === "../lib/project-guides") return { buildPrototypeHandoff, buildPrototypeRoadmap, getProjectGuides, getPrototypeHandoffFields, getPrototypeLinks, getPrototypeProfile };
       if (module === "../lib/arabic-challenges") return { ARABIC_CHALLENGE_FAMILIES, CHALLENGE_BY_ID };
+      if (module === "../lib/social-impact-projects") return { SOCIAL_IMPACT_DOMAINS, SOCIAL_IMPACT_PROJECTS, SOCIAL_PROBLEM_MAPPINGS, filterSocialImpactProjects };
       if (module === "../styles/Projects.module.css") return new Proxy({}, { get: (_, key) => String(key) });
       throw new Error(`Unexpected module: ${module}`);
     },

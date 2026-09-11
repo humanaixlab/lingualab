@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import { PROJECT_CATALOG } from "../../lib/project-catalog";
-import { PROTOTYPE_HANDOFF_FIELDS, buildPrototypeHandoff, getPrototypePromptContext } from "../../lib/project-guides";
+import { buildPrototypeHandoff, getPrototypeHandoffFields, getPrototypePromptContext } from "../../lib/project-guides";
 
 const cleanLanguage = (value) => value === "ar" ? "ar" : "en";
 
@@ -25,7 +25,7 @@ export default async function handler(req, res) {
   const context = project ? getPrototypePromptContext(project) : null;
   if (!context) return res.status(400).json({ error: "This project does not support prototype guidance." });
   const rawEdits = req.body?.researcherEdits && typeof req.body.researcherEdits === "object" ? req.body.researcherEdits : {};
-  const researcherEdits = Object.fromEntries(PROTOTYPE_HANDOFF_FIELDS.map(({ id }) => [id, typeof rawEdits[id] === "string" ? rawEdits[id].trim().slice(0, 2000) : ""]));
+  const researcherEdits = Object.fromEntries(getPrototypeHandoffFields(project).map(({ id }) => [id, typeof rawEdits[id] === "string" ? rawEdits[id].trim().slice(0, 2000) : ""]));
   const handoff = buildPrototypeHandoff(project, language, researcherEdits);
   if (handoff.missing.length) return res.status(400).json({ error: "Complete the missing project context before requesting guidance.", missing: handoff.missing });
   if (!process.env.OPENAI_API_KEY) return res.status(503).json({ error: "AI prototype guidance is not configured on this deployment." });
@@ -44,6 +44,13 @@ Required data: ${handoff.reviewed.requiredData}
 Expected research outputs: ${handoff.reviewed.expectedOutputs}
 Evaluation approach: ${handoff.reviewed.evaluation}
 Application potential: ${handoff.reviewed.applicationPotential}
+${project.socialImpact ? `Social problem: ${handoff.reviewed.socialProblem}
+Affected users: ${handoff.reviewed.affectedUsers}
+Language problem: ${handoff.reviewed.languageProblem}
+NLP task: ${handoff.reviewed.nlpTask}
+Annotation schema: ${handoff.reviewed.annotationSchema}
+Expected social impact: ${handoff.reviewed.expectedSocialImpact}
+Risks and limitations: ${handoff.reviewed.risksAndLimitations}` : ""}
 Proposed solution: ${localized(context.solution)}
 Intended users: ${localized(context.users)}
 Inputs: ${localized(context.inputs)}

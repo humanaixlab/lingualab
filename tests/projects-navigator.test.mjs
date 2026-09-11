@@ -13,7 +13,7 @@ test("guidance covers four linguistic paths and three computational workflows", 
 });
 
 test("catalog is structured, varied, bilingual, and connected to current tools", () => {
-  assert.equal(PROJECT_CATALOG.length, 18);
+  assert.equal(PROJECT_CATALOG.length, 28);
   assert.deepEqual(new Set(PROJECT_CATALOG.map((item) => item.path)), new Set(Object.keys(PATH_GUIDANCE)));
   assert.ok(PROJECT_CATALOG.some((item) => item.teamType === "individual"));
   assert.ok(PROJECT_CATALOG.some((item) => item.teamType === "team" && item.annotatorsRequired));
