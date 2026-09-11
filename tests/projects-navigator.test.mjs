@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { PATH_GUIDANCE, PROJECT_CATALOG, recommendProjects } from "../lib/project-catalog.js";
+import { PATH_GUIDANCE, PROJECT_CATALOG, PROJECT_PATH_ROUTES, PROJECT_TOOL_ROUTES, buildProjectRoadmap, recommendProjects } from "../lib/project-catalog.js";
 const source = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("guidance covers four linguistic paths and three computational workflows", () => {
@@ -39,5 +39,32 @@ test("Projects remains navigation-only and separates result layers", () => {
   assert.match(page, /AI-supported interpretation/);
   assert.match(page, /Researcher conclusions/);
   assert.doesNotMatch(page, /localStorage|sessionStorage|fetch\(|\/api\/|projectId|auth|collaborator|WebSocket/);
-  assert.doesNotMatch(source("lib/project-catalog.js"), /href|route|localStorage|sessionStorage/);
+  assert.doesNotMatch(source("lib/project-catalog.js"), /localStorage|sessionStorage|fetch\(|\/api\//);
+});
+
+test("every project links to real canonical, data, tool, evaluation, interpretation, and reporting destinations", () => {
+  const routeFiles = new Set([
+    "/", "/ar-tools", "/workspace", "/research-report", "/research-paths/corpus-linguistics", "/tools/analyze", "/tools/prompt",
+    ...Object.values(PROJECT_TOOL_ROUTES),
+  ]);
+  for (const project of PROJECT_CATALOG) {
+    assert.ok(PROJECT_PATH_ROUTES[project.path]);
+    assert.ok(project.tools.every((tool) => PROJECT_TOOL_ROUTES[tool]));
+    const roadmap = buildProjectRoadmap(project);
+    for (const stage of ["path", "data", "tool", "run", "review", "evaluate", "errors", "interpret", "report", "writing"]) {
+      const step = roadmap.find((item) => item.stage === stage);
+      assert.ok(step?.href, `${project.id} missing ${stage} destination`);
+      assert.ok(routeFiles.has(step.href.split("#")[0]), `${project.id} uses unknown route ${step.href}`);
+    }
+    assert.ok(roadmap.some((item) => item.external && item.stage === "responsibility"));
+    if (project.annotatorsRequired) assert.ok(roadmap.some((item) => item.external && item.stage === "annotation"));
+  }
+});
+
+test("unsupported work is labeled external and the executable roadmap does not trigger work", () => {
+  const page = source("pages/projects.js");
+  assert.match(page, /External step/);
+  assert.match(page, /خطوة خارجية/);
+  assert.match(page, /buildProjectRoadmap/);
+  assert.doesNotMatch(page, /router\.push|window\.location|onClick=\{.*fetch|useEffect/);
 });

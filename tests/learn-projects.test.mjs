@@ -5,7 +5,7 @@ import test from "node:test";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { translate } from "../lib/i18n/translate.js";
-import { PATH_GUIDANCE, PROJECT_CATALOG, recommendProjects } from "../lib/project-catalog.js";
+import { PATH_GUIDANCE, PROJECT_CATALOG, PROJECT_PATH_ROUTES, PROJECT_TOOL_ROUTES, buildProjectRoadmap, recommendProjects } from "../lib/project-catalog.js";
 
 const require = createRequire(import.meta.url);
 const swc = require("next/dist/build/swc");
@@ -26,7 +26,7 @@ async function renderPage(path, language) {
       if (module === "next/head") return function MockHead() { return null; };
       if (module === "next/link") return function MockLink({ children, ...props }) { return React.createElement("a", props, children); };
       if (module === "../components/LanguageProvider") return { useLanguage: () => ({ language, t: (key, variables) => translate(language, key, variables) }) };
-      if (module === "../lib/project-catalog") return { PATH_GUIDANCE, PROJECT_CATALOG, recommendProjects };
+      if (module === "../lib/project-catalog") return { PATH_GUIDANCE, PROJECT_CATALOG, PROJECT_PATH_ROUTES, PROJECT_TOOL_ROUTES, buildProjectRoadmap, recommendProjects };
       if (module === "../styles/Projects.module.css") return new Proxy({}, { get: (_, key) => String(key) });
       throw new Error(`Unexpected module: ${module}`);
     },
