@@ -38,7 +38,8 @@ test("Projects remains navigation-only and separates result layers", () => {
   assert.match(page, /Measured \/ computed results/);
   assert.match(page, /AI-supported interpretation/);
   assert.match(page, /Researcher conclusions/);
-  assert.doesNotMatch(page, /localStorage|sessionStorage|fetch\(|\/api\/|projectId|auth|collaborator|WebSocket/);
+  assert.doesNotMatch(page, /localStorage|sessionStorage|auth|collaborator|WebSocket|useEffect/);
+  assert.match(page, /fetch\("\/api\/project-prototype-guidance"/);
   assert.doesNotMatch(source("lib/project-catalog.js"), /localStorage|sessionStorage|fetch\(|\/api\//);
 });
 
@@ -66,5 +67,5 @@ test("unsupported work is labeled external and the executable roadmap does not t
   assert.match(page, /External step/);
   assert.match(page, /خطوة خارجية/);
   assert.match(page, /buildProjectRoadmap/);
-  assert.doesNotMatch(page, /router\.push|window\.location|onClick=\{.*fetch|useEffect/);
+  assert.doesNotMatch(page, /router\.push|window\.location|useEffect/);
 });

@@ -6,6 +6,7 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { translate } from "../lib/i18n/translate.js";
 import { PATH_GUIDANCE, PROJECT_CATALOG, PROJECT_PATH_ROUTES, PROJECT_TOOL_ROUTES, buildProjectRoadmap, recommendProjects } from "../lib/project-catalog.js";
+import { buildPrototypeRoadmap, getProjectGuides, getPrototypeLinks, getPrototypeProfile } from "../lib/project-guides.js";
 
 const require = createRequire(import.meta.url);
 const swc = require("next/dist/build/swc");
@@ -27,6 +28,7 @@ async function renderPage(path, language) {
       if (module === "next/link") return function MockLink({ children, ...props }) { return React.createElement("a", props, children); };
       if (module === "../components/LanguageProvider") return { useLanguage: () => ({ language, t: (key, variables) => translate(language, key, variables) }) };
       if (module === "../lib/project-catalog") return { PATH_GUIDANCE, PROJECT_CATALOG, PROJECT_PATH_ROUTES, PROJECT_TOOL_ROUTES, buildProjectRoadmap, recommendProjects };
+      if (module === "../lib/project-guides") return { buildPrototypeRoadmap, getProjectGuides, getPrototypeLinks, getPrototypeProfile };
       if (module === "../styles/Projects.module.css") return new Proxy({}, { get: (_, key) => String(key) });
       throw new Error(`Unexpected module: ${module}`);
     },
@@ -59,7 +61,8 @@ test("Projects is a bilingual research navigator without persistence or fake upl
   assert.match(en, /How can this path help my research/);
   assert.match(ar, /دليل المشاريع البحثية/);
   assert.match(ar, /كيف يخدمني هذا المسار/);
-  assert.doesNotMatch(page, /type="file"|type="checkbox"|sessionStorage|localStorage|fetch\(|\/api\//);
+  assert.doesNotMatch(page, /type="file"|type="checkbox"|sessionStorage|localStorage|useEffect/);
+  assert.match(page, /fetch\("\/api\/project-prototype-guidance"/);
   assert.doesNotMatch(`${en}${ar}`, /Student Dashboard|لوحة الطالبة|رفع المشروع|Upload project/);
   assert.doesNotMatch(ar, /ارفعي|اختاري|اكتبي|ألصقي|حددي/);
   assert.match(source("styles/Projects.module.css"), /font-family:\s*var\(--font-ui\)/);
