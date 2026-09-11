@@ -5,6 +5,7 @@ import test from "node:test";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { translate } from "../lib/i18n/translate.js";
+import { PATH_GUIDANCE, PROJECT_CATALOG, recommendProjects } from "../lib/project-catalog.js";
 
 const require = createRequire(import.meta.url);
 const swc = require("next/dist/build/swc");
@@ -25,6 +26,7 @@ async function renderPage(path, language) {
       if (module === "next/head") return function MockHead() { return null; };
       if (module === "next/link") return function MockLink({ children, ...props }) { return React.createElement("a", props, children); };
       if (module === "../components/LanguageProvider") return { useLanguage: () => ({ language, t: (key, variables) => translate(language, key, variables) }) };
+      if (module === "../lib/project-catalog") return { PATH_GUIDANCE, PROJECT_CATALOG, recommendProjects };
       if (module === "../styles/Projects.module.css") return new Proxy({}, { get: (_, key) => String(key) });
       throw new Error(`Unexpected module: ${module}`);
     },
@@ -49,20 +51,18 @@ test("Learning Hub keeps its compatible route, progress logic, and tool learning
   assert.match(page, /`\$\{path\.href\}\?from=learn`/);
 });
 
-test("Projects is a bilingual Workspace launcher without fake upload or persistence", async () => {
+test("Projects is a bilingual research navigator without persistence or fake upload", async () => {
   const page = source("pages/projects.js");
   const en = await renderPage("pages/projects.js", "en");
   const ar = await renderPage("pages/projects.js", "ar");
-  assert.match(en, /Start a new research project/);
-  assert.match(en, /Learning Hub/);
-  assert.match(ar, /ابدأ مشروعًا بحثيًا جديدًا/);
-  assert.match(ar, /مركز التعلّم/);
-  assert.match(en, /href="\/workspace"/);
-  assert.match(ar, /href="\/workspace"/);
+  assert.match(en, /RESEARCH PROJECT NAVIGATOR/);
+  assert.match(en, /How can this path help my research/);
+  assert.match(ar, /دليل المشاريع البحثية/);
+  assert.match(ar, /كيف يخدمني هذا المسار/);
   assert.doesNotMatch(page, /type="file"|type="checkbox"|sessionStorage|localStorage|fetch\(|\/api\//);
   assert.doesNotMatch(`${en}${ar}`, /Student Dashboard|لوحة الطالبة|رفع المشروع|Upload project/);
   assert.doesNotMatch(ar, /ارفعي|اختاري|اكتبي|ألصقي|حددي/);
-  assert.match(source("styles/Projects.module.css"), /font-family: var\(--font-ui\)/);
+  assert.match(source("styles/Projects.module.css"), /font-family:\s*var\(--font-ui\)/);
   assert.doesNotMatch(source("styles/Projects.module.css"), /font-family:\s*Arial/);
 });
 

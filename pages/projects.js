@@ -1,77 +1,96 @@
 import Head from "next/head";
 import Link from "next/link";
+import { useMemo, useState } from "react";
 import { useLanguage } from "../components/LanguageProvider";
+import { PATH_GUIDANCE, PROJECT_CATALOG, recommendProjects } from "../lib/project-catalog";
 import styles from "../styles/Projects.module.css";
 
 const COPY = {
   en: {
-    pageTitle: "Projects | LinguaLab",
-    home: "Home",
-    learn: "Learning Hub",
-    projects: "Projects",
-    eyebrow: "PROJECT LAUNCHER",
-    title: "Start a new research project",
-    lead: "Begin with your research dataset and move through a connected workspace for exploration, study design, analysis, interpretation, and reporting.",
-    workspaceLabel: "YOUR PROJECT WORKSPACE",
-    workspaceTitle: "Research work starts in Workspace",
-    workspaceText: "Workspace is where you add your files, inspect the data structure, identify important columns, and choose an appropriate next step.",
-    steps: ["Explore the current dataset", "Review quality, columns, and labels", "Continue to research planning or analysis"],
-    note: "This page does not upload or save projects. Files and active work remain in Workspace under the existing privacy controls.",
-    action: "Open Workspace",
+    pageTitle: "Research Project Navigator | LinguaLab", home: "Home", research: "Research", projects: "Projects", eyebrow: "RESEARCH PROJECT NAVIGATOR", title: "Move from a research need to an executable project plan", lead: "Understand a path, define what you need, explore grounded suggestions, and open a practical plan connected to LinguaLab’s current tools.", journey: ["Understand Path", "Define Need", "Explore Suggestions", "Open Project Plan"],
+    guidanceTitle: "How can this path help my research?", guidanceLead: "Choose a path to understand its research role without turning this page into a methods textbook.", problem: "Research problem", questions: "Typical question", data: "Suitable data", tools: "LinguaLab tools", annotation: "Human annotation", outputs: "Possible outputs", evaluation: "Evaluation", beginner: "Before you start",
+    finderTitle: "Researcher needs", finderLead: "Recommendations are research guidance, not an automatic scientific decision.", pathQ: "What problem is closest to your need?", goalQ: "What should the project produce?", dataQ: "Do you already have data?", dataTypeQ: "What kind of data?", referenceQ: "Do you have labels or a human reference?", teamQ: "How will you work?", annotationQ: "Do you expect human annotation?", taskQ: "What computational action matters most?", complexityQ: "Suitable complexity", any: "Not sure yet", yes: "Yes", no: "No", individual: "Alone", team: "Research team", texts: "Texts / corpus", labeled: "Labeled texts", terms: "Terms / entities", experimental: "Experiment cases", paper: "Research paper", dataset: "Corpus / dataset", benchmark: "Evaluation / benchmark", prototype: "Prototype / application", describe: "Describe patterns", classify: "Classify", extraction: "Extract information", evaluationTask: "Evaluate", experiment: "Run an NLP experiment", beginnerLevel: "Beginner", intermediate: "Intermediate", advanced: "Advanced",
+    recommendations: "Recommended starting points", catalog: "Project suggestions", catalogLead: "Filter a reusable catalog of substantive computational-linguistics projects.", filters: "Filters", all: "All", needsAnnotation: "Needs annotators", noAnnotation: "No annotation needed", open: "Open project plan", teamLabel: "Team", annotationLabel: "Annotation", complexity: "Complexity", impact: "Expected impact", requiredData: "Required data", coreSteps: "Core execution steps", expected: "Expected outputs", possible: "May become", back: "Back to suggestions", why: "Why this project?", before: "What you need before starting", sample: "Sampling guidance", sampleText: "Begin with a documented pilot sample, inspect its variation and errors, then justify expansion from the research question and evaluation design rather than a fixed universal threshold.", use: "Path and LinguaLab tools", execute: "How to execute it", results: "Expected result layers", measured: "Measured / computed results", ai: "AI-supported interpretation", researcher: "Researcher conclusions", success: "How to evaluate success", outside: "Work outside LinguaLab", outsideText: "Data rights, collection, annotation management, advanced statistics, and final methodological decisions remain the researcher’s responsibility.", notice: "Project suggestions are research guidance. The researcher remains responsible for research design, data rights, methodological decisions, validation, and final interpretation.", none: "No project matches all current filters. Adjust one filter to broaden the catalog.",
   },
   ar: {
-    pageTitle: "المشاريع | LinguaLab",
-    home: "الرئيسية",
-    learn: "مركز التعلّم",
-    projects: "المشاريع",
-    eyebrow: "بدء مشروع بحثي",
-    title: "ابدأ مشروعًا بحثيًا جديدًا",
-    lead: "ابدأ ببياناتك البحثية، وانتقل ضمن مساحة عمل مترابطة للاستكشاف وتصميم الدراسة والتحليل والتفسير وإعداد التقرير.",
-    workspaceLabel: "مساحة مشروعك",
-    workspaceTitle: "يبدأ العمل البحثي في مساحة العمل",
-    workspaceText: "مساحة العمل هي المكان المخصص لإضافة الملفات وفحص بنية البيانات وتحديد الأعمدة المهمة واختيار الخطوة التالية المناسبة.",
-    steps: ["استكشف مجموعة البيانات الحالية", "راجع الجودة والأعمدة والتصنيفات", "تابع إلى تخطيط البحث أو التحليل"],
-    note: "لا ترفع هذه الصفحة المشاريع ولا تحفظها. تبقى الملفات والعمل الفعلي داخل مساحة العمل وفق ضوابط الخصوصية الحالية.",
-    action: "افتح مساحة العمل",
+    pageTitle: "دليل المشاريع البحثية | LinguaLab", home: "الرئيسية", research: "البحث", projects: "المشاريع", eyebrow: "دليل المشاريع البحثية", title: "انتقل من الحاجة البحثية إلى خطة مشروع قابلة للتنفيذ", lead: "افهم المسار، وحدد احتياجك، واستكشف مقترحات واقعية، ثم افتح خطة عملية مرتبطة بأدوات LinguaLab الحالية.", journey: ["افهم المسار", "حدد الاحتياج", "استكشف المقترحات", "افتح خطة المشروع"],
+    guidanceTitle: "كيف يخدمني هذا المسار؟", guidanceLead: "اختر مسارًا لفهم دوره البحثي بإيجاز، دون تحويل الصفحة إلى كتاب مناهج مطول.", problem: "المشكلة البحثية", questions: "سؤال نموذجي", data: "البيانات المناسبة", tools: "أدوات LinguaLab", annotation: "الترميز البشري", outputs: "المخرجات الممكنة", evaluation: "التقييم", beginner: "قبل البدء",
+    finderTitle: "أسئلة الباحث", finderLead: "هذه التوصيات إرشاد بحثي، وليست قرارًا علميًا آليًا.", pathQ: "ما المشكلة الأقرب إلى احتياجك؟", goalQ: "ما المخرج الذي تستهدفه؟", dataQ: "هل لديك بيانات بالفعل؟", dataTypeQ: "ما نوع البيانات؟", referenceQ: "هل لديك فئات أو مرجع بشري؟", teamQ: "كيف ستعمل؟", annotationQ: "هل تتوقع الحاجة إلى ترميز بشري؟", taskQ: "ما المهمة الحاسوبية الأهم؟", complexityQ: "مستوى التعقيد المناسب", any: "لم أحدد بعد", yes: "نعم", no: "لا", individual: "بمفردي", team: "ضمن فريق بحثي", texts: "نصوص / مدونة", labeled: "نصوص مصنفة", terms: "مصطلحات / كيانات", experimental: "حالات تجريبية", paper: "ورقة بحثية", dataset: "مدونة / مجموعة بيانات", benchmark: "دراسة تقييم / معيار", prototype: "نموذج أولي / تطبيق", describe: "وصف الأنماط", classify: "التصنيف", extraction: "استخراج المعلومات", evaluationTask: "التقييم", experiment: "تنفيذ تجربة NLP", beginnerLevel: "مبتدئ", intermediate: "متوسط", advanced: "متقدم",
+    recommendations: "نقاط بداية مقترحة", catalog: "المشاريع المقترحة", catalogLead: "رشّح كتالوجًا قابلًا للتوسع يضم مشروعات جادة في اللسانيات الحاسوبية.", filters: "المرشحات", all: "الكل", needsAnnotation: "يحتاج مرمزين", noAnnotation: "لا يحتاج ترميزًا", open: "افتح خطة المشروع", teamLabel: "الفريق", annotationLabel: "الترميز", complexity: "التعقيد", impact: "الأثر المتوقع", requiredData: "البيانات المطلوبة", coreSteps: "خطوات التنفيذ الأساسية", expected: "المخرجات المتوقعة", possible: "قد يتطور إلى", back: "العودة إلى المقترحات", why: "لماذا هذا المشروع؟", before: "ما المطلوب قبل البدء؟", sample: "إرشاد حجم العينة", sampleText: "ابدأ بعينة استطلاعية موثقة، وافحص تنوعها وأخطاءها، ثم برر توسيعها وفق سؤال البحث وتصميم التقييم بدل الالتزام بحد رقمي عام.", use: "المسار وأدوات LinguaLab", execute: "كيف أنفذه؟", results: "طبقات النتائج المتوقعة", measured: "النتائج المقاسة / المحسوبة", ai: "تفسير مدعوم بالذكاء الاصطناعي", researcher: "استنتاجات الباحث", success: "كيف أقيم النجاح؟", outside: "عمل يتم خارج LinguaLab", outsideText: "تبقى حقوق البيانات وجمعها وإدارة الترميز والتحليل الإحصائي المتقدم والقرارات المنهجية النهائية مسؤولية الباحث.", notice: "مقترحات المشاريع إرشاد بحثي. يظل الباحث مسؤولًا عن تصميم البحث وحقوق البيانات والقرارات المنهجية والتحقق والتفسير النهائي.", none: "لا يوجد مشروع يطابق جميع المرشحات الحالية. عدّل أحد المرشحات لتوسيع النتائج.",
   },
 };
 
+const OUTPUT_LABELS = { paper: { en: "Paper", ar: "ورقة بحثية" }, dataset: { en: "Dataset", ar: "مجموعة بيانات" }, corpus: { en: "Corpus", ar: "مدونة" }, benchmark: { en: "Benchmark", ar: "معيار" }, prototype: { en: "Prototype", ar: "نموذج أولي" } };
+const TOOL_ROUTES = { "Corpus Research": "/tools/corpus-research", Frequency: "/tools/frequency", "Concordance / Contexts": "/tools/concordance", "N-grams": "/tools/ngrams", POS: "/tools/pos", "Morphology & Syntax Research Preview": "/tools/morphology-syntax", "Semantics Research Preview": "/tools/semantics", "Discourse Analysis": "/tools/discourse-analysis", Pragmatics: "/tools/pragmatics", "Text Classification Research Preview": "/tools/text-classification-research", Workspace: "/workspace", "Information Extraction": "/tools/information-extraction", "NLP Experiments": "/tools/nlp-experiments", "Spreadsheet Explorer": "/tools/excel", "AI Code Assistant": "/tools/code", "Google Colab": "/tools/colab" };
+const localized = (value, language) => value?.[language] ?? value?.en ?? value;
+
 export default function Projects() {
   const { language } = useLanguage();
-  const copy = COPY[language === "ar" ? "ar" : "en"];
+  const locale = language === "ar" ? "ar" : "en";
+  const copy = COPY[locale];
+  const [guidePath, setGuidePath] = useState("corpus-linguistics");
+  const [answers, setAnswers] = useState({ path: "", goal: "", data: "", dataType: "", reference: "", team: "", annotation: "", task: "", complexity: "" });
+  const [filters, setFilters] = useState({ path: "", team: "", annotation: "", complexity: "", output: "" });
+  const [selectedId, setSelectedId] = useState("");
+  const guide = PATH_GUIDANCE[guidePath];
+  const recommendations = useMemo(() => recommendProjects(answers), [answers]);
+  const filtered = useMemo(() => PROJECT_CATALOG.filter((item) => (!filters.path || item.path === filters.path) && (!filters.team || item.teamType === filters.team) && (!filters.annotation || (filters.annotation === "yes") === item.annotatorsRequired) && (!filters.complexity || item.complexity === filters.complexity) && (!filters.output || item.possibleOutputs.includes(filters.output))), [filters]);
+  const selected = PROJECT_CATALOG.find((item) => item.id === selectedId);
+  const setter = (stateSetter, key) => (event) => stateSetter((current) => ({ ...current, [key]: event.target.value }));
+  if (selected) return <ProjectDetail project={selected} language={locale} copy={copy} onBack={() => setSelectedId("")} />;
 
-  return (
-    <main className={styles.page}>
-      <Head><title>{copy.pageTitle}</title></Head>
+  return <main className={styles.page}>
+    <Head><title>{copy.pageTitle}</title></Head>
+    <nav className={styles.nav} aria-label={locale === "ar" ? "التنقل الرئيسي" : "Primary navigation"}><Link href="/" className={styles.brand}><span className={styles.brandMark}>L</span><span>LinguaLab</span></Link><div className={styles.navLinks}><Link href="/">{copy.home}</Link><Link href="/ar-tools">{copy.research}</Link><Link href="/projects" aria-current="page">{copy.projects}</Link></div></nav>
+    <header className={styles.hero}><p className={styles.eyebrow}>{copy.eyebrow}</p><h1>{copy.title}</h1><p className={styles.lead}>{copy.lead}</p><ol className={styles.journey}>{copy.journey.map((step, index) => <li key={step}><span>{index + 1}</span>{step}</li>)}</ol></header>
 
-      <nav className={styles.nav} aria-label={language === "ar" ? "التنقل الرئيسي" : "Primary navigation"}>
-        <Link href="/" className={styles.brand}><span className={styles.brandMark}>L</span><span>LinguaLab</span></Link>
-        <div className={styles.navLinks}>
-          <Link href="/">{copy.home}</Link>
-          <Link href="/student-dashboard">{copy.learn}</Link>
-          <Link href="/projects" aria-current="page">{copy.projects}</Link>
-        </div>
-      </nav>
+    <section className={styles.section} aria-labelledby="path-guidance-title"><SectionHeading number="01" title={copy.guidanceTitle} lead={copy.guidanceLead} id="path-guidance-title" /><div className={styles.pathTabs} role="tablist" aria-label={copy.guidanceTitle}>{Object.entries(PATH_GUIDANCE).map(([id, item]) => <button key={id} type="button" role="tab" aria-selected={guidePath === id} onClick={() => setGuidePath(id)}>{localized(item.name, locale)}</button>)}</div><article className={styles.guideCard}><h3>{localized(guide.name, locale)}</h3><div className={styles.guideGrid}>{[[copy.problem, guide.problem], [copy.questions, guide.questions], [copy.data, guide.data], [copy.annotation, guide.annotation], [copy.outputs, guide.outputs], [copy.evaluation, guide.evaluation], [copy.beginner, guide.beginner]].map(([label, value]) => <Info key={label} title={label} text={localized(value, locale)} />)}<div><h4>{copy.tools}</h4><div className={styles.badges}>{guide.tools.map((tool) => <span key={tool}>{tool}</span>)}</div></div></div></article></section>
 
-      <section className={styles.hero}>
-        <p className={styles.eyebrow}>{copy.eyebrow}</p>
-        <h1>{copy.title}</h1>
-        <p className={styles.lead}>{copy.lead}</p>
-      </section>
+    <section className={`${styles.section} ${styles.finder}`} aria-labelledby="finder-title"><SectionHeading number="02" title={copy.finderTitle} lead={copy.finderLead} id="finder-title" /><div className={styles.questionGrid}>
+      <Select label={copy.pathQ} value={answers.path} onChange={setter(setAnswers, "path")} options={Object.entries(PATH_GUIDANCE).map(([value, item]) => [value, localized(item.name, locale)])} copy={copy} />
+      <Select label={copy.goalQ} value={answers.goal} onChange={setter(setAnswers, "goal")} options={[["paper", copy.paper], ["dataset", copy.dataset], ["benchmark", copy.benchmark], ["prototype", copy.prototype]]} copy={copy} />
+      <Select label={copy.dataQ} value={answers.data} onChange={setter(setAnswers, "data")} options={[["yes", copy.yes], ["no", copy.no]]} copy={copy} />
+      <Select label={copy.dataTypeQ} value={answers.dataType} onChange={setter(setAnswers, "dataType")} options={[["texts", copy.texts], ["labeled", copy.labeled], ["terms", copy.terms], ["experimental", copy.experimental]]} copy={copy} />
+      <Select label={copy.referenceQ} value={answers.reference} onChange={setter(setAnswers, "reference")} options={[["yes", copy.yes], ["no", copy.no]]} copy={copy} />
+      <Select label={copy.teamQ} value={answers.team} onChange={setter(setAnswers, "team")} options={[["individual", copy.individual], ["team", copy.team]]} copy={copy} />
+      <Select label={copy.annotationQ} value={answers.annotation} onChange={setter(setAnswers, "annotation")} options={[["yes", copy.yes], ["no", copy.no]]} copy={copy} />
+      <Select label={copy.taskQ} value={answers.task} onChange={setter(setAnswers, "task")} options={[["corpus", copy.describe], ["classification", copy.classify], ["extraction", copy.extraction], ["evaluation", copy.evaluationTask], ["experiment", copy.experiment]]} copy={copy} />
+      <Select label={copy.complexityQ} value={answers.complexity} onChange={setter(setAnswers, "complexity")} options={[["beginner", copy.beginnerLevel], ["intermediate", copy.intermediate], ["advanced", copy.advanced]]} copy={copy} />
+    </div><div className={styles.recommendations}><h3>{copy.recommendations}</h3><div className={styles.compactGrid}>{recommendations.map((item) => <ProjectCard key={item.id} project={item} locale={locale} copy={copy} onOpen={setSelectedId} compact />)}</div></div></section>
 
-      <section className={styles.launcher} aria-labelledby="project-workspace-title">
-        <div className={styles.launcherCopy}>
-          <p className={styles.eyebrow}>{copy.workspaceLabel}</p>
-          <h2 id="project-workspace-title">{copy.workspaceTitle}</h2>
-          <p>{copy.workspaceText}</p>
-          <ol>{copy.steps.map((step) => <li key={step} dir="auto">{step}</li>)}</ol>
-        </div>
-
-        <div className={styles.actionPanel}>
-          <p>{copy.note}</p>
-          <Link href="/workspace" className={styles.primaryAction}>{copy.action}<span aria-hidden="true">→</span></Link>
-        </div>
-      </section>
-    </main>
-  );
+    <section className={styles.section} aria-labelledby="catalog-title"><SectionHeading number="03" title={copy.catalog} lead={copy.catalogLead} id="catalog-title" /><div className={styles.filters} aria-label={copy.filters}>
+      <Select label={copy.pathQ} value={filters.path} onChange={setter(setFilters, "path")} options={Object.entries(PATH_GUIDANCE).map(([value, item]) => [value, localized(item.name, locale)])} copy={copy} />
+      <Select label={copy.teamLabel} value={filters.team} onChange={setter(setFilters, "team")} options={[["individual", copy.individual], ["team", copy.team]]} copy={copy} />
+      <Select label={copy.annotationLabel} value={filters.annotation} onChange={setter(setFilters, "annotation")} options={[["yes", copy.needsAnnotation], ["no", copy.noAnnotation]]} copy={copy} />
+      <Select label={copy.complexity} value={filters.complexity} onChange={setter(setFilters, "complexity")} options={[["beginner", copy.beginnerLevel], ["intermediate", copy.intermediate], ["advanced", copy.advanced]]} copy={copy} />
+      <Select label={copy.possible} value={filters.output} onChange={setter(setFilters, "output")} options={Object.entries(OUTPUT_LABELS).map(([value, item]) => [value, localized(item, locale)])} copy={copy} />
+    </div>{filtered.length ? <div className={styles.catalogGrid}>{filtered.map((item) => <ProjectCard key={item.id} project={item} locale={locale} copy={copy} onOpen={setSelectedId} />)}</div> : <p className={styles.empty}>{copy.none}</p>}</section>
+    <aside className={styles.notice}>{copy.notice}</aside>
+  </main>;
 }
+
+function SectionHeading({ number, title, lead, id }) { return <div className={styles.sectionHeading}><p className={styles.kicker}>{number} · {title}</p><h2 id={id}>{title}</h2><p>{lead}</p></div>; }
+function Select({ label, value, onChange, options, copy }) { return <label className={styles.field}><span>{label}</span><select value={value} onChange={onChange}><option value="">{copy.any}</option>{options.map(([key, text]) => <option value={key} key={key}>{text}</option>)}</select></label>; }
+function Info({ title, text }) { return <div><h4>{title}</h4><p>{text}</p></div>; }
+
+function ProjectCard({ project, locale, copy, onOpen, compact = false }) {
+  const level = project.complexity === "beginner" ? "beginnerLevel" : project.complexity;
+  return <article className={`${styles.projectCard} ${compact ? styles.compact : ""}`}><div className={styles.cardTop}><span className={styles.pathBadge}>{localized(PATH_GUIDANCE[project.path].name, locale)}</span><span className={styles.levelBadge}>{copy[level]}</span></div><h3>{localized(project.title, locale)}</h3><p>{localized(project.problem, locale)}</p>{!compact && <><dl><div><dt>{copy.impact}</dt><dd>{localized(project.impact, locale)}</dd></div><div><dt>{copy.requiredData}</dt><dd>{localized(project.dataRequirements, locale)}</dd></div><div><dt>{copy.coreSteps}</dt><dd>{localized(project.steps, locale).join(" → ")}</dd></div><div><dt>{copy.expected}</dt><dd>{localized(project.expectedResults, locale)}</dd></div><div><dt>{copy.evaluation}</dt><dd>{localized(project.evaluation, locale)}</dd></div></dl><div className={styles.badges}>{project.tools.map((tool) => <span key={tool}>{tool}</span>)}</div><div className={styles.outputGrid}>{project.possibleOutputs.map((output) => <span key={output}>{localized(OUTPUT_LABELS[output], locale)}</span>)}</div></>}<div className={styles.indicators}><span>{project.teamType === "team" ? copy.team : copy.individual}</span><span>{project.annotatorsRequired ? copy.needsAnnotation : copy.noAnnotation}</span></div><button type="button" className={styles.openButton} onClick={() => onOpen(project.id)}>{copy.open}<span aria-hidden="true">→</span></button></article>;
+}
+
+function ProjectDetail({ project, language, copy, onBack }) {
+  const path = PATH_GUIDANCE[project.path];
+  return <main className={styles.page}><Head><title>{localized(project.title, language)} | LinguaLab</title></Head><div className={styles.detailNav}><button type="button" onClick={onBack}>← {copy.back}</button><Link href="/">LinguaLab</Link></div><article className={styles.detail}>
+    <header className={styles.detailHero}><span className={styles.pathBadge}>{localized(path.name, language)}</span><p className={styles.eyebrow}>{copy.open}</p><h1>{localized(project.title, language)}</h1><p>{localized(project.impact, language)}</p></header>
+    <DetailSection letter="A" title={copy.why}><div className={styles.detailGrid}><DetailCard title={copy.problem} text={localized(project.problem, language)} /><DetailCard title={copy.impact} text={localized(project.impact, language)} /><DetailCard title={copy.possible} text={localized(project.applicationPotential, language)} /></div></DetailSection>
+    <DetailSection letter="B" title={copy.before}><div className={styles.detailGrid}><DetailCard title={copy.requiredData} text={localized(project.dataRequirements, language)} /><DetailCard title={copy.sample} text={copy.sampleText} /><DetailCard title={copy.teamLabel} text={project.teamType === "team" ? copy.team : copy.individual} /><DetailCard title={copy.annotationLabel} text={localized(project.annotationNotes, language)} /></div></DetailSection>
+    <DetailSection letter="C" title={copy.use}><h3>{localized(path.name, language)}</h3><div className={styles.toolLinks}>{project.tools.map((tool) => TOOL_ROUTES[tool] ? <Link key={tool} href={TOOL_ROUTES[tool]}>{tool}<span aria-hidden="true">↗</span></Link> : <span key={tool}>{tool}</span>)}</div></DetailSection>
+    <DetailSection letter="D" title={copy.execute}><ol className={styles.timeline}>{localized(project.steps, language).map((step, index) => <li key={step}><span>{index + 1}</span><p>{step}</p></li>)}</ol></DetailSection>
+    <DetailSection letter="E" title={copy.results}><div className={styles.resultLayers}><DetailCard title={copy.measured} text={localized(project.expectedResults, language)} /><DetailCard title={copy.ai} text={language === "ar" ? "قد يساعد AI في تفسير الأنماط والأخطاء، لكنه لا يغير النتائج المقاسة ولا المرجع البشري." : "AI may help interpret patterns and errors, but it does not alter measured results or the human reference."} /><DetailCard title={copy.researcher} text={language === "ar" ? "يقرر الباحث ما يمكن اعتماده ويبرر الاستنتاجات في ضوء المنهج والقيود." : "The researcher decides what can be accepted and justifies conclusions against the method and limitations."} /></div></DetailSection>
+    <DetailSection letter="F" title={copy.success}><p>{localized(project.evaluation, language)}</p></DetailSection>
+    <DetailSection letter="G" title={copy.possible}><div className={styles.outputGrid}>{project.possibleOutputs.map((output) => <span key={output}>{localized(OUTPUT_LABELS[output], language)}</span>)}</div></DetailSection>
+    <aside className={styles.outside}><strong>{copy.outside}</strong><p>{copy.outsideText}</p></aside><aside className={styles.notice}>{copy.notice}</aside>
+  </article></main>;
+}
+function DetailSection({ letter, title, children }) { return <section><h2>{letter}. {title}</h2>{children}</section>; }
+function DetailCard({ title, text }) { return <div className={styles.detailCard}><h3>{title}</h3><p>{text}</p></div>; }
