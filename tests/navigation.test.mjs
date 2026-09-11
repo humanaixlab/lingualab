@@ -166,6 +166,7 @@ test("Frequency, POS, and Colab remain renderable as standalone routes", async (
         if (module === "next/link") return function MockLink({ children, ...props }) { return React.createElement("a", props, children); };
         if (module === "next/router") return { useRouter: () => ({ asPath: `/tools/${name}` }) };
         if (module === "../../components/Layout") return function MockLayout({ children, backHref }) { return React.createElement("main", null, React.createElement("a", { href: backHref }, "Back"), children); };
+        if (module === "../../components/ComputationalWorkbench") return function MockWorkbench() { return null; };
         if (module === "../../components/LanguageProvider") return { useLanguage: () => ({ language: "en" }) };
         if (module === "../../styles/AnalysisTool.module.css") return new Proxy({}, { get: (_, key) => String(key) });
         if (module === "../../lib/tool-handoff") return { readToolHandoff: () => null };

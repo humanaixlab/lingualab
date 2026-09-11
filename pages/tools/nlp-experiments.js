@@ -2,6 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useState } from "react";
 import { useLanguage } from "../../components/LanguageProvider";
+import ComputationalWorkbench from "../../components/ComputationalWorkbench";
 import {
   COMPARISON_CHOICES,
   NLP_EXPERIMENT_MODULES,
@@ -33,6 +34,10 @@ const COPY = {
 };
 
 const moduleCopy = { "prompt-experiment": ["prompt", "promptDesc"], "output-comparison": ["comparison", "comparisonDesc"], "task-sandbox": ["sandbox", "sandboxDesc"] };
+const WORKBENCH = {
+  ar: [["مدخل ثابت", "النص والمهمة"], ["إعداد التجربة", "تعليمات أو فئات أو بنية"], ["تشغيل تجريبي", "إجراء صريح"], ["مخرجات منظمة", "حفظ أ وب دون تغيير"], ["المقارنة", "الفئة والدليل والتفسير والاتساق"], ["تقييم الباحث", "لا فائز تلقائيًا"], ["فحص الأخطاء", "سجّل سبب الحكم"], ["التحسين", "عدّل الإعداد ثم أعد التشغيل"]],
+  en: [["Fixed Input", "Text and task"], ["Experiment Setup", "Instructions, labels, or structure"], ["Experiment Run", "Explicit action"], ["Structured Outputs", "Preserved A and B outputs"], ["Comparison", "Decision, evidence, explanation, consistency"], ["Researcher Evaluation", "No automatic winner"], ["Error Inspection", "Record the reason"], ["Improvement", "Adjust setup, then re-run"]],
+};
 
 export default function NlpExperiments() {
   const { language } = useLanguage();
@@ -87,6 +92,7 @@ export default function NlpExperiments() {
 
   return <><Head><title>{copy.head} · LinguaLab</title></Head><main className={styles.page}>
     <Link className={styles.back} href="/ar-tools#build">← {copy.back}</Link><header className={styles.header}><div><p className={styles.eyebrow}>{copy.eyebrow}</p><h1>{copy.title}</h1><p>{copy.lead}</p></div><span className={styles.previewBadge}>{copy.badge}</span></header><p className={styles.notice}>{copy.notice}</p>
+    <ComputationalWorkbench language={locale} methodType="ai" stages={WORKBENCH[locale].map(([label, detail]) => ({ label, detail }))} />
     <div className={styles.moduleTabs} role="tablist">{NLP_EXPERIMENT_MODULES.map((id) => <button type="button" role="tab" aria-selected={moduleId === id} className={moduleId === id ? styles.activeTab : ""} onClick={() => changeModule(id)} key={id}><strong>{copy[moduleCopy[id][0]]}</strong><span>{copy[moduleCopy[id][1]]}</span></button>)}</div>
     {moduleId === "prompt-experiment" && <section className={styles.module}><form className={styles.card} onSubmit={runPrompt}><h2>{copy.prompt}</h2><Field label={copy.task} value={task} setValue={setTask} placeholder={copy.taskPlaceholder} /><Field label={copy.text} value={text} setValue={setText} placeholder={copy.textPlaceholder} arabic /><Field label={copy.variantA} value={variantA} setValue={setVariantA} /><Field label={copy.variantB} value={variantB} setValue={setVariantB} /><RunButton status={status} copy={copy} label={copy.runPrompt} /></form><div className={styles.stack}>{promptOutputs && <><div className={styles.reviewGrid}><ResultCard title={copy.outputA} value={promptOutputs.variantA} /><ResultCard title={copy.outputB} value={promptOutputs.variantB} /></div><Evaluation copy={copy} choice={choice} setChoice={setChoice} reason={reason} setReason={setReason} save={saveComparison} /></>}</div></section>}
     {moduleId === "output-comparison" && <section className={styles.module}><form className={styles.card} onSubmit={runComparison}><h2>{copy.comparison}</h2><Field label={copy.comparisonTask} value={task} setValue={setTask} /><Field label={copy.originalA} value={outputA} setValue={setOutputA} /><Field label={copy.originalB} value={outputB} setValue={setOutputB} /><RunButton status={status} copy={copy} label={copy.compare} loading={copy.comparing} /></form><div className={styles.stack}>{comparison && <><article className={styles.card}><h2>{copy.comparisonResult}</h2><p className={styles.notice}>{copy.noWinner}</p><dl className={styles.output}>{["categoryDecision", "textualEvidence", "explanation", "consistency"].map((field) => <div key={field}><dt>{copy[field]}</dt><dd dir="auto">{comparison[field]}</dd></div>)}</dl></article><Evaluation copy={copy} choice={choice} setChoice={setChoice} reason={reason} setReason={setReason} save={saveComparison} /></>}</div></section>}

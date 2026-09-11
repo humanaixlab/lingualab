@@ -2,6 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useState } from "react";
 import { useLanguage } from "../../components/LanguageProvider";
+import ComputationalWorkbench from "../../components/ComputationalWorkbench";
 import {
   CLASSIFICATION_REVIEW_DECISIONS,
   TEXT_CLASSIFICATION_MODULES,
@@ -17,7 +18,7 @@ const COPY = {
     head: "تصنيف النصوص · تجريب بحثي", back: "العودة إلى البناء", eyebrow: "البيانات ومسارات العمل الحاسوبية", title: "مختبر تصنيف النصوص", badge: "تجريب بحثي",
     lead: "اختبر خط أساس حتميًا، وراجع تصنيفًا مقترحًا بالذكاء الاصطناعي، وافحص الأخطاء مقارنةً بالمرجع البشري.", notice: "المخرجات مقترحات تحليلية مدعومة بالذكاء الاصطناعي، ويظل الباحث مسؤولًا عن التحقق من النتائج واعتمادها في الاستخدام البحثي.",
     baseline: "التصنيف الأساسي", baselineDesc: "درّب خط أساس Naive Bayes على بيانات عربية مصنفة من الباحث.", ai: "التصنيف بمساندة الذكاء الاصطناعي", aiDesc: "اطلب تصنيف نص ضمن فئات مغلقة يحددها الباحث ثم راجع الاقتراح.", errors: "تحليل أخطاء التصنيف", errorsDesc: "قارن توقع النظام بالتصنيف المرجعي البشري وافحص أنماط عدم التطابق.",
-    labeledData: "البيانات العربية المصنفة", dataHint: "أدخل في كل سطر: النص، ثم Tab، ثم التصنيف المرجعي. يلزم ستة سجلات على الأقل وثلاثة أمثلة لكل فئة.", sample: "الخدمة ممتازة\tإيجابي\nالتجربة رائعة ومفيدة\tإيجابي\nأعجبني المنتج كثيرًا\tإيجابي\nالخدمة سيئة جدًا\tسلبي\nالتجربة مخيبة للآمال\tسلبي\nلم يعجبني المنتج\tسلبي", run: "تشغيل خط الأساس", invalidData: "أدخل بيانات عربية مصنفة صحيحة: ستة سجلات على الأقل، وفئتان، وثلاثة أمثلة لكل فئة.",
+    labeledData: "البيانات العربية المصنفة", dataHint: "أدخل في كل سطر: النص، ثم Tab، ثم التصنيف المرجعي. يلزم ستة سجلات على الأقل وثلاثة أمثلة لكل فئة.", sample: "الخدمة ممتازة\tإيجابي\nالتجربة رائعة ومفيدة\tإيجابي\nأعجبني المنتج كثيرًا\tإيجابي\nالخدمة سيئة جدًا\tسلبي\nالتجربة مخيبة للآمال\tسلبي\nلم يعجبني المنتج\tسلبي", inspection: "فحص البيانات قبل التشغيل", items: "السجلات الصالحة", categories: "الفئات", distribution: "توزيع المرجع البشري", run: "تشغيل حاسوبي: خط أساس Naive Bayes", invalidData: "أدخل بيانات عربية مصنفة صحيحة: ستة سجلات على الأقل، وفئتان، وثلاثة أمثلة لكل فئة.",
     baselineResults: "نتائج خط الأساس الحتمية", training: "سجلات التدريب", testing: "سجلات الاختبار", accuracy: "الدقة", vocabulary: "حجم المفردات", matrix: "مصفوفة الالتباس", actualPredicted: "المرجع البشري × توقع النظام",
     allowedLabels: "الفئات المسموح بها", labelsHint: "أدخل فئة في كل سطر أو افصل الفئات بفواصل.", arabicText: "النص العربي", textPlaceholder: "ألصق النص المراد تصنيفه…", classify: "حلّل بالذكاء الاصطناعي", classifying: "جارٍ إنشاء الاقتراح…", aiSuggestion: "اقتراح الذكاء الاصطناعي", label: "التصنيف المقترح", evidence: "الدليل النصي", explanation: "التفسير المختصر",
     review: "مراجعة الباحث", accept: "قبول", edit: "تعديل", reject: "رفض", finalLabel: "التصنيف النهائي", finalEvidence: "الدليل النهائي", save: "حفظ النتيجة المراجعة", saved: "حُفظ اقتراح الذكاء الاصطناعي والنتيجة النهائية كلٌ على حدة محليًا.", invalidFinal: "اختر تصنيفًا نهائيًا وأدخل دليلًا من النص الأصلي.", storageError: "تعذر الحفظ محليًا.",
@@ -27,7 +28,7 @@ const COPY = {
     head: "Text Classification · Research Preview", back: "Back to Build", eyebrow: "DATA & COMPUTATIONAL WORKFLOWS", title: "Text Classification Lab", badge: "Research Preview",
     lead: "Test a deterministic baseline, review an AI classification suggestion, and inspect errors against human reference labels.", notice: "Outputs are AI-supported analytical suggestions. The researcher remains responsible for verifying and approving results for research use.",
     baseline: "Baseline Classification", baselineDesc: "Train a Naive Bayes baseline on researcher-provided labeled Arabic data.", ai: "AI-assisted Classification", aiDesc: "Classify a text within a researcher-defined closed label set, then review the suggestion.", errors: "Error Analysis", errorsDesc: "Compare system predictions with human reference labels and inspect mismatch patterns.",
-    labeledData: "Labeled Arabic data", dataHint: "Enter each row as: text, Tab, human reference label. At least six records and three examples per label are required.", sample: "الخدمة ممتازة\tإيجابي\nالتجربة رائعة ومفيدة\tإيجابي\nأعجبني المنتج كثيرًا\tإيجابي\nالخدمة سيئة جدًا\tسلبي\nالتجربة مخيبة للآمال\tسلبي\nلم يعجبني المنتج\tسلبي", run: "Run baseline", invalidData: "Enter valid labeled Arabic data with at least six records, two labels, and three examples per label.",
+    labeledData: "Labeled Arabic data", dataHint: "Enter each row as: text, Tab, human reference label. At least six records and three examples per label are required.", sample: "الخدمة ممتازة\tإيجابي\nالتجربة رائعة ومفيدة\tإيجابي\nأعجبني المنتج كثيرًا\tإيجابي\nالخدمة سيئة جدًا\tسلبي\nالتجربة مخيبة للآمال\tسلبي\nلم يعجبني المنتج\tسلبي", inspection: "Pre-run data inspection", items: "Valid records", categories: "Categories", distribution: "Human-reference distribution", run: "Computational Run: Naive Bayes baseline", invalidData: "Enter valid labeled Arabic data with at least six records, two labels, and three examples per label.",
     baselineResults: "Deterministic baseline results", training: "Training records", testing: "Test records", accuracy: "Accuracy", vocabulary: "Vocabulary size", matrix: "Confusion matrix", actualPredicted: "Human reference × system prediction",
     allowedLabels: "Allowed labels", labelsHint: "Enter one label per line or separate labels with commas.", arabicText: "Arabic text", textPlaceholder: "Paste the Arabic text to classify…", classify: "Analyze with AI", classifying: "Generating suggestion…", aiSuggestion: "AI suggestion", label: "Suggested label", evidence: "Textual evidence", explanation: "Short explanation",
     review: "Researcher review", accept: "Accept", edit: "Modify", reject: "Reject", finalLabel: "Final label", finalEvidence: "Final evidence", save: "Save reviewed result", saved: "The original AI suggestion and final human result were saved separately on this device.", invalidFinal: "Choose a final label and enter evidence copied from the original text.", storageError: "Local storage is unavailable.",
@@ -36,6 +37,19 @@ const COPY = {
 };
 
 const parseLabels = (value) => [...new Set(value.split(/[\n,،]/).map((item) => item.trim()).filter(Boolean))];
+
+const WORKBENCH = {
+  ar: [
+    ["بيانات مصنفة", "نص + مرجع بشري"], ["فحص التصنيفات", "الحجم وتوزيع الفئات"], ["المعالجة المسبقة", "تطبيع العربية وتجزئتها"],
+    ["إعداد التدريب والاختبار", "تقسيم طبقي حتمي"], ["تشغيل Naive Bayes", "خط أساس حتمي"], ["نتائج منظمة", "توقعات ومصفوفة التباس"],
+    ["التقييم", "الدقة والتطابق"], ["تحليل الأخطاء", "توقع النظام مقابل المرجع"], ["التحسين", "راجع البيانات ثم أعد التشغيل"],
+  ],
+  en: [
+    ["Labeled Data", "Text + human reference"], ["Label Inspection", "Size and class distribution"], ["Preprocessing", "Arabic normalization and tokenization"],
+    ["Train/Test Setup", "Deterministic stratified split"], ["Run Naive Bayes", "Deterministic baseline"], ["Structured Results", "Predictions and confusion matrix"],
+    ["Evaluation", "Accuracy and matches"], ["Error Analysis", "System vs human reference"], ["Improvement", "Review data, then re-run"],
+  ],
+};
 
 export default function TextClassificationResearch() {
   const { language } = useLanguage();
@@ -54,6 +68,11 @@ export default function TextClassificationResearch() {
   const [message, setMessage] = useState("");
 
   const labels = parseLabels(labelsInput);
+  const inspectedRows = parseLabeledRows(datasetInput);
+  const inspectedDistribution = inspectedRows.reduce((counts, row) => {
+    counts[row.label] = (counts[row.label] || 0) + 1;
+    return counts;
+  }, {});
   const mismatches = baseline?.predictions.filter((item) => !item.match) || [];
   function resetAi() { setAiOutput(null); setDecision(""); setFinalOutput({ label: "", evidence: "" }); setStatus("idle"); setMessage(""); }
   function changeModule(next) { setModuleId(next); setMessage(""); setStatus("idle"); }
@@ -94,6 +113,7 @@ export default function TextClassificationResearch() {
       <Link className={styles.back} href="/ar-tools#build">← {copy.back}</Link>
       <header className={styles.header}><div><p className={styles.eyebrow}>{copy.eyebrow}</p><h1>{copy.title}</h1><p>{copy.lead}</p></div><span className={styles.previewBadge}>{copy.badge}</span></header>
       <p className={styles.notice}>{copy.notice}</p>
+      <ComputationalWorkbench language={locale} methodType="deterministic" methodName={locale === "ar" ? "خط أساس Naive Bayes + استدلال AI منفصل" : "Naive Bayes baseline + separate AI inference"} stages={WORKBENCH[locale].map(([label, detail]) => ({ label, detail }))} />
       <div className={styles.moduleTabs} role="tablist">
         {TEXT_CLASSIFICATION_MODULES.map((id) => {
           const key = id === "baseline" ? "baseline" : id === "ai-assisted" ? "ai" : "errors";
@@ -102,7 +122,7 @@ export default function TextClassificationResearch() {
       </div>
 
       {moduleId === "baseline" && <section className={styles.module} aria-labelledby="baseline-title">
-        <article className={styles.card}><h2 id="baseline-title">{copy.baseline}</h2><label>{copy.labeledData}<textarea lang="ar" dir="rtl" value={datasetInput} onChange={(event) => { setDatasetInput(event.target.value); setBaseline(null); setErrorInterpretation(null); setMessage(""); }} /></label><p className={styles.hint}>{copy.dataHint}</p><button type="button" className={styles.primaryButton} onClick={runBaseline}>{copy.run}</button>{message && <p className={styles.error}>{message}</p>}</article>
+        <article className={styles.card}><h2 id="baseline-title">{copy.baseline}</h2><label>{copy.labeledData}<textarea lang="ar" dir="rtl" value={datasetInput} onChange={(event) => { setDatasetInput(event.target.value); setBaseline(null); setErrorInterpretation(null); setMessage(""); }} /></label><p className={styles.hint}>{copy.dataHint}</p><div className={styles.inspection}><h3>{copy.inspection}</h3><div className={styles.metrics}><Metric value={inspectedRows.length} label={copy.items} /><Metric value={Object.keys(inspectedDistribution).length} label={copy.categories} /></div><p><strong>{copy.distribution}:</strong> <span dir="auto">{Object.entries(inspectedDistribution).map(([label, count]) => `${label}: ${count}`).join(" · ") || "—"}</span></p></div><button type="button" className={styles.primaryButton} onClick={runBaseline}>{copy.run}</button>{message && <p className={styles.error}>{message}</p>}</article>
         <article className={styles.card}><h2>{copy.baselineResults}</h2>{baseline ? <><div className={styles.metrics}><Metric value={baseline.trainCount} label={copy.training} /><Metric value={baseline.testCount} label={copy.testing} /><Metric value={`${(baseline.accuracy * 100).toFixed(1)}%`} label={copy.accuracy} /><Metric value={baseline.vocabularySize} label={copy.vocabulary} /></div><ConfusionMatrix result={baseline} copy={copy} /></> : <p className={styles.empty}>{copy.invalidData}</p>}</article>
       </section>}
 

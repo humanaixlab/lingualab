@@ -40,6 +40,10 @@
 .metrics strong, .metrics span { display: block; }
 .metrics strong { color: #5148d9; font-size: var(--text-section); }
 .metrics span, .hint, .empty { color: #706c88; font-size: var(--text-helper); line-height: var(--leading-helper); }
+.inspection { margin: 16px 0; padding: 14px; border: 1px solid #e5e2f2; border-radius: 12px; background: #faf9ff; }
+.inspection h3 { margin: 0 0 10px; }
+.inspection .metrics { margin-bottom: 10px; }
+.inspection p { margin: 0; color: #625d78; font-size: var(--text-helper); line-height: var(--leading-helper); }
 .resultBlock { margin-top: 18px; }
 .tableWrap { overflow-x: auto; }
 .tableWrap table { width: 100%; border-collapse: collapse; }

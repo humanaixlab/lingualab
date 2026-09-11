@@ -3,10 +3,15 @@ import { useRouter } from "next/router";
 import Layout from "../../components/Layout";
 import { useLanguage } from "../../components/LanguageProvider";
 import { readToolHandoff } from "../../lib/tool-handoff";
+import ComputationalWorkbench from "../../components/ComputationalWorkbench";
 
 const COPY = {
   en: { title: "Google Colab Workspace", description: "Run reviewed research code in a cloud notebook without installing local software.", review: "Review your generated response", selected: "Selected language", warning: "This response may include explanations or non-Python code. Review it before copying anything into Colab. Nothing has been sent or executed.", copy: "Copy response", clear: "Clear transferred response", copied: "Copied. Paste only the reviewed code into your notebook.", copyFailed: "Copy failed. Select and copy the response manually.", cleanupFailed: "Response cleared from this page, but the saved handoff could not be removed from this tab.", intro: "A ready environment for testing code without installing software on your device.", what: "What is Google Colab?", whatText: "A Google platform that runs Python code directly in the browser without requiring local installation.", when: "When should I use it?", uses: ["Run reviewed generated code", "Analyze larger text collections", "Experiment with AI projects"], start: "Start now", open: "Open Google Colab", suggestions: "Starter ideas", ideas: ["Try tokenizing a text", "Try a word-frequency analysis", "Try reading a CSV file"] },
   ar: { title: "مساحة Google Colab", description: "شغّل الشفرة البحثية التي راجعتها في دفتر سحابي دون تثبيت برامج محلية.", review: "راجع الناتج المنقول", selected: "لغة البرمجة المحددة", warning: "قد يتضمن هذا الناتج شرحًا أو شفرة بلغة غير Python. راجعه قبل نسخه إلى Colab. لم يُرسل أو يُنفذ أي شيء تلقائيًا.", copy: "نسخ الناتج", clear: "مسح الناتج المنقول", copied: "تم النسخ. ألصق الشفرة التي راجعتها فقط في دفتر العمل.", copyFailed: "تعذر النسخ. حدد الناتج وانسخه يدويًا.", cleanupFailed: "مُسح الناتج من الصفحة، لكن تعذر حذف النقل المحفوظ من علامة التبويب.", intro: "بيئة جاهزة لتجربة الشفرة دون تثبيت برامج على جهازك.", what: "ما Google Colab؟", whatText: "منصة من Google تتيح تشغيل شفرة Python مباشرة من المتصفح دون تثبيت برامج محلية.", when: "متى تستخدمه؟", uses: ["تشغيل الشفرة المنشأة بعد مراجعتها", "تحليل مجموعات نصية أكبر", "تجربة مشروعات الذكاء الاصطناعي"], start: "ابدأ الآن", open: "فتح Google Colab", suggestions: "أفكار للبدء", ideas: ["جرّب تجزئة نص إلى كلمات", "جرّب تحليل تكرار الكلمات", "جرّب قراءة ملف CSV"] },
+};
+const WORKBENCH = {
+  en: [["Reviewed Input", "Transferred code or response"], ["Safety Review", "Confirm executable code"], ["Explicit Copy", "Nothing runs automatically"], ["Open Colab", "External notebook"], ["Computational Run", "Researcher-controlled execution"], ["View Results", "Notebook outputs"], ["Evaluate & Improve", "Inspect errors and revise"]],
+  ar: [["مدخل مراجع", "شفرة أو ناتج منقول"], ["مراجعة السلامة", "تحقق من الشفرة القابلة للتنفيذ"], ["نسخ صريح", "لا شيء يعمل تلقائيًا"], ["فتح Colab", "دفتر عمل خارجي"], ["تشغيل حاسوبي", "تنفيذ يتحكم فيه الباحث"], ["عرض النتائج", "مخرجات دفتر العمل"], ["التقييم والتحسين", "افحص الأخطاء وراجع التجربة"]],
 };
 
 export default function ColabPage() {
@@ -26,6 +31,7 @@ export default function ColabPage() {
   return (
     <Layout title={copy.title} description={copy.description} backHref="/ar-tools#build-tools" backLabel={language === "ar" ? "العودة إلى البناء" : "Back to Build"} dataSource={handoff ? "transferred" : "standalone"}>
       <div style={{ direction, color: "#111827" }}>
+        <ComputationalWorkbench language={language} methodType="environment" stages={WORKBENCH[language].map(([label, detail]) => ({ label, detail }))} />
         {handoff && (
           <section style={styles.card}>
             <h2 style={styles.title}>{copy.review}</h2>

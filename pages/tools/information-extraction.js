@@ -2,6 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useState } from "react";
 import { useLanguage } from "../../components/LanguageProvider";
+import ComputationalWorkbench from "../../components/ComputationalWorkbench";
 import {
   INFORMATION_EXTRACTION_DECISIONS,
   INFORMATION_EXTRACTION_TOOLS,
@@ -25,6 +26,11 @@ const COPY = {
     head: "Information Extraction · Research Preview", back: "Back to Build", eyebrow: "DATA & COMPUTATIONAL WORKFLOWS", title: "Information Extraction Lab", badge: "Research Preview",
     lead: "Turn explicit Arabic-text elements into structured suggestions for researcher review.", notice: "Outputs are AI-supported analytical suggestions. The researcher remains responsible for verifying and approving results for research use.", choose: "Choose an extraction module", text: "Arabic text", placeholder: "Paste the Arabic text from which information should be extracted…", analyze: "Extract with AI", analyzing: "Generating suggestion…", aiSuggestion: "AI suggestion", review: "Researcher review", accept: "Accept", edit: "Modify", reject: "Reject", final: "Final reviewed result", finalHint: "Edit values in the JSON structure while keeping every item and evidence span in the original text.", save: "Save review", saved: "The original AI suggestion and final human result were saved separately on this device.", invalidFinal: "The final result is incomplete or contains content absent from the source text.", storageError: "Local storage is unavailable.", requestError: "A reliable suggestion could not be generated.", entities: "Entities", span: "Exact source span", category: "Category", relations: "Textual relations", entity1: "Entity 1", relation: "Relation", entity2: "Entity 2", evidence: "Supporting span", terms: "Terms and keyphrases", term: "Term", rationale: "Short rationale", explanation: "Short explanation", none: "No text-supported items were extracted.",
   },
+};
+
+const WORKBENCH = {
+  ar: [["النص العربي", "مدخل الباحث"], ["إعداد مهمة الاستخراج", "كيانات أو علاقات أو مصطلحات"], ["مخطط المخرج", "حقول وفئات مغلقة"], ["تشغيل الاستخراج", "استدلال AI صريح"], ["نتائج منظمة", "صفوف وأدلة نصية"], ["مراجعة الباحث", "قبول أو تعديل أو رفض"], ["فحص الأخطاء", "تحقق من العناصر والأدلة"], ["النتيجة النهائية", "اعتماد الباحث منفصلًا"]],
+  en: [["Arabic Text", "Researcher input"], ["Extraction Setup", "Entities, relations, or terms"], ["Output Schema", "Closed fields and categories"], ["Extraction Run", "Explicit AI inference"], ["Structured Results", "Rows and source evidence"], ["Researcher Review", "Accept, modify, or reject"], ["Error Inspection", "Verify items and evidence"], ["Final Result", "Separate researcher approval"]],
 };
 
 export default function InformationExtraction() {
@@ -67,6 +73,7 @@ export default function InformationExtraction() {
       <Link className={styles.back} href="/ar-tools#build">← {copy.back}</Link>
       <header className={styles.header}><div><p className={styles.eyebrow}>{copy.eyebrow}</p><h1>{copy.title}</h1><p>{copy.lead}</p></div><span className={styles.previewBadge}>{copy.badge}</span></header>
       <p className={styles.notice}>{copy.notice}</p>
+      <ComputationalWorkbench language={locale} methodType="ai" stages={WORKBENCH[locale].map(([label, detail]) => ({ label, detail }))} />
       <section aria-labelledby="extraction-tools-title"><h2 id="extraction-tools-title">{copy.choose}</h2><div className={styles.moduleTabs} role="tablist">
         {Object.keys(INFORMATION_EXTRACTION_TOOLS).map((id) => <button type="button" role="tab" aria-selected={toolId === id} className={toolId === id ? styles.activeTab : ""} onClick={() => changeTool(id)} key={id}><strong>{TOOL_COPY[id][locale][0]}</strong><span>{TOOL_COPY[id][locale][1]}</span></button>)}
       </div></section>

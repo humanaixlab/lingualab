@@ -108,7 +108,7 @@ test("canonical homes remain separated across Analyze, Build, Research, Workspac
   assert.match(analyze, /href="\/ar-tools#research-paths"/);
   assert.doesNotMatch(analyze, /href="\/tools\/(frequency|concordance|ngrams|pos)"/);
   assert.match(analyze, /href="\/research-paths\/corpus-linguistics"/);
-  assert.match(source("lib/i18n/en.js"), /Prepare data → Generate and review code → Run and reproduce → Evaluate/);
+  assert.match(source("lib/i18n/en.js"), /Data → Prepare → Configure → Run → Evaluate → Interpret → Improve/);
   assert.match(hub, /id="writing-tools"/);
   assert.match(source("lib/research-paths.js"), /href: "\/tools\/prompt"[^\n]+contextual: true/);
   assert.doesNotMatch(source("pages/workspace.js"), /<ResearchPaths|RESEARCH_PATHS\.map/);

@@ -3,12 +3,17 @@ import { useRouter } from "next/router";
 import Layout from "../../components/Layout";
 import { createToolHandoff, readToolHandoff, codeTask } from "../../lib/tool-handoff";
 import { useLanguage } from "../../components/LanguageProvider";
+import ComputationalWorkbench from "../../components/ComputationalWorkbench";
 
 const COPY = {
   en: { title: "AI Code Assistant", description: "Generate and review code for research, data preparation, and reproducible workflows.", intro: "Generate research-ready code for corpus analysis, data preparation, and reproducible experiments—with implementation guidance from GPT-5.6.", infoTitle: "Research-oriented generation", infoText: "Describe the method, expected input, and desired output. Never include API keys, participant identifiers, or sensitive raw data.", programming: "Programming language", experience: "Experience level", task: "Research coding task", placeholder: "Example: Build a Python script that compares word frequencies across two text corpora and exports a reproducible CSV summary.", hint: "Include your research objective, input format, constraints, and expected output.", generate: "✦ Generate Research Code", generating: "Generating research code…", clear: "Clear", output: "GPT-5.6 RESEARCH OUTPUT", blueprint: "Implementation blueprint", copied: "Copied", copy: "Copy output", colab: "Continue to Google Colab →", required: "Describe the research or coding task before generating code.", failed: "Code generation failed. Please try again.", unavailable: "The model did not return a usable result.", timeout: "Code generation timed out. Shorten the task or split it into smaller steps, then try again.", copyFailed: "The result could not be copied. Select and copy it manually.", transfer: "The result could not be transferred. Please try again.", levels: ["Beginner", "Intermediate", "Advanced"] },
   ar: { title: "مساعد البرمجة بالذكاء الاصطناعي", description: "أنشئ الشفرة وراجعها لمهام البحث وإعداد البيانات ومسارات العمل القابلة لإعادة الإنتاج.", intro: "أنشئ شفرة صالحة للبحث لتحليل المدونات وإعداد البيانات والتجارب القابلة لإعادة الإنتاج، مع إرشادات تنفيذية من GPT-5.6.", infoTitle: "إنشاء موجّه للبحث", infoText: "صف المنهج والمدخلات المتوقعة والمخرجات المطلوبة. لا تُدخل مفاتيح API أو معرّفات المشاركين أو البيانات الخام الحساسة.", programming: "لغة البرمجة", experience: "مستوى الخبرة", task: "مهمة البرمجة البحثية", placeholder: "مثال: أنشئ برنامج Python يقارن تكرار الكلمات بين مدونتين نصيتين ويصدر ملخصًا قابلًا لإعادة الإنتاج بصيغة CSV.", hint: "أدخل هدف البحث وصيغة المدخلات والقيود والمخرجات المتوقعة.", generate: "✦ إنشاء الشفرة البحثية", generating: "جارٍ إنشاء الشفرة البحثية…", clear: "مسح", output: "ناتج GPT-5.6 البحثي", blueprint: "مخطط التنفيذ", copied: "تم النسخ", copy: "نسخ الناتج", colab: "المتابعة إلى Google Colab ←", required: "أدخل مهمة البحث أو البرمجة قبل إنشاء الشفرة.", failed: "تعذر إنشاء الشفرة. حاول مرة أخرى.", unavailable: "لم يُرجع النموذج نتيجة قابلة للاستخدام.", timeout: "انتهت مهلة إنشاء الشفرة. اختصر المهمة أو قسّمها إلى خطوات أصغر ثم حاول مرة أخرى.", copyFailed: "تعذر نسخ الناتج. حدده وانسخه يدويًا.", transfer: "تعذر نقل الناتج. حاول مرة أخرى.", levels: ["مبتدئ", "متوسط", "متقدم"] },
 };
 const LEVEL_VALUES = ["Beginner", "Intermediate", "Advanced"];
+const WORKBENCH = {
+  en: [["Research Task", "Objective, input, constraints, output"], ["Implementation Setup", "Language and experience level"], ["Generation Run", "Explicit AI-supported action"], ["Implementation Blueprint", "Generated response preserved"], ["Researcher Review", "Inspect before copying"], ["Colab Handoff", "Explicit transfer only"], ["Execution & Evaluation", "Performed after researcher review"]],
+  ar: [["المهمة البحثية", "الهدف والمدخلات والقيود والمخرجات"], ["إعداد التنفيذ", "اللغة ومستوى الخبرة"], ["تشغيل الإنشاء", "إجراء صريح مدعوم بالذكاء الاصطناعي"], ["مخطط التنفيذ", "الحفاظ على الناتج المنشأ"], ["مراجعة الباحث", "الفحص قبل النسخ"], ["النقل إلى Colab", "نقل صريح فقط"], ["التشغيل والتقييم", "بعد مراجعة الباحث"]],
+};
 
 export default function CodeTool() {
   const { language: uiLanguage, direction } = useLanguage();
@@ -113,6 +118,7 @@ export default function CodeTool() {
         <p style={styles.intro}>
           {copy.intro}
         </p>
+        <ComputationalWorkbench language={uiLanguage} methodType="implementation" stages={WORKBENCH[uiLanguage].map(([label, detail]) => ({ label, detail }))} />
 
         <div style={styles.infoCard}>
           <span aria-hidden="true" style={styles.infoIcon}>✦</span>
