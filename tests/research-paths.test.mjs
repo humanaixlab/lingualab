@@ -134,6 +134,33 @@ test("Corpus Linguistics keeps its educational card and adds a dedicated executa
   assert.doesNotMatch(hub, /COMING[\s\S]{0,180}<Link/);
 });
 
+test("Corpus Linguistics leads with a practical evidence-based workflow", () => {
+  const hub = source("pages/research-paths/corpus-linguistics.js");
+  assert.match(hub, /How do I run a corpus-linguistics study in LinguaLab\?/);
+  assert.match(hub, /كيف أطبق لسانيات المدونات داخل LinguaLab؟/);
+  assert.deepEqual(
+    [...hub.matchAll(/\{ key: "([^"]+)"(?:, href: "([^"]+)")?, type: "([^"]+)" \}/g)].map((match) => match.slice(1)),
+    [
+      ["input", "/tools/corpus-research", "review"],
+      ["prepare", "/tools/corpus-research", "review"],
+      ["inspect", "/tools/corpus-research", "deterministic"],
+      ["frequency", "/tools/frequency", "deterministic"],
+      ["contexts", "/tools/concordance", "deterministic"],
+      ["ngrams", "/tools/ngrams", "deterministic"],
+      ["review", undefined, "review"],
+      ["interpret", "/tools/analyze", "ai"],
+      ["report", "/research-report", "review"],
+    ],
+  );
+  for (const label of ["Deterministic computation", "AI-supported interpretation", "Researcher review", "حساب حتمي", "تفسير مدعوم بالذكاء الاصطناعي", "مراجعة الباحث"])
+    assert.match(hub, new RegExp(label));
+  assert.match(hub, /Frequency does not automatically mean importance/);
+  assert.match(hub, /التكرار لا يعني الأهمية تلقائيًا/);
+  assert.match(hub, /Studying frequent expressions in university messages/);
+  assert.match(hub, /دراسة الألفاظ المتكررة في رسائل الجامعات/);
+  assert.doesNotMatch(hub, /AI-generated counts|تكرارات مولدة بالذكاء الاصطناعي/);
+});
+
 test("POS remains owned by Morphology & Syntax and Arabic path labels include scientific English", () => {
   const corpus = RESEARCH_PATHS.find((path) => path.id === "corpus-linguistics");
   const morphology = RESEARCH_PATHS.find((path) => path.id === "morphology-syntax");

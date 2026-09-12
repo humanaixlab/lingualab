@@ -32,6 +32,87 @@ const COMING = {
   ar: ["المصاحبات اللفظية (Collocations)", "تحليل الكلمات المفتاحية (Keyword Analysis)", "مقارنة المدونات (Corpus Comparison)"],
 };
 
+const WORKFLOW = [
+  { key: "input", href: "/tools/corpus-research", type: "review" },
+  { key: "prepare", href: "/tools/corpus-research", type: "review" },
+  { key: "inspect", href: "/tools/corpus-research", type: "deterministic" },
+  { key: "frequency", href: "/tools/frequency", type: "deterministic" },
+  { key: "contexts", href: "/tools/concordance", type: "deterministic" },
+  { key: "ngrams", href: "/tools/ngrams", type: "deterministic" },
+  { key: "review", type: "review" },
+  { key: "interpret", href: "/tools/analyze", type: "ai" },
+  { key: "report", href: "/research-report", type: "review" },
+];
+
+const PRACTICAL = {
+  en: {
+    title: "How do I run a corpus-linguistics study in LinguaLab?",
+    lead: "Follow the corpus from preparation to evidence-led interpretation. Each stage shows who or what produces the result.",
+    types: {
+      deterministic: "Deterministic computation",
+      ai: "AI-supported interpretation",
+      review: "Researcher review",
+    },
+    stages: {
+      input: ["Corpus / texts", "Bring together the documented texts that answer the research question."],
+      prepare: ["Prepare corpus", "Create the corpus and enter available source metadata without fabricating missing details."],
+      inspect: ["Inspect corpus quality", "Inspect actual missing metadata, duplicates, and corpus readiness."],
+      frequency: ["Frequency analysis", "Compute word counts directly from the submitted corpus."],
+      contexts: ["Concordance / Contexts", "Retrieve the actual contexts in which a selected word or phrase occurs."],
+      ngrams: ["N-grams", "Compute recurring two- or three-word sequences from the submitted corpus."],
+      review: ["Review patterns", "Compare the measured patterns and record observations supported by the displayed evidence."],
+      interpret: ["Interpret findings", "Use AI-supported interpretation based on actual results, then review it as the researcher."],
+      report: ["Research report", "Organize the available analysis context into a structured report and verify the final account."],
+    },
+    open: "Open stage",
+    exampleTitle: "Example: Studying frequent expressions in university messages",
+    exampleSteps: [
+      "Collect a documented set of texts.",
+      "Create the corpus.",
+      "Inspect missing information, duplicates, and metadata.",
+      "Extract the most frequent words.",
+      "Open the contexts of important words.",
+      "Inspect N-grams.",
+      "Record a linguistic observation supported by evidence.",
+      "Continue to interpretation and reporting.",
+    ],
+    caution: "Frequency does not automatically mean importance. Interpret results in light of corpus size, data collection, context, and the research question.",
+  },
+  ar: {
+    title: "كيف أطبق لسانيات المدونات داخل LinguaLab؟",
+    lead: "اتبع مسار المدونة من التجهيز إلى التفسير المدعوم بالدليل، مع توضيح الجهة التي تنتج النتيجة في كل مرحلة.",
+    types: {
+      deterministic: "حساب حتمي",
+      ai: "تفسير مدعوم بالذكاء الاصطناعي",
+      review: "مراجعة الباحث",
+    },
+    stages: {
+      input: ["النصوص / المدونة", "اجمع النصوص الموثقة التي تخدم سؤال البحث."],
+      prepare: ["تجهيز المدونة", "أنشئ المدونة وأدخل البيانات الوصفية المتاحة دون اختلاق معلومات ناقصة."],
+      inspect: ["فحص جودة المدونة", "افحص البيانات الوصفية الناقصة والنصوص المكررة وجاهزية المدونة فعليًا."],
+      frequency: ["تحليل التكرار", "احسب تكرارات الكلمات مباشرة من المدونة المقدمة."],
+      contexts: ["تحليل السياقات", "استرجع السياقات الفعلية التي تظهر فيها الكلمة أو العبارة المحددة."],
+      ngrams: ["المتتاليات اللفظية", "احسب المتتاليات الثنائية أو الثلاثية المتكررة من المدونة المقدمة."],
+      review: ["مراجعة الأنماط", "قارن الأنماط المقاسة وسجّل ملاحظات تستند إلى الأدلة المعروضة."],
+      interpret: ["تفسير النتائج", "استخدم تفسيرًا مدعومًا بالذكاء الاصطناعي قائمًا على النتائج الفعلية، ثم راجعه بوصفك الباحث."],
+      report: ["التقرير البحثي", "نظّم سياق التحليل المتاح في تقرير منظم وتحقق من الصياغة النهائية."],
+    },
+    open: "فتح المرحلة",
+    exampleTitle: "مثال: دراسة الألفاظ المتكررة في رسائل الجامعات",
+    exampleSteps: [
+      "اجمع مجموعة نصوص موثقة.",
+      "أنشئ المدونة.",
+      "افحص النواقص والتكرار والبيانات الوصفية.",
+      "استخرج أكثر الكلمات تكرارًا.",
+      "افتح السياقات للكلمات المهمة.",
+      "افحص المتتاليات اللفظية (N-grams).",
+      "سجّل ملاحظة لغوية مدعومة بالدليل.",
+      "انتقل إلى التفسير والتقرير.",
+    ],
+    caution: "التكرار لا يعني الأهمية تلقائيًا. يجب تفسير النتائج في ضوء حجم المدونة، وطريقة جمع البيانات، والسياق، وسؤال البحث.",
+  },
+};
+
 export default function CorpusLinguisticsPath() {
   const { language } = useLanguage();
   const locale = language === "ar" ? "ar" : "en";
@@ -52,6 +133,7 @@ export default function CorpusLinguisticsPath() {
     sequence: "Create a corpus when needed, or start with frequency to see broad patterns, then use contexts and N-grams according to your research question.",
     back: "Back to Research Paths",
   };
+  const practical = PRACTICAL[locale];
 
   return (
     <>
@@ -63,6 +145,40 @@ export default function CorpusLinguisticsPath() {
           <h1>{copy.title}</h1>
           <p>{copy.description}</p>
         </header>
+
+        <section className={styles.workflow} aria-labelledby="corpus-practical-workflow">
+          <div className={styles.workflowHeading}>
+            <p className={styles.eyebrow}>{locale === "ar" ? "مسار تطبيقي" : "PRACTICAL WORKFLOW"}</p>
+            <h2 id="corpus-practical-workflow">{practical.title}</h2>
+            <p>{practical.lead}</p>
+          </div>
+          <div className={styles.typeLegend} aria-label={locale === "ar" ? "أنواع التنفيذ" : "Execution types"}>
+            {Object.entries(practical.types).map(([type, label]) => <span className={styles[type]} key={type}>{label}</span>)}
+          </div>
+          <ol className={styles.workflowSteps}>
+            {WORKFLOW.map((stage, index) => {
+              const [title, description] = practical.stages[stage.key];
+              const content = <>
+                <span className={styles.stageNumber}>{String(index + 1).padStart(2, "0")}</span>
+                <span className={`${styles.executionType} ${styles[stage.type]}`}>{practical.types[stage.type]}</span>
+                <h3>{title}</h3>
+                <p>{description}</p>
+                {stage.href && <span className={styles.stageAction}>{practical.open} <span aria-hidden="true">→</span></span>}
+              </>;
+              return <li key={stage.key}>{stage.href ? <Link href={stage.href}>{content}</Link> : <div>{content}</div>}</li>;
+            })}
+          </ol>
+          <div className={styles.practicalSupport}>
+            <article className={styles.example}>
+              <h3>{practical.exampleTitle}</h3>
+              <ol>{practical.exampleSteps.map((step) => <li key={step}>{step}</li>)}</ol>
+            </article>
+            <aside className={styles.caution}>
+              <strong>{locale === "ar" ? "تنبيه منهجي" : "Methodological caution"}</strong>
+              <p>{practical.caution}</p>
+            </aside>
+          </div>
+        </section>
 
         <section aria-labelledby="available-corpus-tools">
           <h2 id="available-corpus-tools">{copy.available}</h2>
