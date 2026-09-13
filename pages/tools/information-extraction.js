@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useLanguage } from "../../components/LanguageProvider";
 import ComputationalWorkbench from "../../components/ComputationalWorkbench";
+import PageGuidance from "../../components/PageGuidance";
 import {
   INFORMATION_EXTRACTION_DECISIONS,
   INFORMATION_EXTRACTION_TOOLS,
@@ -15,6 +16,11 @@ const TOOL_COPY = {
   ner: { ar: ["استخراج الكيانات المسماة (Named Entity Recognition – NER)", "استخرج الكيانات الظاهرة في النص ضمن فئات مغلقة مع الحفاظ على صورتها الأصلية."], en: ["Named Entity Recognition (NER)", "Extract visible entities using a closed category set while preserving exact source forms."] },
   relations: { ar: ["استخراج العلاقات (Relation Extraction)", "حدّد العلاقات الصريحة أو المدعومة نصيًا بقوة بين الكيانات دون معرفة خارجية."], en: ["Relation Extraction", "Identify explicit or strongly text-supported entity relations without external knowledge."] },
   terminology: { ar: ["استخراج المصطلحات والعبارات المفتاحية", "استخرج المصطلحات والعبارات متعددة الكلمات ذات الصلة بالمجال بدل الكلمات العامة."], en: ["Terminology & Keyphrase Extraction", "Extract domain-relevant terms and multiword expressions instead of generic frequent words."] },
+};
+
+const GUIDANCE = {
+  ar: ["أدخل النص أو البيانات العربية.", "اختر مهمة الاستخراج المطلوبة.", "شغّل التحليل المدعوم بالذكاء الاصطناعي.", "راجع العناصر المستخرجة وصححها عند الحاجة."],
+  en: ["Enter Arabic text or data.", "Choose the required extraction task.", "Run the AI-supported analysis.", "Review extracted items and correct them when needed."],
 };
 
 const COPY = {
@@ -73,6 +79,7 @@ export default function InformationExtraction() {
       <Link className={styles.back} href="/ar-tools#build">← {copy.back}</Link>
       <header className={styles.header}><div><p className={styles.eyebrow}>{copy.eyebrow}</p><h1>{copy.title}</h1><p>{copy.lead}</p></div><span className={styles.previewBadge}>{copy.badge}</span></header>
       <p className={styles.notice}>{copy.notice}</p>
+      <PageGuidance language={locale} steps={GUIDANCE[locale]} />
       <ComputationalWorkbench language={locale} methodType="ai" stages={WORKBENCH[locale].map(([label, detail]) => ({ label, detail }))} />
       <section aria-labelledby="extraction-tools-title"><h2 id="extraction-tools-title">{copy.choose}</h2><div className={styles.moduleTabs} role="tablist">
         {Object.keys(INFORMATION_EXTRACTION_TOOLS).map((id) => <button type="button" role="tab" aria-selected={toolId === id} className={toolId === id ? styles.activeTab : ""} onClick={() => changeTool(id)} key={id}><strong>{TOOL_COPY[id][locale][0]}</strong><span>{TOOL_COPY[id][locale][1]}</span></button>)}

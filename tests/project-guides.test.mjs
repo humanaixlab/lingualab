@@ -75,7 +75,8 @@ test("prototype handoff action opens review before AI guidance and asks only for
   const page = source("pages/projects.js");
   assert.match(page, /Turn this project into a prototype/);
   assert.match(page, /حوّل هذا المشروع إلى نموذج أولي/);
-  assert.match(page, /Inherited project information/);
+  assert.match(page, /Current project information/);
+  assert.match(page, /معلومات المشروع الحالية/);
   assert.match(page, /Researcher edits \/ additions/);
   assert.match(page, /disabled=\{!contextReviewed \|\| guidanceStatus === "loading"\}/);
   assert.match(page, /missingFields\.includes\(field\.id\)/);

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useLanguage } from "../../components/LanguageProvider";
 import ComputationalWorkbench from "../../components/ComputationalWorkbench";
+import PageGuidance from "../../components/PageGuidance";
 import {
   COMPARISON_CHOICES,
   NLP_EXPERIMENT_MODULES,
@@ -36,6 +37,10 @@ const COPY = {
 };
 
 const moduleCopy = { "prompt-experiment": ["prompt", "promptDesc"], "output-comparison": ["comparison", "comparisonDesc"], "task-sandbox": ["sandbox", "sandboxDesc"] };
+const GUIDANCE = {
+  ar: ["عرّف المهمة والنص الذي ستختبره.", "حدّد التعليمات والفئات أو بنية المخرجات.", "شغّل التجربة صراحةً.", "راجع النتيجة واقبلها أو عدّلها أو ارفضها."],
+  en: ["Define the task and the text to test.", "Set instructions, allowed labels, or the output structure.", "Run the experiment explicitly.", "Review the result, then accept, modify, or reject it."],
+};
 const WORKBENCH = {
   ar: [["مدخل ثابت", "النص والمهمة"], ["إعداد التجربة", "تعليمات أو فئات أو بنية"], ["تشغيل تجريبي", "إجراء صريح"], ["مخرجات منظمة", "حفظ أ وب دون تغيير"], ["المقارنة", "الفئة والدليل والتفسير والاتساق"], ["تقييم الباحث", "لا فائز تلقائيًا"], ["فحص الأخطاء", "سجّل سبب الحكم"], ["التحسين", "عدّل الإعداد ثم أعد التشغيل"]],
   en: [["Fixed Input", "Text and task"], ["Experiment Setup", "Instructions, labels, or structure"], ["Experiment Run", "Explicit action"], ["Structured Outputs", "Preserved A and B outputs"], ["Comparison", "Decision, evidence, explanation, consistency"], ["Researcher Evaluation", "No automatic winner"], ["Error Inspection", "Record the reason"], ["Improvement", "Adjust setup, then re-run"]],
@@ -94,6 +99,7 @@ export default function NlpExperiments() {
 
   return <><Head><title>{copy.head} · LinguaLab</title></Head><main className={styles.page}>
     <Link className={styles.back} href="/ar-tools#build">← {copy.back}</Link><header className={styles.header}><div><p className={styles.eyebrow}>{copy.eyebrow}</p><h1>{copy.title}</h1><p>{copy.lead}</p></div><span className={styles.previewBadge}>{copy.badge}</span></header><p className={styles.notice}>{copy.notice}</p>
+    <PageGuidance language={locale} steps={GUIDANCE[locale]} />
     <section className={styles.executionExplanation} aria-labelledby="nlp-execution-title">
       <div className={styles.executionHeading}><div><p>{copy.executionType}</p><h2 id="nlp-execution-title">{copy.executionTitle}</h2></div><span>{locale === "ar" ? "مخرج منظم · تحقق برمجي · مراجعة الباحث" : "Structured output · Programmatic validation · Researcher review"}</span></div>
       <p>{copy.executionText}</p><p>{copy.executionContrast}</p>

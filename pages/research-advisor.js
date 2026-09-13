@@ -7,8 +7,14 @@ import { normalizeAdvisorUiLanguage } from "../lib/advisor-language";
 import { createReportContext } from "../lib/report-context";
 import { readResearchContext, researchContextHref } from "../lib/research-context";
 import DataSourceIndicator from "../components/DataSourceIndicator";
+import PageGuidance from "../components/PageGuidance";
 
 const stages = ["idea", "data", "analysis", "interpretation", "writing"];
+
+const GUIDANCE = {
+  ar: ["صف هدف البحث والبيانات المتاحة والمرحلة الحالية.", "يقدّم المستشار طريقة وخطوات مقترحة تناسب السياق.", "راجع الافتراضات والقيود والأسئلة المقترحة.", "اعتمد ما يناسب دراستك ثم انتقل إلى التحليل أو التقرير."],
+  en: ["Describe the research goal, available data, and current stage.", "The advisor proposes a method and steps suited to that context.", "Review the assumptions, limitations, and suggested questions.", "Accept what fits your study, then continue to analysis or reporting."],
+};
 
 const examples = [
   {
@@ -200,6 +206,8 @@ export default function ResearchAdvisorPage() {
             <span>{t("advisor.principleLabel")}</span><strong>{t("advisor.principle")}</strong>
           </div>
         </section>
+
+        <PageGuidance language={language} steps={GUIDANCE[language === "ar" ? "ar" : "en"]} />
 
         <section className={styles.workspace}>
           <form className={styles.formCard} onSubmit={submit}>

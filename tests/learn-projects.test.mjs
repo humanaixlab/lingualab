@@ -36,6 +36,7 @@ async function renderPage(path, language, router = { query: {}, isReady: true, p
       if (module === "next/link") return function MockLink({ children, ...props }) { return React.createElement("a", props, children); };
       if (module === "next/router") return { useRouter: () => router };
       if (module === "../components/LanguageProvider") return { useLanguage: () => ({ language, t: (key, variables) => translate(language, key, variables) }) };
+      if (module === "../components/PageGuidance") return function MockPageGuidance({ steps = [] }) { return React.createElement("aside", null, steps.map((step) => React.createElement("p", { key: step }, step))); };
       if (module === "../lib/project-catalog") return { PATH_GUIDANCE, PROJECT_CATALOG, PROJECT_PATH_ROUTES, PROJECT_TOOL_ROUTES, buildProjectRoadmap, recommendProjects };
       if (module === "../lib/project-guides") return { buildPrototypeHandoff, buildPrototypeRoadmap, getProjectGuides, getPrototypeHandoffFields, getPrototypeLinks, getPrototypeProfile };
       if (module === "../lib/arabic-challenges") return { ARABIC_CHALLENGE_FAMILIES, CHALLENGE_BY_ID };

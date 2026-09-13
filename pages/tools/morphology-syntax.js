@@ -2,6 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useState } from "react";
 import { useLanguage } from "../../components/LanguageProvider";
+import PageGuidance from "../../components/PageGuidance";
 import {
   MORPHOLOGY_SYNTAX_DECISIONS,
   MORPHOLOGY_SYNTAX_TOOLS,
@@ -35,6 +36,11 @@ const COPY = {
 const sectionTools = {
   morphology: ["lemmatization", "morphological-features", "word-structure"],
   syntax: ["pos", "syntactic-relations", "sentence-structure"],
+};
+
+const GUIDANCE = {
+  ar: ["أدخل النص وحدد الكلمة أو العناصر المطلوبة عند الحاجة.", "اختر نوع التحليل الصرفي أو النحوي.", "شغّل الأداة المدعومة بالذكاء الاصطناعي.", "راجع المخرجات الصرفية أو النحوية قبل استخدامها بحثيًا."],
+  en: ["Enter the text and select the required word or elements when needed.", "Choose a morphology or syntax analysis.", "Run the AI-supported tool.", "Review the morphological or syntactic output before research use."],
 };
 
 export default function MorphologySyntax() {
@@ -87,6 +93,7 @@ export default function MorphologySyntax() {
       <Link className={styles.back} href="/ar-tools#all-tools">← {copy.back}</Link>
       <header className={styles.header}><div><p className={styles.eyebrow}>{copy.eyebrow}</p><h1>{copy.title}</h1><p>{copy.lead}</p></div><span className={styles.previewBadge}>{copy.badge}</span></header>
       <p className={styles.notice}>{copy.notice}</p>
+      <PageGuidance language={locale} steps={GUIDANCE[locale]} />
       <div className={styles.moduleTabs} role="tablist">
         {["morphology", "syntax"].map((id) => <button type="button" role="tab" aria-selected={section === id} className={section === id ? styles.activeTab : ""} onClick={() => changeSection(id)} key={id}><strong>{copy[id]}</strong><span>{copy[`${id}Desc`]}</span></button>)}
       </div>

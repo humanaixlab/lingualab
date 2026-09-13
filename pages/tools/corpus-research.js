@@ -2,6 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useLanguage } from "../../components/LanguageProvider";
+import PageGuidance from "../../components/PageGuidance";
 import {
   analyzeCorpusDeterministically,
   createCorpusDocument,
@@ -16,6 +17,11 @@ const EMPTY_METADATA = { source: "", genre: "", date: "", author: "", notes: "" 
 const EMPTY_SETUP = { metadataFields: [], inclusionCriteria: [], exclusionCriteria: [], textTypes: [], corpusStructure: [], readinessIssues: [] };
 const EMPTY_INTERPRETATION = { summary: "", patterns: [], researchQuestions: [], caution: "" };
 const ARABIC_PATTERN = /[\u0600-\u06ff]/;
+
+const GUIDANCE = {
+  ar: ["أنشئ المدونة أو حمّل النصوص.", "افحص جودة البيانات والبيانات الوصفية والتكرارات.", "نفّذ التحليلات المناسبة على المدونة.", "فسّر النتائج في ضوء سؤال البحث."],
+  en: ["Create the corpus or upload texts.", "Inspect data quality, metadata, and duplicates.", "Run the appropriate corpus analyses.", "Interpret results in light of the research question."],
+};
 
 const COPY = {
   ar: {
@@ -149,6 +155,7 @@ export default function CorpusResearch() {
       <Link className={styles.back} href="/ar-tools#all-tools">← {copy.back}</Link>
       <header className={styles.header}><div><p className={styles.eyebrow}>{copy.eyebrow}</p><h1>{copy.title}</h1><p>{copy.lead}</p></div><span className={styles.previewBadge}>{copy.badge}</span></header>
       <p className={styles.notice}>{copy.notice}</p>
+      <PageGuidance language={locale} steps={GUIDANCE[locale]} />
       <div className={styles.moduleTabs} role="tablist">
         {["create", "analyze"].map((id) => <button type="button" role="tab" aria-selected={moduleId === id} className={moduleId === id ? styles.activeTab : ""} onClick={() => changeModule(id)} key={id}><strong>{copy[id]}</strong><span>{copy[`${id}Desc`]}</span></button>)}
       </div>

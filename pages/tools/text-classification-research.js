@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useLanguage } from "../../components/LanguageProvider";
 import ComputationalWorkbench from "../../components/ComputationalWorkbench";
+import PageGuidance from "../../components/PageGuidance";
 import {
   CLASSIFICATION_REVIEW_DECISIONS,
   TEXT_CLASSIFICATION_MODULES,
@@ -37,6 +38,11 @@ const COPY = {
 };
 
 const parseLabels = (value) => [...new Set(value.split(/[\n,،]/).map((item) => item.trim()).filter(Boolean))];
+
+const GUIDANCE = {
+  ar: ["أدخل بياناتك المصنفة وحدد النص والوسم المرجعي.", "اختر التصنيف الأساسي أو التصنيف بمساندة الذكاء الاصطناعي.", "شغّل النموذج أو التحليل المطلوب.", "راجع المقاييس والأخطاء قبل اعتماد النتيجة."],
+  en: ["Enter labeled data and identify the text and reference-label fields.", "Choose baseline or AI-assisted classification.", "Run the selected model or analysis.", "Review metrics and errors before accepting the result."],
+};
 
 const WORKBENCH = {
   ar: [
@@ -113,6 +119,7 @@ export default function TextClassificationResearch() {
       <Link className={styles.back} href="/ar-tools#build">← {copy.back}</Link>
       <header className={styles.header}><div><p className={styles.eyebrow}>{copy.eyebrow}</p><h1>{copy.title}</h1><p>{copy.lead}</p></div><span className={styles.previewBadge}>{copy.badge}</span></header>
       <p className={styles.notice}>{copy.notice}</p>
+      <PageGuidance language={locale} steps={GUIDANCE[locale]} />
       <ComputationalWorkbench language={locale} methodType="deterministic" methodName={locale === "ar" ? "خط أساس Naive Bayes + استدلال AI منفصل" : "Naive Bayes baseline + separate AI inference"} stages={WORKBENCH[locale].map(([label, detail]) => ({ label, detail }))} />
       <div className={styles.moduleTabs} role="tablist">
         {TEXT_CLASSIFICATION_MODULES.map((id) => {

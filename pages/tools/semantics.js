@@ -2,6 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useLanguage } from "../../components/LanguageProvider";
+import PageGuidance from "../../components/PageGuidance";
 import {
   SEMANTICS_TOOLS,
   createSemanticsReviewedCase,
@@ -23,6 +24,11 @@ const TOOL_COPY = {
     ar: { title: "التجميع الدلالي", description: "اجمع نصوصًا عربية قصيرة في مجموعات قائمة على تقارب المعنى." },
     en: { title: "Semantic Grouping", description: "Group short Arabic texts according to meaning-based similarity." },
   },
+};
+
+const GUIDANCE = {
+  ar: ["أدخل النص أو النصوص العربية.", "اختر التشابه أو اكتشاف الموضوعات أو التجميع الدلالي.", "شغّل التحليل المدعوم بالذكاء الاصطناعي.", "راجع التفسير واعتمده فقط بعد التحقق."],
+  en: ["Enter the Arabic text or texts.", "Choose similarity, topic discovery, or semantic grouping.", "Run the AI-supported analysis.", "Review the interpretation and accept it only after verification."],
 };
 
 const COPY = {
@@ -120,6 +126,7 @@ export default function SemanticsTool() {
       <Link className={styles.back} href="/ar-tools#semantics">← {copy.back}</Link>
       <header className={styles.header}><div><p className={styles.eyebrow}>{copy.eyebrow}</p><h1>{copy.title}</h1><p>{copy.lead}</p></div><span className={styles.previewBadge}>{copy.badge}</span></header>
       <p className={styles.notice}>{copy.notice}</p>
+      <PageGuidance language={locale} steps={GUIDANCE[locale]} />
       <section aria-labelledby="semantics-tools-title"><h2 id="semantics-tools-title">{copy.choose}</h2><div className={styles.toolTabs} role="tablist" aria-label={copy.choose}>
         {Object.keys(SEMANTICS_TOOLS).map((id) => <button type="button" role="tab" aria-selected={toolId === id} className={toolId === id ? styles.activeTool : ""} onClick={() => changeTool(id)} key={id}><strong>{TOOL_COPY[id][locale].title}</strong><span>{TOOL_COPY[id][locale].description}</span></button>)}
       </div></section>
