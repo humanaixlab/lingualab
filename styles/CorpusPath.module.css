@@ -74,6 +74,7 @@
 .deterministic { background: #e8f6f1; color: #176d59; }
 .ai { background: #eeeafe; color: #5148d9; }
 .review { background: #fff1db; color: #8a5a11; }
+.typeBadges { display: flex; flex-wrap: wrap; gap: 6px; }
 
 .workflowSteps {
   display: grid;

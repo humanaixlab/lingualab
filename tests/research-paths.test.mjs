@@ -122,8 +122,8 @@ test("Corpus Linguistics keeps its educational card and adds a dedicated executa
     assert.ok(corpus[field], `Corpus educational field ${field} must remain`);
   assert.equal(corpus.hubHref, "/research-paths/corpus-linguistics");
   assert.deepEqual(corpus.cta, { en: "Start the Corpus Linguistics workflow", ar: "ابدأ مسار لسانيات المدونات" });
-  assert.match(corpus.overview.en, /Create or prepare the corpus → inspect data quality → analyze frequency → examine contexts → extract n-grams → review patterns → interpret findings → prepare the research report/);
-  assert.match(corpus.overview.ar, /أنشئ أو جهّز المدونة ← افحص جودة البيانات ← حلّل التكرار ← افحص السياقات ← استخرج المتتاليات اللفظية ← راجع الأنماط ← فسّر النتائج ← أعد التقرير البحثي/);
+  assert.match(corpus.overview.en, /Prepare the corpus → check corpus readiness → analyze frequency → examine contexts → extract n-grams → review patterns → interpret findings → prepare the research report/);
+  assert.match(corpus.overview.ar, /إعداد المدونة ← فحص جاهزية المدونة ← تحليل التكرار ← تحليل السياقات ← المتتاليات اللفظية ← مراجعة الأنماط ← تفسير النتائج ← التقرير البحثي/);
   assert.deepEqual(corpus.available.map((tool) => tool.href), ["/tools/corpus-research", "/tools/frequency", "/tools/concordance", "/tools/ngrams"]);
   assert.match(source("components/ResearchPaths.js"), /className=\{styles\.primaryCta\}[\s\S]*path\.hubHref \|\| path\.ctaHref/);
 
@@ -141,20 +141,14 @@ test("Corpus Linguistics leads with a practical evidence-based workflow", () => 
   const hub = source("pages/research-paths/corpus-linguistics.js");
   assert.match(hub, /How do I run a corpus-linguistics study in LinguaLab\?/);
   assert.match(hub, /كيف أطبق لسانيات المدونات داخل LinguaLab؟/);
-  assert.deepEqual(
-    [...hub.matchAll(/\{ key: "([^"]+)"(?:, href: "([^"]+)")?, type: "([^"]+)" \}/g)].map((match) => match.slice(1)),
-    [
-      ["input", "/tools/corpus-research", "review"],
-      ["prepare", "/tools/corpus-research", "review"],
-      ["inspect", "/tools/corpus-research", "deterministic"],
-      ["frequency", "/tools/frequency", "deterministic"],
-      ["contexts", "/tools/concordance", "deterministic"],
-      ["ngrams", "/tools/ngrams", "deterministic"],
-      ["review", undefined, "review"],
-      ["interpret", "/tools/analyze", "ai"],
-      ["report", "/research-report", "review"],
-    ],
-  );
+  const stageKeys = [...hub.matchAll(/\{ key: "([^"]+)"(?:, href: "([^"]+)")?, (?:type: "([^"]+)"|types: \[([^\]]+)\]) \}/g)];
+  assert.deepEqual(stageKeys.map((match) => match[1]), ["prepare", "inspect", "frequency", "contexts", "ngrams", "review", "interpret", "report"]);
+  assert.deepEqual(stageKeys.map((match) => match[2]), ["/tools/corpus-research", "/tools/corpus-research", "/tools/frequency", "/tools/concordance", "/tools/ngrams", undefined, "/tools/analyze", "/research-report"]);
+  assert.match(hub, /types: \["deterministic", "review"\]/);
+  assert.match(hub, /Prepare the corpus[\s\S]*Check corpus readiness/);
+  assert.match(hub, /إعداد المدونة[\s\S]*فحص جاهزية المدونة/);
+  assert.doesNotMatch(hub, /Corpus \/ texts|النصوص \/ المدونة|Inspect corpus quality|فحص جودة المدونة/);
+  assert.match(hub, /practical\.stages\?\.\[stage\.key\] \|\| \[copy\.missingStage, ""\]/);
   for (const label of ["Deterministic computation", "AI-supported interpretation", "Researcher review", "حساب حتمي", "تفسير مدعوم بالذكاء الاصطناعي", "مراجعة الباحث"])
     assert.match(hub, new RegExp(label));
   assert.match(hub, /Frequency does not automatically mean importance/);

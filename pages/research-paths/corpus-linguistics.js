@@ -33,9 +33,8 @@ const COMING = {
 };
 
 const WORKFLOW = [
-  { key: "input", href: "/tools/corpus-research", type: "review" },
   { key: "prepare", href: "/tools/corpus-research", type: "review" },
-  { key: "inspect", href: "/tools/corpus-research", type: "deterministic" },
+  { key: "inspect", href: "/tools/corpus-research", types: ["deterministic", "review"] },
   { key: "frequency", href: "/tools/frequency", type: "deterministic" },
   { key: "contexts", href: "/tools/concordance", type: "deterministic" },
   { key: "ngrams", href: "/tools/ngrams", type: "deterministic" },
@@ -54,9 +53,8 @@ const PRACTICAL = {
       review: "Researcher review",
     },
     stages: {
-      input: ["Corpus / texts", "Bring together the documented texts that answer the research question."],
-      prepare: ["Prepare corpus", "Create the corpus and enter available source metadata without fabricating missing details."],
-      inspect: ["Inspect corpus quality", "Inspect actual missing metadata, duplicates, and corpus readiness."],
+      prepare: ["Prepare the corpus", "Collect the texts relevant to the research question, organize them into a clear corpus, and add essential metadata when available."],
+      inspect: ["Check corpus readiness", "Check missing data, duplicates, text quality, and whether the corpus is ready for analysis."],
       frequency: ["Frequency analysis", "Compute word counts directly from the submitted corpus."],
       contexts: ["Concordance / Contexts", "Retrieve the actual contexts in which a selected word or phrase occurs."],
       ngrams: ["N-grams", "Compute recurring two- or three-word sequences from the submitted corpus."],
@@ -87,9 +85,8 @@ const PRACTICAL = {
       review: "مراجعة الباحث",
     },
     stages: {
-      input: ["النصوص / المدونة", "اجمع النصوص الموثقة التي تخدم سؤال البحث."],
-      prepare: ["تجهيز المدونة", "أنشئ المدونة وأدخل البيانات الوصفية المتاحة دون اختلاق معلومات ناقصة."],
-      inspect: ["فحص جودة المدونة", "افحص البيانات الوصفية الناقصة والنصوص المكررة وجاهزية المدونة فعليًا."],
+      prepare: ["إعداد المدونة", "اجمع النصوص التي تخدم سؤال البحث، ونظّمها في مدونة واضحة، وأضف البيانات الوصفية الأساسية عند توفرها."],
+      inspect: ["فحص جاهزية المدونة", "تحقق من البيانات الناقصة، والتكرار، وجودة النصوص، ومدى جاهزية المدونة للتحليل."],
       frequency: ["تحليل التكرار", "احسب تكرارات الكلمات مباشرة من المدونة المقدمة."],
       contexts: ["تحليل السياقات", "استرجع السياقات الفعلية التي تظهر فيها الكلمة أو العبارة المحددة."],
       ngrams: ["المتتاليات اللفظية", "احسب المتتاليات الثنائية أو الثلاثية المتكررة من المدونة المقدمة."],
@@ -123,6 +120,7 @@ export default function CorpusLinguisticsPath() {
     available: "الأدوات المتاحة الآن",
     coming: "قدرات قادمة",
     sequence: "أنشئ مدونة جديدة عند الحاجة، أو ابدأ بتحليل التكرار لرؤية الأنماط العامة، ثم استخدم السياقات والمتتاليات اللفظية وفق سؤالك البحثي.",
+    missingStage: "مرحلة من مسار المدونة",
     back: "العودة إلى المسارات البحثية",
   } : {
     eyebrow: "RESEARCH PATH",
@@ -131,6 +129,7 @@ export default function CorpusLinguisticsPath() {
     available: "Available now",
     coming: "Coming next",
     sequence: "Create a corpus when needed, or start with frequency to see broad patterns, then use contexts and N-grams according to your research question.",
+    missingStage: "Corpus workflow stage",
     back: "Back to Research Paths",
   };
   const practical = PRACTICAL[locale];
@@ -157,10 +156,11 @@ export default function CorpusLinguisticsPath() {
           </div>
           <ol className={styles.workflowSteps}>
             {WORKFLOW.map((stage, index) => {
-              const [title, description] = practical.stages[stage.key];
+              const [title, description] = practical.stages?.[stage.key] || [copy.missingStage, ""];
+              const executionTypes = (stage.types || [stage.type]).filter((type) => practical.types?.[type]);
               const content = <>
                 <span className={styles.stageNumber}>{String(index + 1).padStart(2, "0")}</span>
-                <span className={`${styles.executionType} ${styles[stage.type]}`}>{practical.types[stage.type]}</span>
+                {executionTypes.length > 0 && <span className={styles.typeBadges}>{executionTypes.map((type) => <span className={`${styles.executionType} ${styles[type] || ""}`} key={type}>{practical.types[type]}</span>)}</span>}
                 <h3>{title}</h3>
                 <p>{description}</p>
                 {stage.href && <span className={styles.stageAction}>{practical.open} <span aria-hidden="true">→</span></span>}
