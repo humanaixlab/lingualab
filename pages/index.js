@@ -256,6 +256,15 @@ export default function HomePage() {
             ))}
           </div>
 
+          <div className={styles.executionTypes}>
+            <p>{t("home.computationalJourney.execution.intro")}</p>
+            <div>
+              {["deterministic", "ai", "researcher"].map((type) => (
+                <span key={type}>{t(`home.computationalJourney.execution.${type}`)}</span>
+              ))}
+            </div>
+          </div>
+
           <div className={styles.computationalMessage}>
             <p>{t("home.computationalJourney.message")}</p>
             <Link href="/ar-tools#build-tools" className={styles.computationalLink}>

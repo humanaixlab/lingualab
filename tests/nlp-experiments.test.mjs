@@ -27,6 +27,29 @@ test("the preview exposes exactly the three requested modules", () => {
   for (const label of ["تجربة التعليمات", "مقارنة المخرجات", "مختبر مهام NLP", "Prompt Experiment", "Model Output Comparison", "NLP Task Sandbox", "تجريب بحثي", "Research Preview", "يظل الباحث مسؤولًا"]) assert.match(page, new RegExp(label));
 });
 
+test("the page explains AI execution, structured validation, and researcher review without calling it deterministic", () => {
+  const page = source("pages/tools/nlp-experiments.js");
+  for (const label of [
+    "كيف تعمل مهام NLP هنا؟",
+    "استدلال مدعوم بالذكاء الاصطناعي",
+    "مخرج منظم",
+    "تحقق برمجي",
+    "مراجعة الباحث",
+    "How are NLP tasks executed here?",
+    "AI-supported inference",
+    "Structured output",
+    "Programmatic validation",
+    "Researcher review",
+  ]) assert.match(page, new RegExp(label));
+  assert.match(page, /NLP Task Sandbox executes the task using an AI model through the API under researcher-defined instructions, labels, and output structure/);
+  assert.match(page, /UI builds a structured request/);
+  assert.match(page, /API executes an AI model/);
+  assert.match(page, /تبني الواجهة طلبًا منظمًا/);
+  assert.match(page, /تنفذ الـAPI نموذج الذكاء الاصطناعي/);
+  assert.match(page, /Naive Bayes, TF-IDF/);
+  assert.doesNotMatch(page, /algorithmic NLP/);
+});
+
 test("prompt experiments preserve both outputs and never accept an automatic winner", () => {
   const outputs = { variantA: "المخرج الأول", variantB: "المخرج الثاني" };
   assert.equal(validatePromptExperiment(outputs), true);

@@ -68,6 +68,12 @@ test("Home explains the complete bilingual computational research journey before
   assert.match(ar, /مصفوفات الالتباس · المقارنة بالمرجع البشري/);
   assert.match(en, /You do not need to be an advanced programmer/);
   assert.match(ar, /لا تحتاج إلى خبرة متقدمة في البرمجة/);
+  for (const label of ["Deterministic computation", "AI-supported inference", "Researcher-reviewed result"])
+    assert.match(en, new RegExp(label));
+  for (const label of ["حساب حتمي", "استدلال مدعوم بالذكاء الاصطناعي", "نتيجة مراجعة من الباحث"])
+    assert.match(ar, new RegExp(label));
+  assert.match(journey, /home\.computationalJourney\.execution/);
+  assert.match(en, /LinguaLab shows how each result is produced: whether it is computed deterministically, inferred with AI support, or reviewed and approved by the researcher\./);
 });
 
 test("the computational workflow section retains compatible directory anchors and tool returns", () => {
