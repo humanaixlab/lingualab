@@ -82,7 +82,7 @@ test("Projects is a bilingual research navigator without persistence or fake upl
   assert.doesNotMatch(source("styles/Projects.module.css"), /font-family:\s*Arial/);
   for (const rawId of ["terminology-extraction", "named-entities", "relation-extraction", "semantic-grouping", "corpus-analysis"])
     assert.doesNotMatch(ar, new RegExp(`>${rawId}<`));
-  for (const label of ["استخراج المعلومات", "إنشاء وتحليل المدونة", "التحليل الدلالي", "استخراج المصطلحات", "التعرف على الكيانات المسماة", "استخراج العلاقات", "التجميع الدلالي", "تحليل المدونة"])
+  for (const label of ["استخراج المعلومات", "إنشاء وتحليل المدونة", "التحليل الدلالي", "استخراج المصطلحات", "استخراج الكيانات المسماة", "استخراج العلاقات", "التجميع الدلالي", "تحليل المدونة"])
     assert.match(ar, new RegExp(label));
   for (const label of ["Information Extraction", "Corpus Research", "Semantic Analysis", "Terminology Extraction", "Named Entity Recognition", "Relation Extraction", "Semantic Grouping", "Corpus Analysis"])
     assert.match(en, new RegExp(label));

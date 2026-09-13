@@ -35,6 +35,15 @@ test("challenge-aware recommendations extend rather than replace existing scorin
   assert.deepEqual(filterChallenges({ family: "speech" }).map((item) => item.id), ["speech"]);
 });
 
+test("dialect identification uses beginner-friendly Arabic while preserving scientific terms", () => {
+  const project = PROJECT_CATALOG.find((item) => item.id === "dialect-identification");
+  assert.match(project.title.ar, /نموذج مرجعي بسيط \(Baseline\)/);
+  assert.match(project.impact.ar, /مرجع موثق لتحديد اللهجات/);
+  assert.match(project.impact.ar, /يصعب فيها التمييز بين لهجتين أو أكثر/);
+  assert.match(project.expectedResults.ar, /مصفوفة الالتباس \(Confusion Matrix\)/);
+  assert.match(project.evaluation.ar, /الدقة \(Accuracy\)/);
+});
+
 test("speech and data collection limitations are explicitly external", () => {
   assert.ok(CHALLENGE_BY_ID.speech.externalSteps.length);
   const asr = PROJECT_CATALOG.find((item) => item.id === "arabic-asr-evaluation");

@@ -21,7 +21,7 @@ test("preview exposes exactly the three requested extraction modules and closed 
   assert.deepEqual(Object.keys(INFORMATION_EXTRACTION_TOOLS), ["ner", "relations", "terminology"]);
   assert.deepEqual(ENTITY_CATEGORIES, ["شخص", "جهة/مؤسسة", "مكان", "تاريخ/زمن", "أخرى"]);
   const page = source("pages/tools/information-extraction.js");
-  for (const label of ["التعرف على الكيانات المسماة", "استخراج العلاقات", "استخراج المصطلحات والعبارات المفتاحية", "Named Entity Recognition", "Relation Extraction", "Terminology & Keyphrase Extraction", "تجريب بحثي", "Research Preview", "يظل الباحث مسؤولًا"]) assert.match(page, new RegExp(label));
+  for (const label of ["استخراج الكيانات المسماة", "استخراج العلاقات", "استخراج المصطلحات والعبارات المفتاحية", "Named Entity Recognition", "NER", "Relation Extraction", "Terminology & Keyphrase Extraction", "تجريب بحثي", "Research Preview", "يظل الباحث مسؤولًا"]) assert.match(page, new RegExp(label));
 });
 
 test("named entities must be exact source spans and use only approved categories", () => {
