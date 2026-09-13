@@ -121,7 +121,10 @@ test("Corpus Linguistics keeps its educational card and adds a dedicated executa
   for (const field of ["overview", "question", "data", "available", "coming", "output", "report", "beginner", "advanced"])
     assert.ok(corpus[field], `Corpus educational field ${field} must remain`);
   assert.equal(corpus.hubHref, "/research-paths/corpus-linguistics");
-  assert.deepEqual(corpus.cta, { en: "Explore Corpus Linguistics", ar: "استكشف مسار لسانيات المدونات" });
+  assert.deepEqual(corpus.cta, { en: "Start the Corpus Linguistics workflow", ar: "ابدأ مسار لسانيات المدونات" });
+  assert.match(corpus.overview.en, /Create or prepare the corpus → inspect data quality → analyze frequency → examine contexts → extract n-grams → review patterns → interpret findings → prepare the research report/);
+  assert.match(corpus.overview.ar, /أنشئ أو جهّز المدونة ← افحص جودة البيانات ← حلّل التكرار ← افحص السياقات ← استخرج المتتاليات اللفظية ← راجع الأنماط ← فسّر النتائج ← أعد التقرير البحثي/);
+  assert.deepEqual(corpus.available.map((tool) => tool.href), ["/tools/corpus-research", "/tools/frequency", "/tools/concordance", "/tools/ngrams"]);
   assert.match(source("components/ResearchPaths.js"), /className=\{styles\.primaryCta\}[\s\S]*path\.hubHref \|\| path\.ctaHref/);
 
   const hub = source("pages/research-paths/corpus-linguistics.js");
