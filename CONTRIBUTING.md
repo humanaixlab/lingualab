@@ -24,6 +24,10 @@ A pull request should:
 - include a focused test or clear manual verification steps;
 - avoid unrelated formatting or dependency changes.
 
+## Visual assets
+
+All contributions must follow the [LinguaLab Visual Asset Policy](docs/VISUAL_ASSET_POLICY.md). Do not add external images, icons, illustrations, stock assets, or third-party icon packs unless their licenses and attribution requirements are explicitly verified and documented.
+
 ## Product principle
 
 Every addition should help the user **build, analyze, learn, or discover** with Arabic language data.

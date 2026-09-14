@@ -55,6 +55,8 @@ Only text explicitly submitted to the optional AI tools is sent to their server-
 
 Read the detailed architecture notes in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
+Visual assets must follow the [`LinguaLab Visual Asset Policy`](docs/VISUAL_ASSET_POLICY.md).
+
 ## Technology
 
 - Next.js 16 Pages Router
