@@ -116,7 +116,7 @@ Use **Try demo dataset** in `/workspace`, or upload one of:
 - `public/sample-datasets/arabic_reviews_demo.csv`
 - `public/sample-datasets/arabic_reviews_demo.xlsx`
 
-The balanced sample contains 30 Arabic reviews across positive, neutral, and negative labels. It is designed to make the full competition workflow easy to reproduce.
+The balanced sample contains 30 fully synthetic Arabic records across positive, neutral, and negative labels. It was created specifically for LinguaLab, contains no real user or externally sourced data, and is safe for public redistribution under the documented project license. See [`sample-datasets/README.md`](sample-datasets/README.md).
 
 ## Project structure
 
