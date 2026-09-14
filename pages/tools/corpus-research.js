@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useLanguage } from "../../components/LanguageProvider";
 import PageGuidance from "../../components/PageGuidance";
+import { createAnalysisHandoff } from "../../lib/analysis-handoff";
 import {
   analyzeCorpusDeterministically,
   createCorpusDocument,
@@ -33,7 +34,7 @@ const COPY = {
     readiness: "فحص الجاهزية", documentCount: "عدد النصوص", characterCount: "عدد المحارف", duplicates: "النصوص المكررة", missing: "سجلات بها بيانات وصفية ناقصة", noDuplicates: "لا توجد تكرارات واضحة.",
     setup: "اقتراح إعداد المدونة بالذكاء الاصطناعي", settingUp: "جارٍ إعداد الاقتراح…", run: "تشغيل التحليل الحتمي", query: "كلمة أو عبارة للسياقات", queryPlaceholder: "أدخل عنصر البحث اختياريًا…", ngram: "نوع المتتالية", bigrams: "ثنائيات (Bigrams)", trigrams: "ثلاثيات (Trigrams)",
     results: "النتائج الحتمية", wordCount: "عدد الكلمات", frequency: "تحليل التكرار", contexts: "السياقات", ngrams: "المتتاليات اللفظية", item: "العنصر", count: "التكرار", noContexts: "أدخل كلمة أو عبارة ثم أعد التحليل لعرض السياقات.",
-    interpret: "تفسير النتائج بالذكاء الاصطناعي", interpreting: "جارٍ إنشاء التفسير…", aiSuggestion: "اقتراح الذكاء الاصطناعي", review: "مراجعة الباحث", accept: "قبول", edit: "تعديل", reject: "رفض", save: "حفظ النتيجة المراجعة", saved: "حُفظت النتيجة والمراجعة محليًا.", storageError: "تعذر الحفظ محليًا.", invalidFinal: "أدخل نتيجة نهائية كاملة قبل الحفظ.", requestError: "تعذر إنشاء اقتراح موثوق.",
+    interpret: "تفسير النتائج بالذكاء الاصطناعي", openInterpreter: "فسّر النتائج في مفسّر البحث", interpreting: "جارٍ إنشاء التفسير…", aiSuggestion: "اقتراح الذكاء الاصطناعي", review: "مراجعة الباحث", accept: "قبول", edit: "تعديل", reject: "رفض", save: "حفظ النتيجة المراجعة", saved: "حُفظت النتيجة والمراجعة محليًا.", storageError: "تعذر الحفظ محليًا.", invalidFinal: "أدخل نتيجة نهائية كاملة قبل الحفظ.", requestError: "تعذر إنشاء اقتراح موثوق.",
     metadataFields: "حقول وصفية مقترحة", inclusionCriteria: "معايير الإدراج", exclusionCriteria: "معايير الاستبعاد", textTypes: "أنواع النصوص المناسبة", corpusStructure: "بنية مقترحة للمدونة", readinessIssues: "مسائل الجاهزية", summary: "الملخص", patterns: "أنماط تستحق المراجعة", researchQuestions: "أسئلة بحثية ممكنة", caution: "تنبيه منهجي", onePerLine: "عنصر واحد في كل سطر", clear: "مسح المدونة المحلية", confirmClear: "مسح جميع نصوص هذه المدونة ومراجعاتها المحلية؟", arabicRequired: "أدخل نصًا عربيًا صالحًا. لم تُضف الملفات التي لا تحتوي على نص عربي.",
   },
   en: {
@@ -45,7 +46,7 @@ const COPY = {
     readiness: "Readiness check", documentCount: "Texts", characterCount: "Characters", duplicates: "Duplicate texts", missing: "Records with missing metadata", noDuplicates: "No obvious duplicates detected.",
     setup: "Suggest corpus setup with AI", settingUp: "Generating setup suggestion…", run: "Run deterministic analysis", query: "Context word or phrase", queryPlaceholder: "Optionally enter a search expression…", ngram: "Sequence type", bigrams: "Bigrams", trigrams: "Trigrams",
     results: "Deterministic results", wordCount: "Words", frequency: "Frequency Analysis", contexts: "Contexts", ngrams: "N-grams", item: "Item", count: "Count", noContexts: "Enter a word or phrase and rerun the analysis to show contexts.",
-    interpret: "Interpret results with AI", interpreting: "Generating interpretation…", aiSuggestion: "AI suggestion", review: "Researcher review", accept: "Accept", edit: "Modify", reject: "Reject", save: "Save reviewed result", saved: "The result and review were saved locally.", storageError: "Local storage is unavailable.", invalidFinal: "Complete the final result before saving.", requestError: "A reliable suggestion could not be generated.",
+    interpret: "Interpret results with AI", openInterpreter: "Interpret results in Research Interpreter", interpreting: "Generating interpretation…", aiSuggestion: "AI suggestion", review: "Researcher review", accept: "Accept", edit: "Modify", reject: "Reject", save: "Save reviewed result", saved: "The result and review were saved locally.", storageError: "Local storage is unavailable.", invalidFinal: "Complete the final result before saving.", requestError: "A reliable suggestion could not be generated.",
     metadataFields: "Suggested metadata fields", inclusionCriteria: "Inclusion criteria", exclusionCriteria: "Exclusion criteria", textTypes: "Suitable text types", corpusStructure: "Possible corpus structure", readinessIssues: "Readiness issues", summary: "Summary", patterns: "Patterns for review", researchQuestions: "Possible research questions", caution: "Methodological caution", onePerLine: "One item per line", clear: "Clear local corpus", confirmClear: "Clear all texts and local reviews for this corpus?", arabicRequired: "Enter valid Arabic text. Files without Arabic text were not added.",
   },
 };
@@ -116,6 +117,21 @@ export default function CorpusResearch() {
     setDocuments(next); persist(next, reviews); setResults(null); resetAi();
   }
   function runAnalysis() { setResults(analyzeCorpusDeterministically(documents, { query, ngramSize })); resetAi("analyze"); }
+  function openInterpreter() {
+    if (!results) return;
+    const corpusText = documents.map((document) => document.text).filter(Boolean).join("\n\n");
+    const url = createAnalysisHandoff("corpus-research", "corpus-research", {
+      text: corpusText,
+      documentCount: results.documentCount,
+      wordCount: results.wordCount,
+      query: results.query,
+      frequencies: results.frequencies,
+      contexts: results.contexts,
+      size: ngramSize,
+      ngrams: results.ngrams,
+    });
+    if (url) window.location.href = url;
+  }
 
   async function requestAi() {
     setStatus("loading"); setMessage(""); setAiOutput(null); setDecision("");
@@ -177,7 +193,7 @@ export default function CorpusResearch() {
         </div>
       </section> : <section className={styles.module} aria-labelledby="corpus-analysis-title">
         <article className={styles.card}><h2 id="corpus-analysis-title">{copy.analyze}</h2><label>{copy.query}<input value={query} onChange={(event) => { setQuery(event.target.value); setResults(null); resetAi("analyze"); }} placeholder={copy.queryPlaceholder} /></label><label>{copy.ngram}<select value={ngramSize} onChange={(event) => { setNgramSize(Number(event.target.value)); setResults(null); resetAi("analyze"); }}><option value="2">{copy.bigrams}</option><option value="3">{copy.trigrams}</option></select></label><button type="button" className={styles.primaryButton} disabled={!documents.length} onClick={runAnalysis}>{copy.run}</button></article>
-        <div className={styles.stack}>{results && <article className={styles.card}><h2>{copy.results}</h2><div className={styles.metrics}><div><strong>{results.documentCount}</strong><span>{copy.documentCount}</span></div><div><strong>{results.wordCount}</strong><span>{copy.wordCount}</span></div></div><ResultTable title={copy.frequency} rows={results.frequencies} copy={copy} />{results.query ? <ResultList title={copy.contexts} rows={results.contexts} /> : <p className={styles.hint}>{copy.noContexts}</p>}<ResultTable title={copy.ngrams} rows={results.ngrams} copy={copy} /><button type="button" className={styles.primaryButton} disabled={status === "loading"} onClick={requestAi}>{status === "loading" ? copy.interpreting : copy.interpret}</button></article>}</div>
+        <div className={styles.stack}>{results && <article className={styles.card}><h2>{copy.results}</h2><div className={styles.metrics}><div><strong>{results.documentCount}</strong><span>{copy.documentCount}</span></div><div><strong>{results.wordCount}</strong><span>{copy.wordCount}</span></div></div><ResultTable title={copy.frequency} rows={results.frequencies} copy={copy} />{results.query ? <ResultList title={copy.contexts} rows={results.contexts} /> : <p className={styles.hint}>{copy.noContexts}</p>}<ResultTable title={copy.ngrams} rows={results.ngrams} copy={copy} /><div className={styles.resultActions}><button type="button" className={styles.primaryButton} disabled={status === "loading"} onClick={requestAi}>{status === "loading" ? copy.interpreting : copy.interpret}</button><button type="button" className={styles.secondaryButton} onClick={openInterpreter}>{copy.openInterpreter}</button></div></article>}</div>
       </section>}
 
       {status === "error" && <p className={styles.error} role="alert">{message}</p>}

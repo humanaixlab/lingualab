@@ -47,8 +47,58 @@ const SOURCE_ROUTES = {
   frequency: "/tools/frequency",
   concordance: "/tools/concordance",
   ngrams: "/tools/ngrams",
+  "corpus-research": "/tools/corpus-research",
   pos: "/tools/pos",
 };
+
+const CORPUS_TOOL_LABELS = {
+  frequency: { ar: "تحليل التكرار", en: "Frequency Analysis" },
+  concordance: { ar: "تحليل السياقات", en: "Concordance / Contexts" },
+  ngrams: { ar: "المتتاليات اللفظية", en: "N-grams" },
+  "corpus-research": { ar: "إنشاء وتحليل المدونة", en: "Corpus Research" },
+};
+
+function ContextualCorpusResult({ handoff, language }) {
+  const evidence = handoff?.evidence || {};
+  const label = CORPUS_TOOL_LABELS[handoff?.sourceTool]?.[language] || handoff?.sourceTool || "";
+  const rows = handoff?.sourceTool === "frequency"
+    ? evidence.frequencies
+    : handoff?.sourceTool === "ngrams"
+      ? evidence.results
+      : handoff?.sourceTool === "corpus-research"
+        ? evidence.frequencies
+        : [];
+  const contexts = Array.isArray(evidence.contexts) ? evidence.contexts : [];
+  const ngrams = handoff?.sourceTool === "corpus-research" && Array.isArray(evidence.ngrams) ? evidence.ngrams : [];
+  const target = evidence.target || evidence.query;
+
+  return (
+    <article className={styles.contextResult} aria-labelledby="transferred-result-title">
+      <p className={styles.sectionLabel}>{language === "ar" ? "النتيجة الفعلية المنقولة" : "TRANSFERRED COMPUTED RESULT"}</p>
+      <h2 id="transferred-result-title">{label}</h2>
+      <p className={styles.contextSource}>
+        <strong>{language === "ar" ? "مصدر البيانات/السياق:" : "Data source/context:"}</strong>{" "}
+        {language === "ar"
+          ? `النص والنتيجة المنقولة من أداة ${label}. لا تُعرض بيانات وصفية غير متاحة.`
+          : `Text and results transferred from ${label}. Unavailable metadata is not shown.`}
+      </p>
+      {handoff?.sourceTool === "corpus-research" && (evidence.documentCount !== null || evidence.wordCount !== null) && (
+        <div className={styles.contextMetrics}>
+          {evidence.documentCount !== null && <div><span>{language === "ar" ? "عدد النصوص" : "Texts"}</span><strong>{evidence.documentCount}</strong></div>}
+          {evidence.wordCount !== null && <div><span>{language === "ar" ? "عدد الكلمات" : "Words"}</span><strong>{evidence.wordCount}</strong></div>}
+        </div>
+      )}
+      {target && <p><strong>{language === "ar" ? "عنصر البحث:" : "Target:"}</strong> <span dir="auto">{target}</span></p>}
+      {rows?.length > 0 && <EvidenceTable rows={rows} language={language} />}
+      {contexts.length > 0 && <div className={styles.contextList}><h3>{language === "ar" ? "السياقات الفعلية" : "Observed contexts"}</h3><ul>{contexts.map((item, index) => <li key={`${index}-${item}`} dir="auto">{item}</li>)}</ul></div>}
+      {ngrams.length > 0 && <div className={styles.contextList}><h3>{language === "ar" ? "المتتاليات اللفظية الفعلية" : "Observed N-grams"}</h3><EvidenceTable rows={ngrams} language={language} /></div>}
+    </article>
+  );
+}
+
+function EvidenceTable({ rows, language }) {
+  return <div className={styles.contextTable}><table><thead><tr><th>{language === "ar" ? "العنصر" : "Item"}</th><th>{language === "ar" ? "القيمة المحسوبة" : "Computed value"}</th></tr></thead><tbody>{rows.map(([item, count], index) => <tr key={`${index}-${item}`}><td dir="auto">{item}</td><td>{count}</td></tr>)}</tbody></table></div>;
+}
 
 function analyzeTextValue(text) {
   const words = text.trim().split(/\s+/);
@@ -124,6 +174,7 @@ export default function Analyzer() {
   const [context, setContext] = useState(null);
   const [sourceAnalysis, setSourceAnalysis] = useState(null);
   const router = useRouter();
+  const isCorpusInterpretation = sourceAnalysis?.pathId === "corpus-linguistics" && Boolean(CORPUS_TOOL_LABELS[sourceAnalysis?.sourceTool]);
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
       const nextContext = analyzeContext(readResearchContext(window.location.search));
@@ -296,13 +347,17 @@ const interpretResults = async () => {
           </Link>
 
           <div className={styles.navLinks}>
-            {router.query?.from === "learn" && <Link href="/student-dashboard">{language === "ar" ? "العودة إلى مركز التعلّم" : "Back to Learn"}</Link>}
-            <Link href="/workspace">{t("nav.workspace")}</Link>
-            <Link href="/research-advisor">{t("nav.researchAdvisor")}</Link>
+            {isCorpusInterpretation ? (
+              <Link href="/research-paths/corpus-linguistics">{language === "ar" ? "مسار لسانيات المدونات" : "Corpus Linguistics path"}</Link>
+            ) : <>
+              {router.query?.from === "learn" && <Link href="/student-dashboard">{language === "ar" ? "العودة إلى مركز التعلّم" : "Back to Learn"}</Link>}
+              <Link href="/workspace">{t("nav.workspace")}</Link>
+              <Link href="/research-advisor">{t("nav.researchAdvisor")}</Link>
+            </>}
           </div>
         </nav>
 
-        <section className={styles.hero}>
+        {!isCorpusInterpretation && <section className={styles.hero}>
           <div className={styles.heroCopy}>
             <p className={styles.eyebrow}>{planText("eyebrow")}</p>
             <h1>{planText("title")}</h1>
@@ -313,9 +368,9 @@ const interpretResults = async () => {
             <span>{t("analyze.principleLabel")}</span>
             <strong>{t("analyze.principle")}</strong>
           </div>
-        </section>
+        </section>}
 
-        <section className={styles.toolDirectory} aria-labelledby="research-path-entry-title">
+        {!isCorpusInterpretation && <section className={styles.toolDirectory} aria-labelledby="research-path-entry-title">
           <div>
             <p className={styles.sectionLabel}>{language === "ar" ? "المسارات البحثية" : "RESEARCH PATHS"}</p>
             <h2 id="research-path-entry-title">{language === "ar" ? "استكشف حسب المسار البحثي" : "Explore by Research Path"}</h2>
@@ -324,19 +379,22 @@ const interpretResults = async () => {
           <div className={styles.toolLinks}>
             <Link href="/ar-tools#research-paths">{language === "ar" ? "عرض المسارات البحثية" : "View research paths"} <span aria-hidden="true">↗</span></Link>
           </div>
-        </section>
+        </section>}
 
-        <div style={{ maxWidth: "1240px", margin: "0 auto 22px" }}>
-          <DataSourceIndicator language={language} mode={sourceAnalysis ? "transferred" : context ? "projectContext" : "standalone"} />
-          {sourceAnalysis && (
-            <p style={{ margin: "0 0 16px", fontSize: "var(--text-helper)" }}>
-              {language === "ar" ? `نتائج ${sourceAnalysis.sourceTool} الحالية جاهزة للتفسير.` : `Current ${sourceAnalysis.sourceTool} results are ready for interpretation.`}{" "}
-              <Link href={SOURCE_ROUTES[sourceAnalysis.sourceTool]}>{language === "ar" ? "العودة إلى الأداة السابقة" : "Back to previous tool"}</Link>
-            </p>
-          )}
+        <div className={isCorpusInterpretation ? styles.contextHeader : styles.sourceContext}>
+          {isCorpusInterpretation ? <>
+            <p className={styles.eyebrow}>{language === "ar" ? "تفسير سياقي لنتيجة فعلية" : "CONTEXTUAL INTERPRETATION OF AN ACTUAL RESULT"}</p>
+            <h1>{language === "ar" ? "تفسير نتائج لسانيات المدونات" : "Interpret Corpus Linguistics Results"}</h1>
+            <dl className={styles.contextIdentity}>
+              <div><dt>{language === "ar" ? "المسار" : "Research path"}</dt><dd>{language === "ar" ? "لسانيات المدونات (Corpus Linguistics)" : "Corpus Linguistics"}</dd></div>
+              <div><dt>{language === "ar" ? "الأداة" : "Source tool"}</dt><dd>{CORPUS_TOOL_LABELS[sourceAnalysis.sourceTool][language]}</dd></div>
+            </dl>
+            <DataSourceIndicator language={language} mode="transferred" />
+            <p className={styles.caution}>{language === "ar" ? "تنبيه منهجي: يجب تفسير التكرارات والسياقات والمتتاليات في ضوء حجم المدونة وطريقة جمعها وسؤال البحث. التفسير المدعوم بالذكاء الاصطناعي اقتراح يخضع لمراجعة الباحث ولا يغيّر النتائج المحسوبة." : "Methodological caution: frequencies, contexts, and N-grams must be interpreted in light of corpus size, collection method, and the research question. AI-supported interpretation is a suggestion subject to researcher review and does not alter computed results."}</p>
+          </> : <DataSourceIndicator language={language} mode={context ? "projectContext" : "standalone"} />}
         </div>
 
-        <section className={styles.toolDirectory} aria-labelledby="corpus-tools-title">
+        {!isCorpusInterpretation && <section className={styles.toolDirectory} aria-labelledby="corpus-tools-title">
           <div>
             <p className={styles.sectionLabel}>{language === "ar" ? "أدوات التحليل" : "ANALYSIS TOOLS"}</p>
             <h2 id="corpus-tools-title">{language === "ar" ? "لسانيات المدونات (Corpus Linguistics)" : "Corpus Linguistics"}</h2>
@@ -345,9 +403,9 @@ const interpretResults = async () => {
           <div className={styles.toolLinks}>
             <Link href="/research-paths/corpus-linguistics">{language === "ar" ? "استكشف مسار لسانيات المدونات" : "Explore Corpus Linguistics"} <span aria-hidden="true">↗</span></Link>
           </div>
-        </section>
+        </section>}
 
-        <section
+        {!isCorpusInterpretation && <section
           className={styles.planner}
           aria-labelledby="planner-title"
         >
@@ -404,21 +462,20 @@ const interpretResults = async () => {
               <span aria-hidden="true">↘</span>
             </button>
           </div>
-        </section>
+        </section>}
 
         <section
           className={styles.analysisSection}
           id="quick-analysis"
         >
           <div className={styles.analysisIntro}>
-            <p className={styles.sectionLabel}>
-              {t("analyze.quickLabel")}
-            </p>
-            <h2>{t("analyze.quickTitle")}</h2>
-            <p>{t("analyze.quickText")}</p>
+            <p className={styles.sectionLabel}>{isCorpusInterpretation ? (language === "ar" ? "التفسير المرتبط بالنتيجة" : "RESULT-BOUND INTERPRETATION") : t("analyze.quickLabel")}</p>
+            <h2>{isCorpusInterpretation ? (language === "ar" ? "راجع النتيجة الفعلية ثم اطلب تفسيرها" : "Review the actual result, then request interpretation") : t("analyze.quickTitle")}</h2>
+            <p>{isCorpusInterpretation ? (language === "ar" ? "تبقى النتيجة المحسوبة منفصلة عن التفسير المدعوم بالذكاء الاصطناعي، ويظل اعتماد الاستنتاج للباحث." : "The computed result remains separate from AI-supported interpretation; the researcher decides whether to accept the conclusion.") : t("analyze.quickText")}</p>
           </div>
 
           <div className={styles.analysisGrid}>
+            {isCorpusInterpretation ? <ContextualCorpusResult handoff={sourceAnalysis} language={language} /> : <>
             <div className={styles.inputCard}>
               <label htmlFor="analysis-text">{t("analyze.sample")}</label>
 
@@ -488,6 +545,7 @@ const interpretResults = async () => {
                 </>
               )}
             </div>
+            </>}
           </div>
 
           {result && (
@@ -543,6 +601,12 @@ const interpretResults = async () => {
               <p dir="auto">{interpretationError}</p>
             </div>
           )}
+
+          {isCorpusInterpretation && <div className={styles.contextActions}>
+            <Link href={SOURCE_ROUTES[sourceAnalysis.sourceTool]}>{language === "ar" ? "العودة إلى النتائج" : "Back to results"}</Link>
+            <Link href="/research-paths/corpus-linguistics">{language === "ar" ? "العودة إلى مسار لسانيات المدونات" : "Back to Corpus Linguistics path"}</Link>
+            {interpretation && <button type="button" onClick={generateInterpretationReport}>{language === "ar" ? "إعداد التقرير البحثي" : "Prepare research report"}</button>}
+          </div>}
 
           {interpretation && (
             <section
@@ -604,9 +668,9 @@ const interpretResults = async () => {
                 </p>
               </div>
 
-              <button type="button" className={styles.interpreterButton} onClick={generateInterpretationReport}>
+              {!isCorpusInterpretation && <button type="button" className={styles.interpreterButton} onClick={generateInterpretationReport}>
                 {language === "ar" ? "إنشاء تقرير" : "Generate Report"}
-              </button>
+              </button>}
             </section>
           )}
         </section>
