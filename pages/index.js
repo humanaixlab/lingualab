@@ -41,8 +41,46 @@ const capabilities = [
   "corpus", "frequency", "concordance", "ngrams", "pos", "semantic", "code", "assistant",
 ];
 
+const capabilityIcons = {
+  corpus: "layers",
+  frequency: "bars",
+  concordance: "context",
+  ngrams: "sequence",
+  pos: "tags",
+  semantic: "nodes",
+  code: "code",
+  assistant: "spark",
+};
+
 function ArrowIcon() {
-  return <span aria-hidden="true">↗</span>;
+  return (
+    <svg className={styles.arrowIcon} viewBox="0 0 16 16" aria-hidden="true">
+      <path d="M3 13 13 3M6 3h7v7" />
+    </svg>
+  );
+}
+
+function VisualIcon({ name }) {
+  const common = { fill: "none", stroke: "currentColor", strokeWidth: "1.7", strokeLinecap: "round", strokeLinejoin: "round" };
+  const drawings = {
+    layers: <><path d="m4 7 8-4 8 4-8 4-8-4Z" /><path d="m4 12 8 4 8-4M4 16l8 4 8-4" /></>,
+    bars: <><path d="M5 19V9M12 19V4M19 19v-6" /><path d="M3 19h18" /></>,
+    context: <><path d="M5 7h14M3 12h18M6 17h12" /><circle cx="12" cy="12" r="3" /></>,
+    sequence: <><circle cx="5" cy="12" r="2.5" /><circle cx="12" cy="12" r="2.5" /><circle cx="19" cy="12" r="2.5" /><path d="M7.5 12h2M14.5 12h2" /></>,
+    tags: <><path d="M4 6h7l9 9-5 5-9-9V4Z" /><circle cx="8" cy="8" r="1" /></>,
+    nodes: <><circle cx="6" cy="7" r="3" /><circle cx="18" cy="6" r="2.5" /><circle cx="15" cy="18" r="3" /><path d="m9 7 6.5-.7M8 9.5l5 6" /></>,
+    code: <><path d="m9 7-5 5 5 5M15 7l5 5-5 5M14 4l-4 16" /></>,
+    spark: <><path d="m12 3 1.4 5.6L19 10l-5.6 1.4L12 17l-1.4-5.6L5 10l5.6-1.4L12 3Z" /><path d="m19 16 .7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7L19 16Z" /></>,
+  };
+  return <svg viewBox="0 0 24 24" aria-hidden="true" {...common}>{drawings[name] || drawings.spark}</svg>;
+}
+
+function FlowConnector() {
+  return (
+    <svg className={styles.flowConnector} viewBox="0 0 28 12" aria-hidden="true">
+      <path d="M1 6h23M19 2l5 4-5 4" />
+    </svg>
+  );
 }
 
 export default function HomePage() {
@@ -242,9 +280,27 @@ export default function HomePage() {
               <div className={styles.workflowStep} key={step}>
                 <span>{String(index + 1).padStart(2, "0")}</span>
                 <strong>{t(`home.computationalJourney.steps.${step}`)}</strong>
-                {index < workflow.length - 1 && <i className={styles.journeyArrow} aria-hidden="true">→</i>}
+                {index < workflow.length - 1 && <FlowConnector />}
               </div>
             ))}
+          </div>
+
+          <div className={styles.platformStats} aria-label={t("home.visuals.stats.label")}>
+            <article>
+              <VisualIcon name="layers" />
+              <strong>{goals.length}</strong>
+              <span>{t("home.visuals.stats.destinations")}</span>
+            </article>
+            <article>
+              <VisualIcon name="sequence" />
+              <strong>{workflow.length}</strong>
+              <span>{t("home.visuals.stats.stages")}</span>
+            </article>
+            <article>
+              <VisualIcon name="nodes" />
+              <strong>{capabilities.length}</strong>
+              <span>{t("home.visuals.stats.capabilities")}</span>
+            </article>
           </div>
 
           <div className={styles.computationalAreas}>
@@ -286,7 +342,7 @@ export default function HomePage() {
           <div className={styles.capabilitiesGrid}>
             {capabilities.map((item) => (
               <article className={styles.capabilityCard} key={item}>
-                <div className={styles.capabilityIcon}>✦</div>
+                <div className={styles.capabilityIcon}><VisualIcon name={capabilityIcons[item]} /></div>
                 <h3>{t(`home.capabilities.${item}.name`)}</h3>
                 <p>{t(`home.capabilities.${item}.detail`)}</p>
               </article>
