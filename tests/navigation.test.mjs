@@ -70,10 +70,29 @@ test("Home explains the complete bilingual computational research journey before
   assert.match(ar, /لا تحتاج إلى خبرة متقدمة في البرمجة/);
   for (const label of ["Deterministic computation", "AI-supported inference", "Researcher-reviewed result"])
     assert.match(en, new RegExp(label));
-  for (const label of ["حساب حتمي", "استدلال مدعوم بالذكاء الاصطناعي", "نتيجة مراجعة من الباحث"])
+  for (const label of ["حساب حتمي", "استدلال مدعوم بالذكاء الاصطناعي", "مراجعة من الباحث"])
     assert.match(ar, new RegExp(label));
   assert.match(journey, /home\.computationalJourney\.execution/);
-  assert.match(en, /LinguaLab shows how each result is produced: whether it is computed deterministically, inferred with AI support, or reviewed and approved by the researcher\./);
+  assert.match(en, /LinguaLab does not rely on AI alone/);
+  assert.match(ar, /لا تعتمد LinguaLab على الذكاء الاصطناعي وحده؛ بل توظفه ضمن منظومة بحثية/);
+});
+
+test("Home keeps compact branding, typography, workflow cards, and separated execution badges", () => {
+  const home = source("pages/index.js");
+  const css = source("styles/Home.module.css");
+  const en = source("lib/i18n/en.js");
+  const ar = source("lib/i18n/ar.js");
+  assert.match(en, /Smart Language Lab \| LinguaLab/);
+  assert.match(ar, /مختبر اللغة الذكي \| LinguaLab/);
+  assert.match(ar, /بيئة بحثية رقمية للغة العربية واللسانيات الحاسوبية، تجمع بين التحليل الحاسوبي والذكاء الاصطناعي والمراجعة البحثية البشرية/);
+  assert.match(home, /home\.heroTitleSecond/);
+  assert.match(css, /font-size: clamp\(2\.35rem, 5vw, 4\.25rem\)/);
+  assert.match(css, /font-size: clamp\(1\.75rem, 3vw, 2\.55rem\)/);
+  assert.match(css, /\.workflowTrack[\s\S]*grid-template-columns: repeat\(5, minmax\(0, 1fr\)\)/);
+  assert.match(css, /@media \(max-width: 980px\)[\s\S]*\.workflowTrack[\s\S]*grid-template-columns: repeat\(3, 1fr\)/);
+  assert.match(css, /@media \(max-width: 640px\)[\s\S]*\.workflowTrack[\s\S]*grid-template-columns: repeat\(2, 1fr\)/);
+  assert.match(css, /\.executionTypes > div[\s\S]*display: flex[\s\S]*gap: 8px/);
+  assert.match(css, /\.executionTypes span[\s\S]*border-radius: 999px/);
 });
 
 test("the computational workflow section retains compatible directory anchors and tool returns", () => {

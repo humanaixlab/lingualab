@@ -118,8 +118,8 @@
 .hero h1 {
   margin: 0;
   max-width: 700px;
-  font-size: var(--text-hero);
-  line-height: var(--leading-heading);
+  font-size: clamp(2.35rem, 5vw, 4.25rem);
+  line-height: 1.08;
   letter-spacing: var(--tracking-heading);
   font-weight: 700;
 }
@@ -127,8 +127,8 @@
 .heroLead {
   max-width: 620px;
   margin: 30px 0 10px;
-  font-size: 20px;
-  line-height: 1.45;
+  font-size: 18px;
+  line-height: 1.55;
   letter-spacing: -0.01em;
   font-weight: 600;
 }
@@ -382,8 +382,8 @@
 .partnerCopy h2,
 .finalCta h2 {
   margin: 0;
-  font-size: var(--text-page);
-  line-height: var(--leading-heading);
+  font-size: clamp(1.75rem, 3vw, 2.55rem);
+  line-height: 1.18;
   letter-spacing: var(--tracking-heading);
 }
 
@@ -587,17 +587,17 @@
 .workflowTrack {
   margin-top: 46px;
   display: grid;
-  grid-template-columns: repeat(9, minmax(0, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 9px;
 }
 
 .workflowStep {
   position: relative;
-  min-height: 100px;
-  padding: 17px 14px;
+  min-height: 82px;
+  padding: 13px 12px;
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 6px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 13px;
   background: rgba(255, 255, 255, 0.045);
@@ -610,8 +610,13 @@
 }
 
 .workflowStep strong {
-  font-size: 13px;
-  line-height: 1.45;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.workflowStep:nth-child(5) .flowConnector,
+.workflowStep:last-child .flowConnector {
+  display: none;
 }
 
 .flowConnector {
@@ -696,6 +701,45 @@
   color: #b9c4d6;
   font-size: var(--text-meta);
   line-height: 1.75;
+}
+
+.executionTypes {
+  margin-top: 18px;
+  display: grid;
+  gap: 10px;
+}
+
+.executionTypes > p {
+  max-width: 900px;
+  margin: 0;
+  color: #d9e0ec;
+  font-size: var(--text-helper);
+  line-height: 1.7;
+}
+
+.executionTypes > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.executionTypes span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 5px 10px;
+  border: 1px solid rgba(169, 155, 255, 0.3);
+  border-radius: 999px;
+  color: #eef1f7;
+  background: rgba(255, 255, 255, 0.07);
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+:global(html[dir="rtl"]) .executionTypes > div {
+  direction: rtl;
+  justify-content: flex-start;
 }
 
 .computationalMessage {
@@ -984,7 +1028,7 @@
   }
 
   .hero h1 {
-    font-size: var(--text-hero);
+    font-size: clamp(2rem, 10vw, 2.85rem);
   }
 
   .heroActions {

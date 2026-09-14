@@ -128,8 +128,7 @@ export default function HomePage() {
             <p className={styles.eyebrow}>{t("home.eyebrow")}</p>
             <h1>
               {t("home.heroTitle")}
-              <br />
-              {t("home.heroTitleSecond")}
+              {t("home.heroTitleSecond") && <><br />{t("home.heroTitleSecond")}</>}
             </h1>
             <p className={styles.heroLead}>
               {t("home.heroLead")}
