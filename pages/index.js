@@ -394,7 +394,7 @@ export default function HomePage() {
             <span className={styles.brandMark}>L</span>
             <span>LinguaLab</span>
           </Link>
-          <p>{t("home.footer")}</p>
+          <p>{t("home.footer")} · <Link href="/platform-inventory">{t("home.inventory")}</Link></p>
           <span>{t("home.edition")}</span>
         </footer>
       </main>
