@@ -39,8 +39,8 @@ const WORKFLOW = [
   { key: "contexts", href: "/tools/concordance", type: "deterministic" },
   { key: "ngrams", href: "/tools/ngrams", type: "deterministic" },
   { key: "review", type: "review" },
-  { key: "interpret", href: "/tools/analyze", type: "ai" },
-  { key: "report", href: "/research-report", type: "review" },
+  { key: "interpret", type: "ai", requiresResult: true },
+  { key: "report", type: "review", requiresResult: true },
 ];
 
 const PRACTICAL = {
@@ -63,6 +63,7 @@ const PRACTICAL = {
       report: ["Research report", "Organize the available analysis context into a structured report and verify the final account."],
     },
     open: "Open stage",
+    fromResult: "Available from a completed result",
     exampleTitle: "Example: Studying frequent expressions in university messages",
     exampleSteps: [
       "Collect a documented set of texts.",
@@ -95,6 +96,7 @@ const PRACTICAL = {
       report: ["التقرير البحثي", "نظّم سياق التحليل المتاح في تقرير منظم وتحقق من الصياغة النهائية."],
     },
     open: "فتح المرحلة",
+    fromResult: "تتاح من النتيجة المكتملة",
     exampleTitle: "مثال: دراسة الألفاظ المتكررة في رسائل الجامعات",
     exampleSteps: [
       "اجمع مجموعة نصوص موثقة.",
@@ -164,8 +166,10 @@ export default function CorpusLinguisticsPath() {
                 <h3>{title}</h3>
                 <p>{description}</p>
                 {stage.href && <span className={styles.stageAction}>{practical.open} <span aria-hidden="true">→</span></span>}
+                {stage.requiresResult && <span className={styles.stageAction}>{practical.fromResult}</span>}
               </>;
-              return <li key={stage.key}>{stage.href ? <Link href={stage.href}>{content}</Link> : <div>{content}</div>}</li>;
+              const stageHref = stage.href ? researchPathHref(stage.href, "corpus-linguistics", CORPUS_PATH_HUB_SECTION) : null;
+              return <li key={stage.key}>{stageHref ? <Link href={stageHref}>{content}</Link> : <div>{content}</div>}</li>;
             })}
           </ol>
           <div className={styles.practicalSupport}>

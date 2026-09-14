@@ -296,12 +296,20 @@ const interpretResults = async () => {
 
   const generateInterpretationReport = () => {
     if (!result || !interpretation) return;
-    const url = createReportContext(sourceAnalysis?.sourceTool || "interpreter", "interpretation", {
+    const sourceTool = sourceAnalysis?.sourceTool || "interpreter";
+    const analysisType = sourceAnalysis?.analysisType || "interpretation";
+    const evidence = sourceAnalysis?.evidence || {};
+    const payload = sourceAnalysis ? {
+      ...evidence,
+      interpretation,
+      pathId: "corpus-linguistics",
+    } : {
       wordCount: result.wordCount,
       sentenceCount: result.sentenceCount,
       topWords: result.topWords,
       interpretation,
-    });
+    };
+    const url = createReportContext(sourceTool, analysisType, payload);
     if (url) window.location.href = url;
   };
 
@@ -603,7 +611,7 @@ const interpretResults = async () => {
           )}
 
           {isCorpusInterpretation && <div className={styles.contextActions}>
-            <Link href={SOURCE_ROUTES[sourceAnalysis.sourceTool]}>{language === "ar" ? "العودة إلى النتائج" : "Back to results"}</Link>
+            <Link href={sourceAnalysis.returnHref || SOURCE_ROUTES[sourceAnalysis.sourceTool]}>{language === "ar" ? "العودة إلى النتائج" : "Back to results"}</Link>
             <Link href="/research-paths/corpus-linguistics">{language === "ar" ? "العودة إلى مسار لسانيات المدونات" : "Back to Corpus Linguistics path"}</Link>
             {interpretation && <button type="button" onClick={generateInterpretationReport}>{language === "ar" ? "إعداد التقرير البحثي" : "Prepare research report"}</button>}
           </div>}

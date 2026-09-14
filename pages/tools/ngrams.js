@@ -1,15 +1,26 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Layout from "../../components/Layout";
 import { useLanguage } from "../../components/LanguageProvider";
 import styles from "../../styles/AnalysisTool.module.css";
 import { createReportContext } from "../../lib/report-context";
-import { createAnalysisHandoff } from "../../lib/analysis-handoff";
+import { createAnalysisHandoff, readAnalysisResultHandoff } from "../../lib/analysis-handoff";
+import { readCorpusWorkflowHandoff } from "../../lib/corpus-workflow-context";
 
 export default function NgramsTool() {
   const { language } = useLanguage();
   const [text, setText] = useState("");
   const [size, setSize] = useState(2);
   const [results, setResults] = useState([]);
+  const [workflowSource, setWorkflowSource] = useState(null);
+
+  useEffect(() => {
+    const restored = readAnalysisResultHandoff(window.location.search, "ngrams");
+    const incoming = readCorpusWorkflowHandoff(window.location.search, "ngrams");
+    if (restored) { setText(restored.text); setSize(restored.evidence.size); setResults(restored.evidence.results); setWorkflowSource(restored); }
+    else if (incoming) { setText(incoming.text); setWorkflowSource(incoming); }
+  }, []);
+
+  const inCorpusPath = workflowSource || (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("researchPath") === "corpus-linguistics");
 
   const analyzeNgrams = () => {
     if (!text.trim()) return;
@@ -49,6 +60,7 @@ export default function NgramsTool() {
       size,
       results,
       summary: language === "ar" ? "يعرض التقرير المتتاليات اللفظية الأكثر تكرارًا في النص المدخل." : "This report presents the most frequent word sequences in the submitted text.",
+      pathId: inCorpusPath ? "corpus-linguistics" : null,
     });
     if (url) window.location.href = url;
   };
@@ -59,7 +71,8 @@ export default function NgramsTool() {
   };
 
   return (
-    <Layout title={language === "ar" ? "المتتاليات اللفظية" : "N-grams"} backHref="/tools/analyze" backLabel={language === "ar" ? "العودة إلى مركز التحليل" : "Back to Analyze"} description={language === "ar" ? "اكتشف المتتاليات اللفظية والعبارات المتجاورة المتكررة في النص." : "Discover recurring word sequences and adjacent phrases in the text."} dataSource="standalone">
+    <Layout title={language === "ar" ? "المتتاليات اللفظية" : "N-grams"} backHref={inCorpusPath ? "/research-paths/corpus-linguistics" : "/tools/analyze"} backLabel={language === "ar" ? (inCorpusPath ? "العودة إلى مسار لسانيات المدونات" : "العودة إلى مركز التحليل") : (inCorpusPath ? "Back to Corpus Linguistics path" : "Back to Analyze")} description={language === "ar" ? "اكتشف المتتاليات اللفظية والعبارات المتجاورة المتكررة في النص." : "Discover recurring word sequences and adjacent phrases in the text."} dataSource={inCorpusPath ? "research-path" : "standalone"}>
+      {workflowSource && <p>{language === "ar" ? "تم نقل نص المدونة من مرحلة السياقات. راجعه ثم شغّل التحليل." : "Corpus text was transferred from the contexts stage. Review it, then run the analysis."}</p>}
 
       <div style={{ marginBottom: "15px" }}>
         <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold" }}>

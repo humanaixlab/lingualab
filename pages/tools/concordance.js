@@ -1,15 +1,26 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Layout from "../../components/Layout";
 import { useLanguage } from "../../components/LanguageProvider";
 import styles from "../../styles/AnalysisTool.module.css";
 import { createReportContext } from "../../lib/report-context";
-import { createAnalysisHandoff } from "../../lib/analysis-handoff";
+import { createAnalysisHandoff, readAnalysisResultHandoff } from "../../lib/analysis-handoff";
+import { createCorpusWorkflowHandoff, readCorpusWorkflowHandoff } from "../../lib/corpus-workflow-context";
 
 export default function ConcordanceTool() {
   const { language } = useLanguage();
   const [text, setText] = useState("");
   const [keyword, setKeyword] = useState("");
   const [results, setResults] = useState([]);
+  const [workflowSource, setWorkflowSource] = useState(null);
+
+  useEffect(() => {
+    const restored = readAnalysisResultHandoff(window.location.search, "concordance");
+    const incoming = readCorpusWorkflowHandoff(window.location.search, "concordance");
+    if (restored) { setText(restored.text); setKeyword(restored.evidence.target); setResults(restored.evidence.contexts); setWorkflowSource(restored); }
+    else if (incoming) { setText(incoming.text); setWorkflowSource(incoming); }
+  }, []);
+
+  const inCorpusPath = workflowSource || (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("researchPath") === "corpus-linguistics");
 
   const analyzeConcordance = () => {
     if (!text.trim() || !keyword.trim()) return;
@@ -46,6 +57,7 @@ export default function ConcordanceTool() {
       target: keyword,
       contexts: results,
       summary: language === "ar" ? "يعرض التقرير السياقات الفعلية التي ورد فيها العنصر المستهدف." : "This report presents the observed contexts containing the target expression.",
+      pathId: inCorpusPath ? "corpus-linguistics" : null,
     });
     if (url) window.location.href = url;
   };
@@ -55,8 +67,14 @@ export default function ConcordanceTool() {
     if (url) window.location.href = url;
   };
 
+  const continueWorkflow = () => {
+    const url = createCorpusWorkflowHandoff("concordance", "ngrams", { text, result: { target: keyword, contexts: results } });
+    if (url) window.location.href = url;
+  };
+
   return (
-    <Layout title={language === "ar" ? "السياقات" : "Contexts"} backHref="/tools/analyze" backLabel={language === "ar" ? "العودة إلى مركز التحليل" : "Back to Analyze"} description={language === "ar" ? "افحص كلمة أو عبارة داخل الجمل التي وردت فيها لفهم استعمالها في السياق." : "Examine a word or phrase in the sentences where it occurs to understand its use in context."} dataSource="standalone">
+    <Layout title={language === "ar" ? "السياقات" : "Contexts"} backHref={inCorpusPath ? "/research-paths/corpus-linguistics" : "/tools/analyze"} backLabel={language === "ar" ? (inCorpusPath ? "العودة إلى مسار لسانيات المدونات" : "العودة إلى مركز التحليل") : (inCorpusPath ? "Back to Corpus Linguistics path" : "Back to Analyze")} description={language === "ar" ? "افحص كلمة أو عبارة داخل الجمل التي وردت فيها لفهم استعمالها في السياق." : "Examine a word or phrase in the sentences where it occurs to understand its use in context."} dataSource={inCorpusPath ? "research-path" : "standalone"}>
+      {workflowSource && <p>{language === "ar" ? "تم نقل نص المدونة من المرحلة السابقة. حدّد عنصر البحث ثم شغّل التحليل." : "Corpus text was transferred from the previous stage. Choose a target, then run the analysis."}</p>}
 
       <div style={{ marginBottom: "15px" }}>
         <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold" }}>
@@ -114,7 +132,7 @@ export default function ConcordanceTool() {
               {sentence}
             </div>
           ))}</div>
-          <div className={styles.actions}><button className={`${styles.button} ${styles.next}`} type="button" onClick={interpretResults}>{language === "ar" ? "فسّر النتائج" : "Interpret results"}</button><button className={`${styles.button} ${styles.next}`} type="button" onClick={generateReport}>{language === "ar" ? "إنشاء تقرير" : "Generate Report"}</button></div>
+          <div className={styles.actions}><button className={styles.button} type="button" onClick={continueWorkflow}>{language === "ar" ? "متابعة إلى المتتاليات اللفظية" : "Continue to N-grams"}</button><button className={`${styles.button} ${styles.next}`} type="button" onClick={interpretResults}>{language === "ar" ? "فسّر النتائج" : "Interpret results"}</button><button className={`${styles.button} ${styles.next}`} type="button" onClick={generateReport}>{language === "ar" ? "إنشاء تقرير" : "Generate Report"}</button></div>
         </section>
       )}
 

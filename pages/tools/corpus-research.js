@@ -3,7 +3,8 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useLanguage } from "../../components/LanguageProvider";
 import PageGuidance from "../../components/PageGuidance";
-import { createAnalysisHandoff } from "../../lib/analysis-handoff";
+import { createAnalysisHandoff, readAnalysisResultHandoff } from "../../lib/analysis-handoff";
+import { createCorpusWorkflowHandoff } from "../../lib/corpus-workflow-context";
 import {
   analyzeCorpusDeterministically,
   createCorpusDocument,
@@ -74,12 +75,17 @@ export default function CorpusResearch() {
   const [decision, setDecision] = useState("");
   const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
+  const [workflowActive, setWorkflowActive] = useState(false);
+  const [workflowText, setWorkflowText] = useState("");
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
       const state = readCorpusResearchState();
       setDocuments(state.documents);
       setReviews(state.reviews);
+      const restored = readAnalysisResultHandoff(window.location.search, "corpus-research");
+      if (restored) { setWorkflowActive(true); setWorkflowText(restored.text); setModuleId("analyze"); setResults(restored.evidence); }
+      else if (new URLSearchParams(window.location.search).get("researchPath") === "corpus-linguistics") setWorkflowActive(true);
     });
     return () => window.cancelAnimationFrame(frame);
   }, []);
@@ -119,7 +125,7 @@ export default function CorpusResearch() {
   function runAnalysis() { setResults(analyzeCorpusDeterministically(documents, { query, ngramSize })); resetAi("analyze"); }
   function openInterpreter() {
     if (!results) return;
-    const corpusText = documents.map((document) => document.text).filter(Boolean).join("\n\n");
+    const corpusText = documents.map((document) => document.text).filter(Boolean).join("\n\n") || workflowText;
     const url = createAnalysisHandoff("corpus-research", "corpus-research", {
       text: corpusText,
       documentCount: results.documentCount,
@@ -129,6 +135,16 @@ export default function CorpusResearch() {
       contexts: results.contexts,
       size: ngramSize,
       ngrams: results.ngrams,
+    });
+    if (url) window.location.href = url;
+  }
+
+  function continueToFrequency() {
+    if (!results) return;
+    const corpusText = documents.map((document) => document.text).filter(Boolean).join("\n\n") || workflowText;
+    const url = createCorpusWorkflowHandoff("corpus-research", "frequency", {
+      text: corpusText,
+      result: { documentCount: results.documentCount, wordCount: results.wordCount },
     });
     if (url) window.location.href = url;
   }
@@ -193,7 +209,7 @@ export default function CorpusResearch() {
         </div>
       </section> : <section className={styles.module} aria-labelledby="corpus-analysis-title">
         <article className={styles.card}><h2 id="corpus-analysis-title">{copy.analyze}</h2><label>{copy.query}<input value={query} onChange={(event) => { setQuery(event.target.value); setResults(null); resetAi("analyze"); }} placeholder={copy.queryPlaceholder} /></label><label>{copy.ngram}<select value={ngramSize} onChange={(event) => { setNgramSize(Number(event.target.value)); setResults(null); resetAi("analyze"); }}><option value="2">{copy.bigrams}</option><option value="3">{copy.trigrams}</option></select></label><button type="button" className={styles.primaryButton} disabled={!documents.length} onClick={runAnalysis}>{copy.run}</button></article>
-        <div className={styles.stack}>{results && <article className={styles.card}><h2>{copy.results}</h2><div className={styles.metrics}><div><strong>{results.documentCount}</strong><span>{copy.documentCount}</span></div><div><strong>{results.wordCount}</strong><span>{copy.wordCount}</span></div></div><ResultTable title={copy.frequency} rows={results.frequencies} copy={copy} />{results.query ? <ResultList title={copy.contexts} rows={results.contexts} /> : <p className={styles.hint}>{copy.noContexts}</p>}<ResultTable title={copy.ngrams} rows={results.ngrams} copy={copy} /><div className={styles.resultActions}><button type="button" className={styles.primaryButton} disabled={status === "loading"} onClick={requestAi}>{status === "loading" ? copy.interpreting : copy.interpret}</button><button type="button" className={styles.secondaryButton} onClick={openInterpreter}>{copy.openInterpreter}</button></div></article>}</div>
+        <div className={styles.stack}>{results && <article className={styles.card}><h2>{copy.results}</h2><div className={styles.metrics}><div><strong>{results.documentCount}</strong><span>{copy.documentCount}</span></div><div><strong>{results.wordCount}</strong><span>{copy.wordCount}</span></div></div><ResultTable title={copy.frequency} rows={results.frequencies} copy={copy} />{results.query ? <ResultList title={copy.contexts} rows={results.contexts} /> : <p className={styles.hint}>{copy.noContexts}</p>}<ResultTable title={copy.ngrams} rows={results.ngrams} copy={copy} /><div className={styles.resultActions}><button type="button" className={styles.primaryButton} onClick={continueToFrequency}>{locale === "ar" ? "متابعة إلى تحليل التكرار" : "Continue to Frequency Analysis"}</button><button type="button" className={styles.primaryButton} disabled={status === "loading"} onClick={requestAi}>{status === "loading" ? copy.interpreting : copy.interpret}</button><button type="button" className={styles.secondaryButton} onClick={openInterpreter}>{copy.openInterpreter}</button></div></article>}</div>
       </section>}
 
       {status === "error" && <p className={styles.error} role="alert">{message}</p>}

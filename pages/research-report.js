@@ -107,6 +107,7 @@ function contextualTitle(type, language, size) {
     concordance: ["Contexts report", "تقرير السياقات"],
     ngrams: [size === 3 ? "Trigram report" : "Bigram report", size === 3 ? "تقرير الثلاثيات" : "تقرير الثنائيات"],
     pos: ["Parts-of-speech report", "تقرير أقسام الكلام"],
+    "corpus-research": ["Corpus research report", "تقرير أبحاث المدونة"],
     interpretation: ["Research interpretation report", "تقرير التفسير البحثي"],
     methodology: ["Research methodology report", "التقرير المنهجي للبحث"],
   };
@@ -118,7 +119,7 @@ function ContextualReport({ context, language, returnTarget, reportRef }) {
   const copy = CONTEXT_COPY[language];
   const payload = context.payload;
   const interpretation = payload.interpretation;
-  const entries = context.analysisType === "frequency" ? payload.frequencies : context.analysisType === "ngrams" ? payload.results : context.analysisType === "pos" ? payload.distribution : [];
+  const entries = context.analysisType === "frequency" ? payload.frequencies : context.analysisType === "ngrams" ? payload.results : context.analysisType === "corpus-research" ? payload.frequencies : context.analysisType === "pos" ? payload.distribution : [];
   const maxValue = Math.max(0, ...entries.map(([, count]) => count));
   const total = entries.reduce((sum, [, count]) => sum + count, 0);
   const gradient = entries.map(([, count], index) => {
@@ -157,7 +158,7 @@ function ContextualReport({ context, language, returnTarget, reportRef }) {
         <>
           {summary && <section className="reportSection"><p className="sectionLabel">01</p><h3>{copy.summary}</h3><p dir="auto">{summary}</p></section>}
           {metrics.length > 0 && <section className="reportSection"><p className="sectionLabel">02</p><h3>{copy.metrics}</h3><div className="stats">{metrics.map(([label, value]) => <div className="stat" key={label}><span>{label}</span><strong>{Number(value).toLocaleString(language)}</strong></div>)}</div></section>}
-          {context.analysisType === "concordance" && <section className="reportSection"><p className="sectionLabel">03</p><h3>{copy.contexts}</h3><p><strong>{copy.target}:</strong> <span dir="auto">{payload.target}</span></p><ol className="contextList">{payload.contexts.map((item, index) => <li key={index} dir="auto">{item}</li>)}</ol></section>}
+          {(context.analysisType === "concordance" || context.analysisType === "corpus-research") && payload.contexts?.length > 0 && <section className="reportSection"><p className="sectionLabel">03</p><h3>{copy.contexts}</h3><p><strong>{copy.target}:</strong> <span dir="auto">{payload.target || payload.query}</span></p><ol className="contextList">{payload.contexts.map((item, index) => <li key={index} dir="auto">{item}</li>)}</ol></section>}
           {entries.length > 0 && <section className="reportSection"><p className="sectionLabel">03</p><h3>{copy.visuals}</h3><div className="visualGrid"><figure className="chartCard"><figcaption>{copy.frequency}</figcaption><div className="barChart">{entries.slice(0, 15).map(([label, count]) => <div className="barRow" key={`${label}-${count}`}><span dir="auto">{label}</span><div><i style={{ width: `${maxValue ? Math.max(4, count / maxValue * 100) : 0}%` }} /></div><strong>{count}</strong></div>)}</div></figure>{context.analysisType === "pos" && total > 0 && <figure className="chartCard"><figcaption>{copy.distribution}</figcaption><div className="donutLayout"><div className="donut" style={{ background: `conic-gradient(${gradient})` }} /><ul>{entries.map(([label, count], index) => <li key={`${label}-${count}`}><i style={{ background: ["#7c6cf2", "#4da7d8", "#55b89f", "#e6a85c", "#d96f91"][index % 5] }} /><span dir="auto">{label}</span><strong>{count}</strong></li>)}</ul></div></figure>}</div></section>}
           {showStandard && context.analysisType === "methodology" && <section className="reportSection"><p className="sectionLabel">04</p><h3>{copy.method}</h3><p dir="auto">{payload.recommendedMethod}</p>{payload.studyDesign && <><h4>{copy.design}</h4><p dir="auto">{payload.studyDesign}</p></>}{payload.questions?.length > 0 && <><h4>{copy.questions}</h4><ul>{payload.questions.map((item) => <li key={item} dir="auto">{item}</li>)}</ul></>}</section>}
           {showStandard && workflow.length > 0 && <section className="reportSection"><p className="sectionLabel">05</p><h3>{copy.workflow}</h3><div className="workflowDiagram">{workflow.map((step, index) => <div className="workflowNode" key={`${index}-${step}`}><span>{String(index + 1).padStart(2, "0")}</span><p dir="auto">{step}</p></div>)}</div></section>}
@@ -262,7 +263,7 @@ export default function ResearchReport() {
   }).join(", ");
 
   const hasReportData = Boolean(reportContext || analysis || interpretation);
-  const returnTarget = reportReturnTarget(reportContext?.sourceTool, language);
+  const returnTarget = reportReturnTarget(reportContext?.sourceTool, language, reportContext?.pathId);
   const exportModel = buildReportExportModel({ context: reportContext, analysis, language });
   const exportCopy = EXPORT_COPY[language];
   const reportTitle = reportContext

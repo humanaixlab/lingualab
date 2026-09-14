@@ -85,12 +85,12 @@ test("result CTAs, research progression, Build backs, and Learn returns use cano
     const page = source(`pages/tools/${name}.js`);
     assert.match(page, /createAnalysisHandoff/);
     assert.match(page, /createReportContext/);
-    assert.match(page, /backHref="\/tools\/analyze"/);
+    assert.match(page, /inCorpusPath \? "\/research-paths\/corpus-linguistics" : "\/tools\/analyze"/);
   }
   assert.doesNotMatch(source("pages/tools/pos.js"), /createAnalysisHandoff|createReportContext/);
   assert.match(source("pages/research-advisor.js"), /researchContextHref\("\/tools\/analyze", datasetContext\)/);
   assert.match(source("pages/workspace.js"), /onClick=\{openAnalyze\}/);
-  assert.match(source("pages/tools/analyze.js"), /createReportContext\(sourceAnalysis\?\.sourceTool \|\| "interpreter"/);
+  assert.match(source("pages/tools/analyze.js"), /createReportContext\(sourceTool, analysisType, payload\)/);
   for (const name of ["prompt", "code", "excel", "colab"])
     assert.match(source(`pages/tools/${name}.js`), /backHref="\/ar-tools#build-tools"/);
   assert.match(source("pages/student-dashboard.js"), /`\$\{path\.href\}\?from=learn`/);
@@ -109,7 +109,9 @@ test("data-source indicators distinguish project context, transferred results, a
 
   assert.match(source("pages/workspace.js"), /mode="project"/);
   assert.match(source("pages/tools/analyze.js"), /sourceAnalysis \? "transferred" : context \? "projectContext" : "standalone"/);
-  for (const name of ["frequency", "concordance", "ngrams", "pos", "prompt", "excel"])
+  for (const name of ["frequency", "concordance", "ngrams"])
+    assert.match(source(`pages/tools/${name}.js`), /dataSource=\{inCorpusPath \? "research-path" : "standalone"\}/);
+  for (const name of ["pos", "prompt", "excel"])
     assert.match(source(`pages/tools/${name}.js`), /dataSource="standalone"/);
 
   const standalone = ["frequency", "concordance", "ngrams", "pos", "prompt", "code", "excel", "colab"]
