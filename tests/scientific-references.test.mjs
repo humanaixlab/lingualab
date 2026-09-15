@@ -34,14 +34,15 @@ test("seven paths expose exactly three approved platform references", () => {
   assert.equal(total, 21);
 });
 
-test("approved bibliographic details are preserved exactly without inferred source data", () => {
-  const allReferences = Object.values(SCIENTIFIC_FOUNDATIONS).flatMap((foundation) => foundation.platformReferences);
-  assert.ok(allReferences.every((reference) => reference.doiOrUrl === null));
-
+test("approved bibliographic details and verified official source links are preserved", () => {
   const corpusBook = SCIENTIFIC_FOUNDATIONS["corpus-linguistics"].platformReferences[0];
   assert.equal(corpusBook.author.ar, "صالح بن فهد العصيمي (محرر)، ومجموعة من الباحثين");
   assert.equal(corpusBook.title.ar, "المدونات اللغوية العربية: بناؤها وطرائق الإفادة منها");
   assert.equal(corpusBook.isbn, "9786039066484");
+  assert.equal(corpusBook.doiOrUrl, "https://library.ksaa.gov.sa/links/epubs/Arabic-Corpora.pdf");
+
+  const corpusProcessing = SCIENTIFIC_FOUNDATIONS["corpus-linguistics"].platformReferences[1];
+  assert.equal(corpusProcessing.doiOrUrl, "https://library.ksaa.gov.sa/index/book/141");
 
   const treebank = SCIENTIFIC_FOUNDATIONS["morphology-syntax"].platformReferences[2];
   assert.equal(treebank.publisher, null);
@@ -60,11 +61,21 @@ test("approved bibliographic details are preserved exactly without inferred sour
     assert.equal(translatedBook.translator.ar, "هند سليمان الخليفة");
     assert.equal(translatedBook.year, 2014);
     assert.equal(translatedBook.isbn, "9786035072571");
+    assert.equal(translatedBook.doiOrUrl, "https://ksupress.ksu.edu.sa/ar/books/6635/9786035072571");
   }
 
   for (const pathId of ["text-classification", "nlp-experiments"]) {
-    assert.equal(SCIENTIFIC_FOUNDATIONS[pathId].platformReferences[1].isbn, "9786038221532");
+    const applicationBook = SCIENTIFIC_FOUNDATIONS[pathId].platformReferences[1];
+    assert.equal(applicationBook.isbn, "9786038221532");
+    assert.equal(applicationBook.doiOrUrl, "https://library.ksaa.gov.sa/links/epubs/essential-app.pdf");
   }
+
+  for (const pathId of ["text-classification", "information-extraction"]) {
+    assert.equal(SCIENTIFIC_FOUNDATIONS[pathId].platformReferences[2].doiOrUrl, "https://library.ksaa.gov.sa/links/epubs/maeayir_alhawsabat_allughawiat_alearabia.pdf");
+  }
+
+  assert.equal(SCIENTIFIC_FOUNDATIONS["information-extraction"].platformReferences[1].doiOrUrl, null);
+  assert.equal(SCIENTIFIC_FOUNDATIONS["nlp-experiments"].platformReferences[2].doiOrUrl, null);
 });
 
 test("researcher references are normalized, bounded, editable by replacement, and isolated by path", () => {
