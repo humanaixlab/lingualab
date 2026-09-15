@@ -12,10 +12,10 @@ const EMPTY_FORM = { author: "", year: "", title: "", publisher: "", doiOrUrl: "
 
 const COPY = {
   ar: {
-    title: "الأساس العلمي للمسار", intro: "مراجع منهجية عربية اختارتها المنصة من القائمة المعتمدة لدعم هذا المسار.", platform: "مراجع المنصة", approved: "مرجع معتمد من قائمة المنصة", placeholder: "عنصر مؤقت — لم يُضف مرجع حقيقي أو موثّق بعد", author: "المؤلف", translator: "المترجم", year: "السنة", edition: "الطبعة", referenceTitle: "العنوان", publisher: "المجلة / الناشر", isbn: "ISBN", source: "DOI أو رابط المصدر الرسمي", type: "نوع المرجع", note: "صلة المرجع بالمنهجية", notSupplied: "غير متوفر في القائمة المعتمدة", suggested: "مرجع مقترح للتضمين في التقرير", suggestionOnly: "علامة اقتراح فقط؛ لن يُدرج المرجع أو يُستشهد به تلقائيًا في التقرير.", researcher: "مراجع الباحث", researcherIntro: "أضف مراجعك الخاصة بصورة منفصلة. تبقى مسؤولية التحقق منها واختيار إدراجها في التقرير للباحث.", add: "إضافة مرجع", edit: "تعديل المرجع", save: "حفظ المرجع", cancel: "إلغاء", delete: "حذف", editAction: "تعديل", empty: "لم تُضف مراجع للباحث في هذا المسار بعد.", required: "أكمل المؤلف والسنة والعنوان والمجلة أو الناشر.", saved: "حُفظت المراجع محليًا على هذا الجهاز.", storageError: "تعذر الحفظ المحلي. لم تُرسل المراجع إلى أي خدمة خارجية.", limitation: "الحفظ محلي في هذا المتصفح والجهاز فقط، ولا يزامن المراجع مع أجهزة أخرى أو يضيفها إلى التقرير تلقائيًا.",
+    title: "الأساس العلمي للمسار", intro: "مراجع منهجية عربية اختارتها المنصة من القائمة المعتمدة لدعم هذا المسار.", platform: "مراجع المنصة", approved: "مرجع معتمد من قائمة المنصة", placeholder: "عنصر مؤقت — لم يُضف مرجع حقيقي أو موثّق بعد", author: "المؤلف", translator: "المترجم", year: "السنة", edition: "الطبعة", referenceTitle: "العنوان", publisher: "المجلة / الناشر", isbn: "ISBN", source: "DOI أو رابط المصدر الرسمي", type: "نوع المرجع", note: "صلة المرجع بالمسار", notSupplied: "غير متوفر", sourceUnavailable: "لا يتوفر رابط رسمي موثّق حاليًا", showDetails: "عرض التفاصيل", hideDetails: "إخفاء التفاصيل", openSource: "فتح المصدر", suggested: "مرجع مقترح للتضمين في التقرير", suggestionOnly: "علامة اقتراح فقط؛ لن يُدرج المرجع أو يُستشهد به تلقائيًا في التقرير.", researcher: "مراجع الباحث", researcherIntro: "أضف مراجعك الخاصة بصورة منفصلة. تبقى مسؤولية التحقق منها واختيار إدراجها في التقرير للباحث.", add: "إضافة مرجع", edit: "تعديل المرجع", save: "حفظ المرجع", cancel: "إلغاء", delete: "حذف", editAction: "تعديل", empty: "لم تُضف مراجع للباحث في هذا المسار بعد.", required: "أكمل المؤلف والسنة والعنوان والمجلة أو الناشر.", saved: "حُفظت المراجع محليًا على هذا الجهاز.", storageError: "تعذر الحفظ المحلي. لم تُرسل المراجع إلى أي خدمة خارجية.", limitation: "الحفظ محلي في هذا المتصفح والجهاز فقط، ولا يزامن المراجع مع أجهزة أخرى أو يضيفها إلى التقرير تلقائيًا.",
   },
   en: {
-    title: "Scientific Foundations", intro: "Arabic methodological references curated by the platform from the approved list to support this path.", platform: "Platform references", approved: "Approved platform-list reference", placeholder: "Placeholder — no real or verified reference has been added yet", author: "Author", translator: "Translator", year: "Year", edition: "Edition", referenceTitle: "Title", publisher: "Journal / publisher", isbn: "ISBN", source: "DOI or official source URL", type: "Reference type", note: "Why it supports the methodology", notSupplied: "Not supplied in the approved list", suggested: "Suggested for the research report", suggestionOnly: "Suggestion flag only; the reference will not be inserted or cited automatically in the report.", researcher: "Researcher References", researcherIntro: "Add your own references separately. Verification and final report inclusion remain the researcher's responsibility.", add: "Add reference", edit: "Edit reference", save: "Save reference", cancel: "Cancel", delete: "Delete", editAction: "Edit", empty: "No researcher references have been added for this path.", required: "Complete author, year, title, and journal or publisher.", saved: "References were saved locally on this device.", storageError: "Local saving is unavailable. References were not sent to any external service.", limitation: "References are stored only in this browser on this device. They are not synced across devices or inserted into reports automatically.",
+    title: "Scientific Foundations", intro: "Arabic methodological references curated by the platform from the approved list to support this path.", platform: "Platform references", approved: "Approved platform-list reference", placeholder: "Placeholder — no real or verified reference has been added yet", author: "Author", translator: "Translator", year: "Year", edition: "Edition", referenceTitle: "Title", publisher: "Journal / publisher", isbn: "ISBN", source: "DOI or official source URL", type: "Reference type", note: "Why it supports this path", notSupplied: "Not available", sourceUnavailable: "No verified official source link is currently available", showDetails: "Show details", hideDetails: "Hide details", openSource: "Open source", suggested: "Suggested for the research report", suggestionOnly: "Suggestion flag only; the reference will not be inserted or cited automatically in the report.", researcher: "Researcher References", researcherIntro: "Add your own references separately. Verification and final report inclusion remain the researcher's responsibility.", add: "Add reference", edit: "Edit reference", save: "Save reference", cancel: "Cancel", delete: "Delete", editAction: "Edit", empty: "No researcher references have been added for this path.", required: "Complete author, year, title, and journal or publisher.", saved: "References were saved locally on this device.", storageError: "Local saving is unavailable. References were not sent to any external service.", limitation: "References are stored only in this browser on this device. They are not synced across devices or inserted into reports automatically.",
   },
 };
 
@@ -27,6 +27,7 @@ export default function ScientificFoundations({ pathId, language = "en" }) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState("");
   const [message, setMessage] = useState("");
+  const [expandedReferences, setExpandedReferences] = useState(() => new Set());
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
@@ -61,25 +62,52 @@ export default function ScientificFoundations({ pathId, language = "en" }) {
     setMessage("");
   }
 
+  function toggleDetails(referenceId) {
+    setExpandedReferences((current) => {
+      const next = new Set(current);
+      if (next.has(referenceId)) next.delete(referenceId);
+      else next.add(referenceId);
+      return next;
+    });
+  }
+
   return <section className={styles.foundations} aria-labelledby={`${pathId}-scientific-foundations`}>
     <header><p>{foundation.title[locale]}</p><h2 id={`${pathId}-scientific-foundations`}>{copy.title}</h2><span>{copy.intro}</span></header>
     <h3>{copy.platform}</h3>
     <div className={styles.platformGrid}>
-      {foundation.platformReferences.map((reference) => <article className={styles.platformReference} key={reference.id}>
-        <strong className={reference.isPlaceholder ? styles.placeholder : styles.approved}>{reference.isPlaceholder ? copy.placeholder : copy.approved}</strong>
-        <dl>
-          <div><dt>{copy.author}</dt><dd>{reference.author[locale]}</dd></div>
-          {reference.translator && <div><dt>{copy.translator}</dt><dd>{reference.translator[locale]}</dd></div>}
-          <div><dt>{copy.year}</dt><dd>{reference.year || copy.pending}</dd></div>
-          {reference.edition && <div><dt>{copy.edition}</dt><dd>{reference.edition[locale]}</dd></div>}
-          <div><dt>{copy.referenceTitle}</dt><dd>{reference.title[locale]}</dd></div>
-          <div><dt>{copy.publisher}</dt><dd>{reference.publisher?.[locale] || copy.notSupplied}</dd></div>
-          {reference.isbn && <div><dt>{copy.isbn}</dt><dd dir="ltr">{reference.isbn}</dd></div>}
-          <div><dt>{copy.source}</dt><dd>{reference.doiOrUrl ? <a href={reference.doiOrUrl} target="_blank" rel="noreferrer">{reference.doiOrUrl}</a> : copy.notSupplied}</dd></div>
-          <div><dt>{copy.type}</dt><dd>{reference.referenceType[locale]}</dd></div>
-          <div className={styles.full}><dt>{copy.note}</dt><dd>{reference.note[locale]}</dd></div>
-        </dl>
-      </article>)}
+      {foundation.platformReferences.map((reference) => {
+        const expanded = expandedReferences.has(reference.id);
+        const detailsId = `${pathId}-${reference.id}-details`;
+        return <article className={styles.platformReference} key={reference.id}>
+          <strong className={reference.isPlaceholder ? styles.placeholder : styles.approved}>{reference.isPlaceholder ? copy.placeholder : copy.approved}</strong>
+          <div className={styles.referenceIdentity}>
+            <h4>{reference.title[locale]}</h4>
+            <p>{reference.author[locale]}</p>
+          </div>
+          <dl className={styles.referenceSummary}>
+            <div><dt>{copy.year}</dt><dd>{reference.year || copy.notSupplied}</dd></div>
+            <div><dt>{copy.publisher}</dt><dd>{reference.publisher?.[locale] || copy.notSupplied}</dd></div>
+            <div><dt>{copy.type}</dt><dd>{reference.referenceType[locale]}</dd></div>
+            {reference.isbn && <div><dt>{copy.isbn}</dt><dd dir="ltr">{reference.isbn}</dd></div>}
+            <div className={styles.full}><dt>{copy.note}</dt><dd>{reference.note[locale]}</dd></div>
+          </dl>
+          <div className={styles.referenceActions}>
+            <button type="button" className={styles.detailsButton} aria-expanded={expanded} aria-controls={detailsId} onClick={() => toggleDetails(reference.id)}>{expanded ? copy.hideDetails : copy.showDetails}</button>
+            {reference.doiOrUrl
+              ? <a className={styles.sourceButton} href={reference.doiOrUrl} target="_blank" rel="noreferrer">{copy.openSource}</a>
+              : <span className={styles.sourceUnavailable}>{copy.sourceUnavailable}</span>}
+          </div>
+          {expanded && <div id={detailsId} className={styles.referenceDetails}>
+            <dl>
+              <div><dt>{copy.author}</dt><dd>{reference.author[locale]}</dd></div>
+              <div><dt>{copy.referenceTitle}</dt><dd>{reference.title[locale]}</dd></div>
+              {reference.translator && <div><dt>{copy.translator}</dt><dd>{reference.translator[locale]}</dd></div>}
+              {reference.edition && <div><dt>{copy.edition}</dt><dd>{reference.edition[locale]}</dd></div>}
+              <div><dt>{copy.source}</dt><dd>{reference.doiOrUrl ? <a href={reference.doiOrUrl} target="_blank" rel="noreferrer">{reference.doiOrUrl}</a> : copy.sourceUnavailable}</dd></div>
+            </dl>
+          </div>}
+        </article>;
+      })}
     </div>
 
     <div className={styles.researcherHeader}><div><h3>{copy.researcher}</h3><p>{copy.researcherIntro}</p></div></div>
