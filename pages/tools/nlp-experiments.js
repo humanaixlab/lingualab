@@ -5,6 +5,7 @@ import { useLanguage } from "../../components/LanguageProvider";
 import ComputationalWorkbench from "../../components/ComputationalWorkbench";
 import PageGuidance from "../../components/PageGuidance";
 import ResearchCompletionActions from "../../components/ResearchCompletionActions";
+import ScientificFoundations from "../../components/ScientificFoundations";
 import {
   COMPARISON_CHOICES,
   NLP_EXPERIMENT_MODULES,
@@ -114,6 +115,7 @@ export default function NlpExperiments() {
     {moduleId === "task-sandbox" && <section className={styles.module}><form className={styles.card} onSubmit={runSandbox}><h2>{copy.sandbox}</h2><Field label={copy.taskName} value={taskName} setValue={setTaskName} /><Field label={copy.instruction} value={instruction} setValue={setInstruction} /><Field label={copy.labels} value={allowedLabels} setValue={setAllowedLabels} hint={copy.labelsHint} /><Field label={copy.expected} value={expectedStructure} setValue={setExpectedStructure} hint={copy.expectedHint} /><Field label={copy.text} value={text} setValue={setText} arabic /><RunButton status={status} copy={copy} label={copy.runSandbox} /></form><div className={styles.stack}>{sandboxOutput && <><article className={styles.card}><h2>{copy.aiSuggestion}</h2><dl className={styles.output}>{["label", "evidence", "result", "explanation"].map((field) => <div key={field}><dt>{copy[field]}</dt><dd dir="auto">{sandboxOutput[field]}</dd></div>)}</dl></article><article className={styles.card}><h2>{copy.review}</h2><div className={styles.decisions}>{SANDBOX_DECISIONS.map((id) => <button type="button" aria-pressed={decision === id} onClick={() => chooseDecision(id)} key={id}>{copy[id]}</button>)}</div>{(decision === "edit" || decision === "reject") && <div className={styles.editFields}><label>{copy.final}<textarea dir="ltr" value={finalJson} onChange={(event) => setFinalJson(event.target.value)} /></label><p className={styles.hint}>{copy.finalHint}</p></div>}{decision && <button className={styles.primaryButton} type="button" onClick={saveSandbox}>{copy.saveReview}</button>}</article></>}</div></section>}
     {status === "error" && <p className={styles.error}>{message}</p>}{message && status !== "error" && <p className={message === copy.saved ? styles.success : styles.error}>{message}</p>}
     {lastReview && <ResearchCompletionActions language={locale} sourceTool="nlp-experiments" pathId="nlp-experiments" taskLabel={copy[moduleCopy[lastReview.moduleId]?.[0] || "sandbox"]} sourceText={lastReview.inputs?.text || ""} aiOutput={lastReview.outputs || lastReview.aiOutput} researcherDecision={lastReview.researcherDecision || lastReview.choice} finalOutput={lastReview.finalOutput || lastReview.outputs} returnHref="/tools/nlp-experiments" />}
+    <ScientificFoundations pathId="nlp-experiments" language={locale} />
   </main></>;
 }
 

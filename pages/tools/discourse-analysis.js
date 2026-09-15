@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useLanguage } from "../../components/LanguageProvider";
 import ResearchCompletionActions from "../../components/ResearchCompletionActions";
+import ScientificFoundations from "../../components/ScientificFoundations";
 import {
   DISCOURSE_TOOLS,
   createReviewedCase,
@@ -297,7 +298,8 @@ export default function DiscourseAnalysisTool() {
           {!summary.total && <p className={styles.empty}>{copy.noCases}</p>}
         </section>
       {lastReview && <ResearchCompletionActions language={locale} sourceTool="discourse-analysis" pathId="discourse-pragmatics" taskLabel={TOOL_COPY[lastReview.toolId]?.[locale]?.title || copy.title} sourceText={lastReview.originalText} aiOutput={lastReview.aiOutput} researcherDecision={lastReview.researcherDecision} finalOutput={lastReview.finalOutput} returnHref={`/tools/discourse-analysis#${lastReview.toolId}`} />}
-    </main>
+      <ScientificFoundations pathId="discourse-pragmatics" language={locale} />
+      </main>
     </>
   );
 }

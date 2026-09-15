@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useLanguage } from "../../components/LanguageProvider";
 import PageGuidance from "../../components/PageGuidance";
 import ResearchCompletionActions from "../../components/ResearchCompletionActions";
+import ScientificFoundations from "../../components/ScientificFoundations";
 import {
   MORPHOLOGY_SYNTAX_DECISIONS,
   MORPHOLOGY_SYNTAX_TOOLS,
@@ -112,6 +113,7 @@ export default function MorphologySyntax() {
         <div className={styles.stack}>{aiOutput && <><article className={styles.card}><h2>{copy.aiSuggestion}</h2><OutputView output={aiOutput} copy={copy} /></article><article className={styles.card}><h2>{copy.review}</h2><div className={styles.decisions}>{MORPHOLOGY_SYNTAX_DECISIONS.map((id) => <button type="button" aria-pressed={decision === id} onClick={() => chooseDecision(id)} key={id}>{copy[id]}</button>)}</div>{(decision === "edit" || decision === "reject") && <div className={styles.editFields}><label>{copy.final}<textarea dir="ltr" value={finalJson} onChange={(event) => setFinalJson(event.target.value)} /></label><p className={styles.hint}>{copy.finalHint}</p></div>}{decision && <button type="button" className={styles.primaryButton} onClick={saveReview}>{copy.save}</button>}{message && status !== "error" && <p className={message === copy.saved ? styles.success : styles.error}>{message}</p>}</article></>}</div>
       </section>
       {lastReview && <ResearchCompletionActions language={locale} sourceTool="morphology-syntax" pathId="morphology-syntax" taskLabel={toolCopy[0]} sourceText={lastReview.inputs.text} aiOutput={lastReview.aiOutput} researcherDecision={lastReview.researcherDecision} finalOutput={lastReview.finalOutput} returnHref="/tools/morphology-syntax" />}
+      <ScientificFoundations pathId="morphology-syntax" language={locale} />
     </main>
   </>;
 }

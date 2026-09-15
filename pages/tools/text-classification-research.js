@@ -5,6 +5,7 @@ import { useLanguage } from "../../components/LanguageProvider";
 import ComputationalWorkbench from "../../components/ComputationalWorkbench";
 import PageGuidance from "../../components/PageGuidance";
 import ResearchCompletionActions from "../../components/ResearchCompletionActions";
+import ScientificFoundations from "../../components/ScientificFoundations";
 import {
   CLASSIFICATION_REVIEW_DECISIONS,
   TEXT_CLASSIFICATION_MODULES,
@@ -145,6 +146,7 @@ export default function TextClassificationResearch() {
       {moduleId === "baseline" && baseline && <ResearchCompletionActions language={locale} sourceTool="text-classification" pathId="text-classification" taskLabel={copy.baseline} sourceText="" aiOutput={null} researcherDecision="computed" finalOutput={baseline} summary={copy.baselineDesc} returnHref="/tools/text-classification-research" />}
       {moduleId === "ai-assisted" && lastReview && <ResearchCompletionActions language={locale} sourceTool="text-classification" pathId="text-classification" taskLabel={copy.ai} sourceText={lastReview.text} aiOutput={lastReview.aiOutput} researcherDecision={lastReview.researcherDecision} finalOutput={lastReview.finalOutput} returnHref="/tools/text-classification-research" />}
       {moduleId === "error-analysis" && errorInterpretation && <ResearchCompletionActions language={locale} sourceTool="text-classification" pathId="text-classification" taskLabel={copy.errors} sourceText="" aiOutput={errorInterpretation} researcherDecision="researcher-evaluation-required" finalOutput={{ baseline, errorInterpretation }} returnHref="/tools/text-classification-research" />}
+      <ScientificFoundations pathId="text-classification" language={locale} />
     </main>
   </>;
 }

@@ -5,6 +5,7 @@ import { useLanguage } from "../../components/LanguageProvider";
 import ComputationalWorkbench from "../../components/ComputationalWorkbench";
 import PageGuidance from "../../components/PageGuidance";
 import ResearchCompletionActions from "../../components/ResearchCompletionActions";
+import ScientificFoundations from "../../components/ScientificFoundations";
 import {
   INFORMATION_EXTRACTION_DECISIONS,
   INFORMATION_EXTRACTION_TOOLS,
@@ -92,6 +93,7 @@ export default function InformationExtraction() {
         <div className={styles.stack}>{aiOutput && <><article className={styles.card}><h2>{copy.aiSuggestion}</h2><ExtractionOutput toolId={toolId} output={aiOutput} copy={copy} /></article><article className={styles.card}><h2>{copy.review}</h2><div className={styles.decisions}>{INFORMATION_EXTRACTION_DECISIONS.map((id) => <button type="button" aria-pressed={decision === id} onClick={() => chooseDecision(id)} key={id}>{copy[id]}</button>)}</div>{(decision === "edit" || decision === "reject") && <div className={styles.editFields}><label>{copy.final}<textarea dir="ltr" value={finalJson} onChange={(event) => setFinalJson(event.target.value)} /></label><p className={styles.hint}>{copy.finalHint}</p></div>}{decision && <button type="button" className={styles.primaryButton} onClick={saveReview}>{copy.save}</button>}{message && status !== "error" && <p className={message === copy.saved ? styles.success : styles.error}>{message}</p>}</article></>}</div>
       </section>
       {lastReview && <ResearchCompletionActions language={locale} sourceTool="information-extraction" pathId="information-extraction" taskLabel={TOOL_COPY[lastReview.toolId]?.[locale]?.[0] || copy.title} sourceText={lastReview.originalText} aiOutput={lastReview.aiOutput} researcherDecision={lastReview.researcherDecision} finalOutput={lastReview.finalOutput} returnHref="/tools/information-extraction" />}
+      <ScientificFoundations pathId="information-extraction" language={locale} />
     </main>
   </>;
 }

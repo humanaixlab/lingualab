@@ -1,6 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
 import { useLanguage } from "../../components/LanguageProvider";
+import ScientificFoundations from "../../components/ScientificFoundations";
 import { CORPUS_PATH_HUB_SECTION, researchPathHref } from "../../lib/research-path-context";
 import styles from "../../styles/CorpusPath.module.css";
 
@@ -207,6 +208,7 @@ export default function CorpusLinguisticsPath() {
           <h2 id="coming-corpus-tools">{copy.coming}</h2>
           <ul>{COMING[locale].map((item) => <li key={item}>{item}</li>)}</ul>
         </section>
+        <ScientificFoundations pathId="corpus-linguistics" language={locale} />
       </main>
     </>
   );
