@@ -17,16 +17,38 @@ function memoryStorage(initial = {}) {
   return { getItem: (key) => values.get(key) ?? null, setItem: (key, value) => values.set(key, value), values };
 }
 
-test("seven paths expose exactly three clearly unverified platform placeholders", () => {
+test("seven paths expose exactly three approved platform references", () => {
   assert.deepEqual(Object.keys(SCIENTIFIC_FOUNDATIONS), ["corpus-linguistics", "morphology-syntax", "semantics", "discourse-pragmatics", "text-classification", "information-extraction", "nlp-experiments"]);
+  let total = 0;
   for (const foundation of Object.values(SCIENTIFIC_FOUNDATIONS)) {
     assert.equal(foundation.platformReferences.length, 3);
     for (const reference of foundation.platformReferences) {
-      assert.equal(reference.isPlaceholder, true);
-      assert.equal(reference.verified, false);
-      assert.equal(reference.doiOrUrl, null);
+      total += 1;
+      assert.equal(reference.isPlaceholder, false);
+      assert.equal(reference.verified, true);
+      assert.ok(reference.id);
+      assert.ok(Number.isInteger(reference.year));
       for (const field of ["author", "title", "publisher", "referenceType", "note"]) assert.ok(reference[field]?.ar && reference[field]?.en);
     }
+  }
+  assert.equal(total, 21);
+});
+
+test("approved bibliographic details are preserved without inferred source data", () => {
+  const allReferences = Object.values(SCIENTIFIC_FOUNDATIONS).flatMap((foundation) => foundation.platformReferences);
+  const missingSources = allReferences.filter((reference) => !reference.doiOrUrl);
+  assert.deepEqual(missingSources.map((reference) => reference.id), ["discourse-yaqout-2021"]);
+
+  const corpusBook = SCIENTIFIC_FOUNDATIONS["corpus-linguistics"].platformReferences[0];
+  assert.equal(corpusBook.author.ar, "صالح بن فهد العصيمي (محرر)، ومجموعة من الباحثين");
+  assert.equal(corpusBook.title.ar, "المدونات اللغوية العربية: بناؤها وطرائق الإفادة منها");
+  assert.equal(corpusBook.doiOrUrl, "https://library.ksaa.gov.sa/links/epubs/Arabic-Corpora.pdf");
+
+  for (const pathId of ["text-classification", "information-extraction", "nlp-experiments"]) {
+    const translatedBook = SCIENTIFIC_FOUNDATIONS[pathId].platformReferences[0];
+    assert.equal(translatedBook.author.ar, "نزار حبش");
+    assert.equal(translatedBook.translator.ar, "هند بنت سليمان الخليفة");
+    assert.equal(translatedBook.year, 2014);
   }
 });
 
@@ -73,5 +95,8 @@ test("all seven executable paths mount the shared bilingual reference framework"
   for (const label of ["الأساس العلمي للمسار", "Scientific Foundations", "مراجع الباحث", "Researcher References", "مرجع مقترح للتضمين في التقرير", "Suggested for the research report"]) assert.match(component, new RegExp(label));
   assert.match(component, /setEditingId/);
   assert.match(component, /researcherReferences\.filter/);
-  assert.match(source("lib/scientific-references.js"), /isPlaceholder: true/);
+  assert.match(component, /reference\.isPlaceholder \? styles\.placeholder : styles\.approved/);
+  assert.match(component, /reference\.doiOrUrl \? <a/);
+  assert.match(source("lib/scientific-references.js"), /isPlaceholder: false/);
+  assert.doesNotMatch(source("lib/scientific-references.js"), /placeholderReference|isPlaceholder: true/);
 });
