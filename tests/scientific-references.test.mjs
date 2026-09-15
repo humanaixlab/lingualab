@@ -107,13 +107,17 @@ test("all seven executable paths mount the shared bilingual reference framework"
     assert.match(page, new RegExp(`pathId="${pathId}"`));
   }
   const component = source("components/ScientificFoundations.js");
-  for (const label of ["الأساس العلمي للمسار", "Scientific Foundations", "مراجع الباحث", "Researcher References", "مرجع مقترح للتضمين في التقرير", "Suggested for the research report"]) assert.match(component, new RegExp(label));
+  for (const label of ["الأساس العلمي للمسار", "Scientific Foundations", "مراجع الباحث", "Researcher References", "مرجع مقترح للتضمين في التقرير", "Suggested for the research report", "عرض التفاصيل", "فتح المصدر", "لا يتوفر رابط رسمي موثّق حاليًا"]) assert.match(component, new RegExp(label));
   assert.match(component, /setEditingId/);
   assert.match(component, /researcherReferences\.filter/);
   assert.doesNotMatch(component, /togglePlatform|suggestedPlatformReferenceIds\.includes/);
   assert.match(component, /checked=\{form\.suggestedForReport\}/);
   assert.match(component, /reference\.isPlaceholder \? styles\.placeholder : styles\.approved/);
-  assert.match(component, /reference\.doiOrUrl \? <a/);
+  assert.match(component, /expandedReferences/);
+  assert.match(component, /aria-expanded=\{expanded\}/);
+  assert.match(component, /reference\.doiOrUrl[\s\S]*copy\.openSource/);
+  assert.match(component, /copy\.sourceUnavailable/);
+  assert.doesNotMatch(component, /اهتمامات المؤلف|Author interests/);
   assert.match(source("lib/scientific-references.js"), /isPlaceholder: false/);
   assert.doesNotMatch(source("lib/scientific-references.js"), /placeholderReference|isPlaceholder: true/);
 });
