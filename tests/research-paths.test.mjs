@@ -141,9 +141,9 @@ test("Corpus Linguistics leads with a practical evidence-based workflow", () => 
   const hub = source("pages/research-paths/corpus-linguistics.js");
   assert.match(hub, /How do I run a corpus-linguistics study in LinguaLab\?/);
   assert.match(hub, /كيف أطبق لسانيات المدونات داخل LinguaLab؟/);
-  const stageKeys = [...hub.matchAll(/\{ key: "([^"]+)"(?:, href: "([^"]+)")?, (?:type: "([^"]+)"|types: \[([^\]]+)\]) \}/g)];
+  const stageKeys = [...hub.matchAll(/\{ key: "([^"]+)"(?:, href: "([^"]+)")?, (?:type: "([^"]+)"|types: \[([^\]]+)\])(?:, requiresResult: true)? \}/g)];
   assert.deepEqual(stageKeys.map((match) => match[1]), ["prepare", "inspect", "frequency", "contexts", "ngrams", "review", "interpret", "report"]);
-  assert.deepEqual(stageKeys.map((match) => match[2]), ["/tools/corpus-research", "/tools/corpus-research", "/tools/frequency", "/tools/concordance", "/tools/ngrams", undefined, "/tools/analyze", "/research-report"]);
+  assert.deepEqual(stageKeys.map((match) => match[2]), ["/tools/corpus-research", "/tools/corpus-research", "/tools/frequency", "/tools/concordance", "/tools/ngrams", undefined, undefined, undefined]);
   assert.match(hub, /types: \["deterministic", "review"\]/);
   assert.match(hub, /Prepare the corpus[\s\S]*Check corpus readiness/);
   assert.match(hub, /إعداد المدونة[\s\S]*فحص جاهزية المدونة/);

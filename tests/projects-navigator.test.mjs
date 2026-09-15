@@ -43,7 +43,7 @@ test("Projects remains navigation-only and separates result layers", () => {
   assert.doesNotMatch(source("lib/project-catalog.js"), /localStorage|sessionStorage|fetch\(|\/api\//);
 });
 
-test("every project links to real canonical, data, tool, evaluation, interpretation, and reporting destinations", () => {
+test("every project links to real canonical, data, and tool destinations without duplicate workflow detours", () => {
   const routeFiles = new Set([
     "/", "/ar-tools", "/workspace", "/research-report", "/research-paths/corpus-linguistics", "/tools/analyze", "/tools/prompt",
     ...Object.values(PROJECT_TOOL_ROUTES),
@@ -52,11 +52,19 @@ test("every project links to real canonical, data, tool, evaluation, interpretat
     assert.ok(PROJECT_PATH_ROUTES[project.path]);
     assert.ok(project.tools.every((tool) => PROJECT_TOOL_ROUTES[tool]));
     const roadmap = buildProjectRoadmap(project);
-    for (const stage of ["path", "data", "tool", "run", "review", "evaluate", "errors", "interpret", "report", "writing"]) {
+    for (const stage of ["path", "data"]) {
       const step = roadmap.find((item) => item.stage === stage);
       assert.ok(step?.href, `${project.id} missing ${stage} destination`);
-      assert.ok(routeFiles.has(step.href.split("#")[0]), `${project.id} uses unknown route ${step.href}`);
+      assert.ok(routeFiles.has(step.href.split(/[?#]/)[0]), `${project.id} uses unknown route ${step.href}`);
     }
+    const toolStep = roadmap.find((item) => item.stage === "tool");
+    if (toolStep.href) {
+      assert.ok(routeFiles.has(toolStep.href.split(/[?#]/)[0]), `${project.id} uses unknown tool route ${toolStep.href}`);
+      assert.match(toolStep.href, new RegExp(`project=${project.id}`));
+    } else assert.equal(PROJECT_TOOL_ROUTES[project.tools.find((tool) => PROJECT_TOOL_ROUTES[tool])], roadmap.find((item) => item.stage === "data").href.split("?")[0]);
+    for (const stage of ["run", "review", "evaluate", "errors", "interpret", "report", "writing"])
+      assert.equal(roadmap.find((item) => item.stage === stage)?.href, null, `${project.id} should continue inside its active tool`);
+    assert.doesNotMatch(JSON.stringify(roadmap), /\/tools\/analyze|\/research-report/);
     assert.ok(roadmap.some((item) => item.external && item.stage === "responsibility"));
     if (project.annotatorsRequired) assert.ok(roadmap.some((item) => item.external && item.stage === "annotation"));
   }

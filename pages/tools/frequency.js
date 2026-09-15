@@ -13,16 +13,19 @@ export default function Frequency() {
   const [workflowSource, setWorkflowSource] = useState(null);
 
   useEffect(() => {
-    const restored = readAnalysisResultHandoff(window.location.search, "frequency");
-    const incoming = readCorpusWorkflowHandoff(window.location.search, "frequency");
-    if (restored) {
-      setText(restored.text);
-      setResult(JSON.stringify(Object.fromEntries(restored.evidence.frequencies), null, 2));
-      setWorkflowSource(restored);
-    } else if (incoming) {
-      setText(incoming.text);
-      setWorkflowSource(incoming);
-    }
+    const frame = window.requestAnimationFrame(() => {
+      const restored = readAnalysisResultHandoff(window.location.search, "frequency");
+      const incoming = readCorpusWorkflowHandoff(window.location.search, "frequency");
+      if (restored) {
+        setText(restored.text);
+        setResult(JSON.stringify(Object.fromEntries(restored.evidence.frequencies), null, 2));
+        setWorkflowSource(restored);
+      } else if (incoming) {
+        setText(incoming.text);
+        setWorkflowSource(incoming);
+      }
+    });
+    return () => window.cancelAnimationFrame(frame);
   }, []);
 
   const frequencies = () => Object.entries(JSON.parse(result)).sort((a, b) => b[1] - a[1]);

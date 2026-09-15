@@ -6,13 +6,14 @@ const source = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "u
 
 const corpusPages = ["frequency", "concordance", "ngrams", "pos"];
 
-test("corpus tools share the Analyze return path and bilingual label", () => {
+test("corpus tools remain safe standalone and return contextually inside their path", () => {
   for (const name of corpusPages) {
     const page = source(`pages/tools/${name}.js`);
-    assert.match(page, /backHref="\/tools\/analyze"/);
+    if (name === "pos") assert.match(page, /backHref="\/tools\/analyze"/);
+    else assert.match(page, /inCorpusPath \? "\/research-paths\/corpus-linguistics" : "\/tools\/analyze"/);
     assert.match(page, /العودة إلى مركز التحليل/);
     assert.match(page, /Back to Analyze/);
-    assert.doesNotMatch(page, /backHref="\/ar-tools|backHref="\/research/);
+    if (name === "pos") assert.doesNotMatch(page, /backHref="\/ar-tools|backHref="\/research/);
   }
 });
 

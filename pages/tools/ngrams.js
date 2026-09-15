@@ -14,10 +14,13 @@ export default function NgramsTool() {
   const [workflowSource, setWorkflowSource] = useState(null);
 
   useEffect(() => {
-    const restored = readAnalysisResultHandoff(window.location.search, "ngrams");
-    const incoming = readCorpusWorkflowHandoff(window.location.search, "ngrams");
-    if (restored) { setText(restored.text); setSize(restored.evidence.size); setResults(restored.evidence.results); setWorkflowSource(restored); }
-    else if (incoming) { setText(incoming.text); setWorkflowSource(incoming); }
+    const frame = window.requestAnimationFrame(() => {
+      const restored = readAnalysisResultHandoff(window.location.search, "ngrams");
+      const incoming = readCorpusWorkflowHandoff(window.location.search, "ngrams");
+      if (restored) { setText(restored.text); setSize(restored.evidence.size); setResults(restored.evidence.results); setWorkflowSource(restored); }
+      else if (incoming) { setText(incoming.text); setWorkflowSource(incoming); }
+    });
+    return () => window.cancelAnimationFrame(frame);
   }, []);
 
   const inCorpusPath = workflowSource || (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("researchPath") === "corpus-linguistics");

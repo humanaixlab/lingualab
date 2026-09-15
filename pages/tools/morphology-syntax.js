@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useLanguage } from "../../components/LanguageProvider";
 import PageGuidance from "../../components/PageGuidance";
+import ResearchCompletionActions from "../../components/ResearchCompletionActions";
 import {
   MORPHOLOGY_SYNTAX_DECISIONS,
   MORPHOLOGY_SYNTAX_TOOLS,
@@ -58,11 +59,12 @@ export default function MorphologySyntax() {
   const [finalJson, setFinalJson] = useState("{}");
   const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
+  const [lastReview, setLastReview] = useState(null);
 
   const tool = MORPHOLOGY_SYNTAX_TOOLS[toolId];
   const inputs = { text: text.trim(), token: token.trim(), firstElement: firstElement.trim(), secondElement: secondElement.trim() };
   const toolCopy = TOOL_COPY[toolId][locale];
-  function resetResult() { setAiOutput(null); setDecision(""); setFinalJson("{}"); setStatus("idle"); setMessage(""); }
+  function resetResult() { setAiOutput(null); setDecision(""); setFinalJson("{}"); setStatus("idle"); setMessage(""); setLastReview(null); }
   function changeSection(next) { setSection(next); setToolId(sectionTools[next][0]); resetResult(); }
   function changeTool(next) { setToolId(next); resetResult(); }
   function updateInput(setter, value) { setter(value); resetResult(); }
@@ -85,12 +87,13 @@ export default function MorphologySyntax() {
     if (!review) { setMessage(copy.invalidFinal); return; }
     const saved = saveMorphologySyntaxReview(review);
     setMessage(saved.ok ? copy.saved : copy.storageError);
+    if (saved.ok) setLastReview(review);
   }
 
   return <>
     <Head><title>{copy.head} · LinguaLab</title></Head>
     <main className={styles.page}>
-      <Link className={styles.back} href="/ar-tools#all-tools">← {copy.back}</Link>
+      <Link className={styles.back} href="/ar-tools#morphology-syntax">← {copy.back}</Link>
       <header className={styles.header}><div><p className={styles.eyebrow}>{copy.eyebrow}</p><h1>{copy.title}</h1><p>{copy.lead}</p></div><span className={styles.previewBadge}>{copy.badge}</span></header>
       <p className={styles.notice}>{copy.notice}</p>
       <PageGuidance language={locale} steps={GUIDANCE[locale]} />
@@ -108,6 +111,7 @@ export default function MorphologySyntax() {
         </form>
         <div className={styles.stack}>{aiOutput && <><article className={styles.card}><h2>{copy.aiSuggestion}</h2><OutputView output={aiOutput} copy={copy} /></article><article className={styles.card}><h2>{copy.review}</h2><div className={styles.decisions}>{MORPHOLOGY_SYNTAX_DECISIONS.map((id) => <button type="button" aria-pressed={decision === id} onClick={() => chooseDecision(id)} key={id}>{copy[id]}</button>)}</div>{(decision === "edit" || decision === "reject") && <div className={styles.editFields}><label>{copy.final}<textarea dir="ltr" value={finalJson} onChange={(event) => setFinalJson(event.target.value)} /></label><p className={styles.hint}>{copy.finalHint}</p></div>}{decision && <button type="button" className={styles.primaryButton} onClick={saveReview}>{copy.save}</button>}{message && status !== "error" && <p className={message === copy.saved ? styles.success : styles.error}>{message}</p>}</article></>}</div>
       </section>
+      {lastReview && <ResearchCompletionActions language={locale} sourceTool="morphology-syntax" pathId="morphology-syntax" taskLabel={toolCopy[0]} sourceText={lastReview.inputs.text} aiOutput={lastReview.aiOutput} researcherDecision={lastReview.researcherDecision} finalOutput={lastReview.finalOutput} returnHref="/tools/morphology-syntax" />}
     </main>
   </>;
 }

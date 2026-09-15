@@ -142,7 +142,9 @@ test("30-minute TTL rejects expired, missing, invalid, and future timestamps", (
 test("Analyze adapter makes labeled Arabic metadata interpretable without planner changes", () => {
   const h = harness();
   const source = readFileSync(new URL("../pages/tools/analyze.js", import.meta.url), "utf8");
-  vm.runInContext(source.slice(source.indexOf("const DEFAULT_PLAN"), source.indexOf("export default function Analyzer")), h.scope);
+  const defaults = source.slice(source.indexOf("const DEFAULT_PLAN"), source.indexOf("const SOURCE_ROUTES"));
+  const planner = source.slice(source.indexOf("function analyzeTextValue"), source.indexOf("export default function Analyzer"));
+  vm.runInContext(defaults + planner, h.scope);
   const adapted = h.scope.analyzeContext({ ...current, labelColumn: "label", arabicPercent: 100 });
   const plan = h.scope.buildPlan(adapted);
   assert.equal(plan.title, "Start with the strongest testable signal.");

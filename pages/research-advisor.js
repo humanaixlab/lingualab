@@ -188,7 +188,7 @@ export default function ResearchAdvisorPage() {
           <div className={styles.navActions}>
             <Link href="/workspace">{t("nav.workspace")}</Link>
             <Link href="/ar-tools">{t("nav.researchHub")}</Link>
-            <Link href="/research-advisor">{t("nav.researchAdvisor")}</Link>
+            <span aria-current="page">{t("nav.researchAdvisor")}</span>
           </div>
         </nav>
 

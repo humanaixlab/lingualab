@@ -2,6 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useLanguage } from "../../components/LanguageProvider";
+import ResearchCompletionActions from "../../components/ResearchCompletionActions";
 import {
   DISCOURSE_TOOLS,
   createReviewedCase,
@@ -131,6 +132,7 @@ export default function DiscourseAnalysisTool() {
   const [message, setMessage] = useState("");
   const [cases, setCases] = useState([]);
   const [filter, setFilter] = useState("all");
+  const [lastReview, setLastReview] = useState(null);
   const tool = DISCOURSE_TOOLS[toolId];
 
   useEffect(() => {
@@ -211,6 +213,7 @@ export default function DiscourseAnalysisTool() {
       return;
     }
     setCases(saved.cases);
+    setLastReview(record);
     setMessage(copy.saved);
     setText("");
     setTarget("");
@@ -237,7 +240,7 @@ export default function DiscourseAnalysisTool() {
     <>
       <Head><title>{copy.pageTitle} · LinguaLab</title></Head>
       <main className={styles.page}>
-        <Link className={styles.back} href="/ar-tools#discourse-analysis">← {copy.back}</Link>
+        <Link className={styles.back} href="/ar-tools#discourse-pragmatics">← {copy.back}</Link>
         <header className={styles.header}>
           <div><p className={styles.eyebrow}>{copy.eyebrow}</p><h1>{copy.title}</h1><p>{copy.lead}</p></div>
           <span className={styles.previewBadge}>{copy.badge}</span>
@@ -293,7 +296,8 @@ export default function DiscourseAnalysisTool() {
           <div className={styles.metrics}><div><strong>{summary.total}</strong><span>{copy.total}</span></div><div><strong>{summary.accept}</strong><span>{copy.accepted}</span></div><div><strong>{summary.edit}</strong><span>{copy.edited}</span></div><div><strong>{summary.reject}</strong><span>{copy.rejected}</span></div></div>
           {!summary.total && <p className={styles.empty}>{copy.noCases}</p>}
         </section>
-      </main>
+      {lastReview && <ResearchCompletionActions language={locale} sourceTool="discourse-analysis" pathId="discourse-pragmatics" taskLabel={TOOL_COPY[lastReview.toolId]?.[locale]?.title || copy.title} sourceText={lastReview.originalText} aiOutput={lastReview.aiOutput} researcherDecision={lastReview.researcherDecision} finalOutput={lastReview.finalOutput} returnHref={`/tools/discourse-analysis#${lastReview.toolId}`} />}
+    </main>
     </>
   );
 }

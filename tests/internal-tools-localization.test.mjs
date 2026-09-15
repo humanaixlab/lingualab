@@ -33,7 +33,9 @@ test("tool homes use dedicated Research Hub anchors", () => {
   assert.match(hub, /id="writing-tools"/);
   for (const path of ["pages/tools/code.js", "pages/tools/excel.js", "pages/tools/colab.js"]) assert.match(source(path), /backHref="\/ar-tools#build-tools"/);
   assert.match(source("pages/tools/prompt.js"), /backHref="\/ar-tools#build-tools"/);
-  for (const path of ["frequency", "concordance", "ngrams", "pos"]) assert.match(source(`pages/tools/${path}.js`), /backHref="\/tools\/analyze"/);
+  for (const path of ["frequency", "concordance", "ngrams"])
+    assert.match(source(`pages/tools/${path}.js`), /inCorpusPath \? "\/research-paths\/corpus-linguistics" : "\/tools\/analyze"/);
+  assert.match(source("pages/tools/pos.js"), /backHref="\/tools\/analyze"/);
 });
 
 test("modified Arabic tool copy uses neutral imperatives and active UI fonts", () => {

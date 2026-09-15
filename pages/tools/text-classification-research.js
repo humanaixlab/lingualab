@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useLanguage } from "../../components/LanguageProvider";
 import ComputationalWorkbench from "../../components/ComputationalWorkbench";
 import PageGuidance from "../../components/PageGuidance";
+import ResearchCompletionActions from "../../components/ResearchCompletionActions";
 import {
   CLASSIFICATION_REVIEW_DECISIONS,
   TEXT_CLASSIFICATION_MODULES,
@@ -72,6 +73,7 @@ export default function TextClassificationResearch() {
   const [errorInterpretation, setErrorInterpretation] = useState(null);
   const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
+  const [lastReview, setLastReview] = useState(null);
 
   const labels = parseLabels(labelsInput);
   const inspectedRows = parseLabeledRows(datasetInput);
@@ -111,12 +113,13 @@ export default function TextClassificationResearch() {
     if (!review) { setMessage(copy.invalidFinal); return; }
     const saved = saveClassificationReview(review);
     setMessage(saved.ok ? copy.saved : copy.storageError);
+    if (saved.ok) setLastReview(review);
   }
 
   return <>
     <Head><title>{copy.head} · LinguaLab</title></Head>
     <main className={styles.page}>
-      <Link className={styles.back} href="/ar-tools#build">← {copy.back}</Link>
+      <Link className={styles.back} href="/ar-tools#build-tools">← {copy.back}</Link>
       <header className={styles.header}><div><p className={styles.eyebrow}>{copy.eyebrow}</p><h1>{copy.title}</h1><p>{copy.lead}</p></div><span className={styles.previewBadge}>{copy.badge}</span></header>
       <p className={styles.notice}>{copy.notice}</p>
       <PageGuidance language={locale} steps={GUIDANCE[locale]} />
@@ -139,6 +142,9 @@ export default function TextClassificationResearch() {
       </section>}
 
       {moduleId === "error-analysis" && <section aria-labelledby="error-analysis-title"><article className={styles.card}><h2 id="error-analysis-title">{copy.errors}</h2>{!baseline ? <p className={styles.empty}>{copy.noBaseline}</p> : <><ComparisonTable rows={baseline.predictions} copy={copy} />{mismatches.length ? <button type="button" className={styles.primaryButton} disabled={status === "loading"} onClick={requestErrorInterpretation}>{status === "loading" ? copy.interpreting : copy.interpretErrors}</button> : <p className={styles.hint}>{copy.noErrors}</p>}</>}{status === "error" && <p className={styles.error}>{message}</p>}</article>{errorInterpretation && <article className={styles.card}><h2>{copy.errorSummary}</h2><dl className={styles.output}><Output label={copy.errorSummary} value={errorInterpretation.summary} /><Output label={copy.patterns} value={errorInterpretation.patterns} /><Output label={copy.caution} value={errorInterpretation.caution} /></dl></article>}</section>}
+      {moduleId === "baseline" && baseline && <ResearchCompletionActions language={locale} sourceTool="text-classification" pathId="text-classification" taskLabel={copy.baseline} sourceText="" aiOutput={null} researcherDecision="computed" finalOutput={baseline} summary={copy.baselineDesc} returnHref="/tools/text-classification-research" />}
+      {moduleId === "ai-assisted" && lastReview && <ResearchCompletionActions language={locale} sourceTool="text-classification" pathId="text-classification" taskLabel={copy.ai} sourceText={lastReview.text} aiOutput={lastReview.aiOutput} researcherDecision={lastReview.researcherDecision} finalOutput={lastReview.finalOutput} returnHref="/tools/text-classification-research" />}
+      {moduleId === "error-analysis" && errorInterpretation && <ResearchCompletionActions language={locale} sourceTool="text-classification" pathId="text-classification" taskLabel={copy.errors} sourceText="" aiOutput={errorInterpretation} researcherDecision="researcher-evaluation-required" finalOutput={{ baseline, errorInterpretation }} returnHref="/tools/text-classification-research" />}
     </main>
   </>;
 }

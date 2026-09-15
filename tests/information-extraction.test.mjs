@@ -73,7 +73,7 @@ test("review state uses guarded bounded localStorage only", () => {
 
 test("tool is activated in computational workflows and runs AI only after explicit submission", () => {
   const page = source("pages/tools/information-extraction.js");
-  assert.match(page, /href="\/ar-tools#build"/);
+  assert.match(page, /href="\/ar-tools#build-tools"/);
   assert.match(page, /onSubmit=\{analyze\}/);
   assert.doesNotMatch(page, /useEffect|confidence|chart/i);
   assert.match(source("pages/ar-tools.js"), /link: "\/tools\/information-extraction"[^\n]+preview: true/);

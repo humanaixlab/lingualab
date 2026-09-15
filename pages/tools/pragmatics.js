@@ -2,6 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useLanguage } from "../../components/LanguageProvider";
+import ResearchCompletionActions from "../../components/ResearchCompletionActions";
 import {
   PRAGMATICS_TOOLS,
   createPragmaticsReviewedCase,
@@ -63,6 +64,7 @@ export default function PragmaticsTool() {
   const [message, setMessage] = useState("");
   const [cases, setCases] = useState([]);
   const [filter, setFilter] = useState("all");
+  const [lastReview, setLastReview] = useState(null);
   const tool = PRAGMATICS_TOOLS[toolId];
 
   useEffect(() => {
@@ -106,7 +108,7 @@ export default function PragmaticsTool() {
     if (!record) { setMessage(copy.validationError); return; }
     const saved = savePragmaticsReviewedCase(record);
     if (!saved.ok) { setMessage(copy.storageError); return; }
-    setCases(saved.cases); setMessage(copy.saved); setText(""); setAiOutput(null); setDecision(""); setFinalCategory(""); setFinalEvidence(""); setFinalInterpretation(""); setStatus("idle");
+    setCases(saved.cases); setLastReview(record); setMessage(copy.saved); setText(""); setAiOutput(null); setDecision(""); setFinalCategory(""); setFinalEvidence(""); setFinalInterpretation(""); setStatus("idle");
   }
 
   const filteredCases = filter === "all" ? cases : cases.filter((item) => item.toolId === filter);
@@ -156,6 +158,7 @@ export default function PragmaticsTool() {
       <section className={styles.summary} aria-labelledby="pragmatics-review-summary-title"><div className={styles.summaryHeader}><h2 id="pragmatics-review-summary-title">{copy.summary}</h2><label>{copy.filter}<select value={filter} onChange={(event) => setFilter(event.target.value)}><option value="all">{copy.all}</option>{Object.keys(PRAGMATICS_TOOLS).map((id) => <option key={id} value={id}>{TOOL_COPY[id][locale].title}</option>)}</select></label></div>
         <div className={styles.metrics}><div><strong>{summary.total}</strong><span>{copy.total}</span></div><div><strong>{summary.accept}</strong><span>{copy.accepted}</span></div><div><strong>{summary.edit}</strong><span>{copy.edited}</span></div><div><strong>{summary.reject}</strong><span>{copy.rejected}</span></div></div>{!summary.total && <p className={styles.empty}>{copy.noCases}</p>}
       </section>
+      {lastReview && <ResearchCompletionActions language={locale} sourceTool="pragmatics" pathId="discourse-pragmatics" taskLabel={TOOL_COPY[lastReview.toolId]?.[locale]?.title || copy.title} sourceText={lastReview.originalText} aiOutput={lastReview.aiOutput} researcherDecision={lastReview.researcherDecision} finalOutput={lastReview.finalOutput} returnHref={`/tools/pragmatics#${lastReview.toolId}`} />}
     </main>
   </>;
 }

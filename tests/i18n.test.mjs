@@ -47,7 +47,8 @@ function resolveCustomProperties(value, properties) {
 
 function analyzePlanner() {
   const page = source("pages/tools/analyze.js");
-  const logic = page.slice(page.indexOf("const DEFAULT_PLAN"), page.indexOf("export default function Analyzer"));
+  const defaults = page.slice(page.indexOf("const DEFAULT_PLAN"), page.indexOf("const SOURCE_ROUTES"));
+  const logic = defaults + page.slice(page.indexOf("function analyzeTextValue"), page.indexOf("export default function Analyzer"));
   const sandbox = {};
   vm.runInNewContext(`${logic}\nthis.buildPlanForTest = buildPlan;`, sandbox);
   return sandbox.buildPlanForTest;

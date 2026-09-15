@@ -116,14 +116,10 @@ test("the computational workflow section retains compatible directory anchors an
   ]) assert.doesNotMatch(source(path), /href="\/tools"/);
 });
 
-test("corpus-analysis tools return to Analyze instead of the Research Interpreter section", () => {
-  for (const path of ["pages/tools/frequency.js", "pages/tools/pos.js"]) {
-    assert.match(source(path), /backHref="\/tools\/analyze"/);
-    assert.doesNotMatch(source(path), /href="\/ar-tools#all-tools"/);
-  }
-  for (const path of ["pages/tools/concordance.js", "pages/tools/ngrams.js"]) {
-    assert.match(source(path), /backHref="\/tools\/analyze"/);
-  }
+test("corpus-analysis tools retain a safe standalone return and contextual path return", () => {
+  for (const path of ["pages/tools/frequency.js", "pages/tools/concordance.js", "pages/tools/ngrams.js"])
+    assert.match(source(path), /inCorpusPath \? "\/research-paths\/corpus-linguistics" : "\/tools\/analyze"/);
+  assert.match(source("pages/tools/pos.js"), /backHref="\/tools\/analyze"/);
 });
 
 test("Research Hub retains context-aware research destinations", () => {
@@ -206,6 +202,7 @@ test("Frequency, POS, and Colab remain renderable as standalone routes", async (
         if (module === "../../lib/tool-handoff") return { readToolHandoff: () => null };
         if (module === "../../lib/report-context") return { createReportContext: () => "/research-report?reportId=test" };
         if (module === "../../lib/analysis-handoff") return { createAnalysisHandoff: () => "/tools/analyze?interpretHandoff=test" };
+        if (module === "../../lib/corpus-workflow-context") return { createCorpusWorkflowHandoff: () => "/tools/concordance?corpusWorkflow=test", readCorpusWorkflowHandoff: () => null };
         return require(module);
       },
     };

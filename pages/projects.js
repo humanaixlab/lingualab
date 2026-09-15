@@ -159,8 +159,8 @@ function ProjectCard({ project, locale, copy, onOpen, compact = false }) {
 
 function ProjectQuickLinks({ project, copy }) {
   const roadmap = buildProjectRoadmap(project);
-  const links = [["path", copy.pathLink], ["data", copy.dataLink], ["tool", copy.toolLink], ["report", copy.reportLink], ["writing", copy.writingLink]];
-  return <nav className={styles.quickLinks} aria-label={copy.execute}>{links.map(([stage, label]) => { const step = roadmap.find((item) => item.stage === stage); return <Link key={stage} href={step.href}>{label}</Link>; })}</nav>;
+  const links = [["path", copy.pathLink], ["data", copy.dataLink], ["tool", copy.toolLink]];
+  return <nav className={styles.quickLinks} aria-label={copy.execute}>{links.map(([stage, label]) => { const step = roadmap.find((item) => item.stage === stage); return step?.href ? <Link key={stage} href={step.href}>{label}</Link> : null; })}</nav>;
 }
 
 function ProjectDetail({ project, language, copy, onBack }) {

@@ -105,7 +105,7 @@ test("review persistence is guarded, local-only, and bounded to 100 cases", () =
 
 test("route is activated in computational workflows and AI actions require explicit form submission", () => {
   const page = source("pages/tools/nlp-experiments.js");
-  assert.match(page, /href="\/ar-tools#build"/);
+  assert.match(page, /href="\/ar-tools#build-tools"/);
   assert.match(page, /onSubmit=\{runPrompt\}/);
   assert.match(page, /onSubmit=\{runComparison\}/);
   assert.match(page, /onSubmit=\{runSandbox\}/);

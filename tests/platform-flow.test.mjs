@@ -108,7 +108,8 @@ test("data-source indicators distinguish project context, transferred results, a
   ]) assert.ok(indicator.includes(label));
 
   assert.match(source("pages/workspace.js"), /mode="project"/);
-  assert.match(source("pages/tools/analyze.js"), /sourceAnalysis \? "transferred" : context \? "projectContext" : "standalone"/);
+  assert.match(source("pages/tools/analyze.js"), /mode="transferred"/);
+  assert.match(source("pages/tools/analyze.js"), /mode=\{context \? "projectContext" : "standalone"\}/);
   for (const name of ["frequency", "concordance", "ngrams"])
     assert.match(source(`pages/tools/${name}.js`), /dataSource=\{inCorpusPath \? "research-path" : "standalone"\}/);
   for (const name of ["pos", "prompt", "excel"])

@@ -2,6 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useLanguage } from "../../components/LanguageProvider";
+import ResearchCompletionActions from "../../components/ResearchCompletionActions";
 import PageGuidance from "../../components/PageGuidance";
 import {
   SEMANTICS_TOOLS,
@@ -73,6 +74,7 @@ export default function SemanticsTool() {
   const [message, setMessage] = useState("");
   const [cases, setCases] = useState([]);
   const [filter, setFilter] = useState("all");
+  const [lastReview, setLastReview] = useState(null);
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
@@ -113,7 +115,7 @@ export default function SemanticsTool() {
     if (!record) { setMessage(copy.validationError); return; }
     const saved = saveSemanticsReviewedCase(record);
     if (!saved.ok) { setMessage(copy.storageError); return; }
-    setCases(saved.cases); setMessage(copy.saved); setPrimary(""); setSecondary(""); setGroupText(""); setAiOutput(null); setDecision(""); setFinalOutput(emptyOutput(toolId)); setStatus("idle");
+    setCases(saved.cases); setLastReview(record); setMessage(copy.saved); setPrimary(""); setSecondary(""); setGroupText(""); setAiOutput(null); setDecision(""); setFinalOutput(emptyOutput(toolId)); setStatus("idle");
   }
 
   const filteredCases = filter === "all" ? cases : cases.filter((item) => item.toolId === filter);
@@ -156,6 +158,7 @@ export default function SemanticsTool() {
         </div>}
       </section>
       <section className={styles.summary} aria-labelledby="semantics-summary-title"><div className={styles.summaryHeader}><h2 id="semantics-summary-title">{copy.summary}</h2><label>{copy.filter}<select value={filter} onChange={(event) => setFilter(event.target.value)}><option value="all">{copy.all}</option>{Object.keys(SEMANTICS_TOOLS).map((id) => <option key={id} value={id}>{TOOL_COPY[id][locale].title}</option>)}</select></label></div><div className={styles.metrics}><div><strong>{summary.total}</strong><span>{copy.total}</span></div><div><strong>{summary.accept}</strong><span>{copy.accepted}</span></div><div><strong>{summary.edit}</strong><span>{copy.edited}</span></div><div><strong>{summary.reject}</strong><span>{copy.rejected}</span></div></div>{!summary.total && <p className={styles.empty}>{copy.noCases}</p>}</section>
+      {lastReview && <ResearchCompletionActions language={locale} sourceTool="semantics" pathId="semantics" taskLabel={TOOL_COPY[lastReview.toolId]?.[locale]?.title || copy.title} sourceText={lastReview.inputs?.primary || lastReview.inputs?.texts?.join("\n")} aiOutput={lastReview.aiOutput} researcherDecision={lastReview.researcherDecision} finalOutput={lastReview.finalOutput} returnHref={`/tools/semantics#${lastReview.toolId}`} />}
     </main>
   </>;
 }

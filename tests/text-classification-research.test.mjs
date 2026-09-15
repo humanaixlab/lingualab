@@ -75,7 +75,7 @@ test("classification reviews use guarded bounded localStorage only", () => {
 
 test("route is activated in computational workflows without becoming a research path", () => {
   const page = source("pages/tools/text-classification-research.js");
-  assert.match(page, /href="\/ar-tools#build"/);
+  assert.match(page, /href="\/ar-tools#build-tools"/);
   assert.match(source("pages/ar-tools.js"), /link: "\/tools\/text-classification-research"[^\n]+preview: true/);
   assert.doesNotMatch(source("lib/research-paths.js"), /\/tools\/text-classification-research/);
   assert.doesNotMatch(page, /useEffect|automatic/i);

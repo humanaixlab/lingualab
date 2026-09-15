@@ -14,10 +14,13 @@ export default function ConcordanceTool() {
   const [workflowSource, setWorkflowSource] = useState(null);
 
   useEffect(() => {
-    const restored = readAnalysisResultHandoff(window.location.search, "concordance");
-    const incoming = readCorpusWorkflowHandoff(window.location.search, "concordance");
-    if (restored) { setText(restored.text); setKeyword(restored.evidence.target); setResults(restored.evidence.contexts); setWorkflowSource(restored); }
-    else if (incoming) { setText(incoming.text); setWorkflowSource(incoming); }
+    const frame = window.requestAnimationFrame(() => {
+      const restored = readAnalysisResultHandoff(window.location.search, "concordance");
+      const incoming = readCorpusWorkflowHandoff(window.location.search, "concordance");
+      if (restored) { setText(restored.text); setKeyword(restored.evidence.target); setResults(restored.evidence.contexts); setWorkflowSource(restored); }
+      else if (incoming) { setText(incoming.text); setWorkflowSource(incoming); }
+    });
+    return () => window.cancelAnimationFrame(frame);
   }, []);
 
   const inCorpusPath = workflowSource || (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("researchPath") === "corpus-linguistics");

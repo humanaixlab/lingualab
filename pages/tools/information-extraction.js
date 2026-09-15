@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useLanguage } from "../../components/LanguageProvider";
 import ComputationalWorkbench from "../../components/ComputationalWorkbench";
 import PageGuidance from "../../components/PageGuidance";
+import ResearchCompletionActions from "../../components/ResearchCompletionActions";
 import {
   INFORMATION_EXTRACTION_DECISIONS,
   INFORMATION_EXTRACTION_TOOLS,
@@ -50,6 +51,7 @@ export default function InformationExtraction() {
   const [finalJson, setFinalJson] = useState("{}");
   const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
+  const [lastReview, setLastReview] = useState(null);
 
   function resetResult() { setAiOutput(null); setDecision(""); setFinalJson("{}"); setStatus("idle"); setMessage(""); }
   function changeTool(next) { setToolId(next); resetResult(); }
@@ -71,12 +73,13 @@ export default function InformationExtraction() {
     if (!review) { setMessage(copy.invalidFinal); return; }
     const saved = saveInformationExtractionReview(review);
     setMessage(saved.ok ? copy.saved : copy.storageError);
+    if (saved.ok) setLastReview(review);
   }
 
   return <>
     <Head><title>{copy.head} · LinguaLab</title></Head>
     <main className={styles.page}>
-      <Link className={styles.back} href="/ar-tools#build">← {copy.back}</Link>
+      <Link className={styles.back} href="/ar-tools#build-tools">← {copy.back}</Link>
       <header className={styles.header}><div><p className={styles.eyebrow}>{copy.eyebrow}</p><h1>{copy.title}</h1><p>{copy.lead}</p></div><span className={styles.previewBadge}>{copy.badge}</span></header>
       <p className={styles.notice}>{copy.notice}</p>
       <PageGuidance language={locale} steps={GUIDANCE[locale]} />
@@ -88,6 +91,7 @@ export default function InformationExtraction() {
         <form className={styles.card} onSubmit={analyze}><h2 id="active-extraction-title">{TOOL_COPY[toolId][locale][0]}</h2><p className={styles.hint}>{TOOL_COPY[toolId][locale][1]}</p><label>{copy.text}<textarea required lang="ar" dir="rtl" maxLength={12000} value={text} onChange={(event) => { setText(event.target.value); resetResult(); }} placeholder={copy.placeholder} /></label><button className={styles.primaryButton} disabled={status === "loading"}>{status === "loading" ? copy.analyzing : copy.analyze}</button>{status === "error" && <p className={styles.error} role="alert">{message}</p>}</form>
         <div className={styles.stack}>{aiOutput && <><article className={styles.card}><h2>{copy.aiSuggestion}</h2><ExtractionOutput toolId={toolId} output={aiOutput} copy={copy} /></article><article className={styles.card}><h2>{copy.review}</h2><div className={styles.decisions}>{INFORMATION_EXTRACTION_DECISIONS.map((id) => <button type="button" aria-pressed={decision === id} onClick={() => chooseDecision(id)} key={id}>{copy[id]}</button>)}</div>{(decision === "edit" || decision === "reject") && <div className={styles.editFields}><label>{copy.final}<textarea dir="ltr" value={finalJson} onChange={(event) => setFinalJson(event.target.value)} /></label><p className={styles.hint}>{copy.finalHint}</p></div>}{decision && <button type="button" className={styles.primaryButton} onClick={saveReview}>{copy.save}</button>}{message && status !== "error" && <p className={message === copy.saved ? styles.success : styles.error}>{message}</p>}</article></>}</div>
       </section>
+      {lastReview && <ResearchCompletionActions language={locale} sourceTool="information-extraction" pathId="information-extraction" taskLabel={TOOL_COPY[lastReview.toolId]?.[locale]?.[0] || copy.title} sourceText={lastReview.originalText} aiOutput={lastReview.aiOutput} researcherDecision={lastReview.researcherDecision} finalOutput={lastReview.finalOutput} returnHref="/tools/information-extraction" />}
     </main>
   </>;
 }
