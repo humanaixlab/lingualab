@@ -28,27 +28,42 @@ test("seven paths expose exactly three approved platform references", () => {
       assert.equal(reference.verified, true);
       assert.ok(reference.id);
       assert.ok(Number.isInteger(reference.year));
-      for (const field of ["author", "title", "publisher", "referenceType", "note"]) assert.ok(reference[field]?.ar && reference[field]?.en);
+      for (const field of ["author", "title", "referenceType", "note"]) assert.ok(reference[field]?.ar && reference[field]?.en);
     }
   }
   assert.equal(total, 21);
 });
 
-test("approved bibliographic details are preserved without inferred source data", () => {
+test("approved bibliographic details are preserved exactly without inferred source data", () => {
   const allReferences = Object.values(SCIENTIFIC_FOUNDATIONS).flatMap((foundation) => foundation.platformReferences);
-  const missingSources = allReferences.filter((reference) => !reference.doiOrUrl);
-  assert.deepEqual(missingSources.map((reference) => reference.id), ["discourse-yaqout-2021"]);
+  assert.ok(allReferences.every((reference) => reference.doiOrUrl === null));
 
   const corpusBook = SCIENTIFIC_FOUNDATIONS["corpus-linguistics"].platformReferences[0];
   assert.equal(corpusBook.author.ar, "صالح بن فهد العصيمي (محرر)، ومجموعة من الباحثين");
   assert.equal(corpusBook.title.ar, "المدونات اللغوية العربية: بناؤها وطرائق الإفادة منها");
-  assert.equal(corpusBook.doiOrUrl, "https://library.ksaa.gov.sa/links/epubs/Arabic-Corpora.pdf");
+  assert.equal(corpusBook.isbn, "9786039066484");
+
+  const treebank = SCIENTIFIC_FOUNDATIONS["morphology-syntax"].platformReferences[2];
+  assert.equal(treebank.publisher, null);
+  assert.equal(treebank.doiOrUrl, null);
+  assert.equal(treebank.referenceType.ar, "كتاب / دراسة متخصصة");
+
+  assert.equal(SCIENTIFIC_FOUNDATIONS["morphology-syntax"].platformReferences[1].edition.ar, "الطبعة الثانية");
+  assert.equal(SCIENTIFIC_FOUNDATIONS.semantics.platformReferences[0].edition.ar, "الطبعة السابعة");
+  assert.equal(SCIENTIFIC_FOUNDATIONS.semantics.platformReferences[1].edition.ar, "الطبعة الثالثة");
+  assert.equal(SCIENTIFIC_FOUNDATIONS["discourse-pragmatics"].platformReferences[0].isbn, "9789953456058");
+  assert.equal(SCIENTIFIC_FOUNDATIONS["discourse-pragmatics"].platformReferences[1].doiOrUrl, null);
 
   for (const pathId of ["text-classification", "information-extraction", "nlp-experiments"]) {
     const translatedBook = SCIENTIFIC_FOUNDATIONS[pathId].platformReferences[0];
     assert.equal(translatedBook.author.ar, "نزار حبش");
-    assert.equal(translatedBook.translator.ar, "هند بنت سليمان الخليفة");
+    assert.equal(translatedBook.translator.ar, "هند سليمان الخليفة");
     assert.equal(translatedBook.year, 2014);
+    assert.equal(translatedBook.isbn, "9786035072571");
+  }
+
+  for (const pathId of ["text-classification", "nlp-experiments"]) {
+    assert.equal(SCIENTIFIC_FOUNDATIONS[pathId].platformReferences[1].isbn, "9786038221532");
   }
 });
 
