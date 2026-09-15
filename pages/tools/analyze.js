@@ -8,6 +8,8 @@ import { interpretationContextText, readAnalysisHandoff } from "../../lib/analys
 import DataSourceIndicator from "../../components/DataSourceIndicator";
 import styles from "../../styles/Analyze.module.css";
 import { useLanguage } from "../../components/LanguageProvider";
+import ProgressiveAiOutput from "../../components/ProgressiveAiOutput";
+import { fetchAiJson } from "../../lib/ai-stream";
 
 const DEFAULT_PLAN = {
   variant: "default",
@@ -171,6 +173,7 @@ export default function Analyzer() {
   const [interpretation, setInterpretation] = useState(null);
   const [loadingInterpretation, setLoadingInterpretation] = useState(false);
   const [interpretationError, setInterpretationError] = useState("");
+  const [progressText, setProgressText] = useState("");
   const [context, setContext] = useState(null);
   const [sourceAnalysis, setSourceAnalysis] = useState(null);
   const router = useRouter();
@@ -203,6 +206,7 @@ export default function Analyzer() {
   const analyzeText = () => {
     setInterpretation(null);
     setInterpretationError("");
+    setProgressText("");
     setLoadingInterpretation(false);
 
     setSourceAnalysis(null);
@@ -214,9 +218,10 @@ const interpretResults = async () => {
 
   setLoadingInterpretation(true);
   setInterpretationError("");
+  setProgressText("");
 
   try {
-    const response = await fetch("/api/research-interpreter", {
+    const data = await fetchAiJson("/api/research-interpreter", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -229,17 +234,7 @@ const interpretResults = async () => {
         topWords: result.topWords,
         datasetContext: interpretationContextText(sourceAnalysis),
       }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(
-        data?.error ||
-          data?.message ||
-          "LinguaLab could not interpret these findings."
-      );
-    }
+    }, setProgressText);
 
     const payload = data?.result || data?.data || data;
 
@@ -254,6 +249,7 @@ const interpretResults = async () => {
         : payload;
 
     setInterpretation(normalizedInterpretation);
+    setProgressText("");
 
     const savedAnalysis = {
       text,
@@ -283,6 +279,8 @@ const interpretResults = async () => {
     );
   } catch (error) {
     console.error("Research interpreter error:", error);
+
+    if (error?.partialText) setProgressText(error.partialText);
 
     setInterpretationError(
       error instanceof Error
@@ -609,6 +607,13 @@ const interpretResults = async () => {
               <p dir="auto">{interpretationError}</p>
             </div>
           )}
+
+          <ProgressiveAiOutput
+            text={progressText}
+            language={language}
+            active={loadingInterpretation}
+            label={t("analyze.interpreting")}
+          />
 
           {isCorpusInterpretation && <div className={styles.contextActions}>
             <Link href={sourceAnalysis.returnHref || SOURCE_ROUTES[sourceAnalysis.sourceTool]}>{language === "ar" ? "العودة إلى النتائج" : "Back to results"}</Link>

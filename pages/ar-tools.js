@@ -19,8 +19,8 @@ const studyWorkflow = [
   { key: "advisor", href: "/research-advisor" },
   { key: "assistant", href: "/workspace?copilot=1", copilot: true },
   { key: "analysis", href: "/tools/analyze" },
-  { key: "interpretation", href: "/tools/analyze" },
-  { key: "report", href: "/research-report" },
+  { key: "interpretation", href: null },
+  { key: "report", href: null },
   { key: "writing", href: "/tools/prompt" },
 ];
 
@@ -105,7 +105,7 @@ export default function ArabicToolsPage() {
               <li key={step.key} style={{ minHeight: "142px", padding: "17px", display: "flex", flexDirection: "column", border: "1px solid rgba(73, 67, 137, 0.12)", borderRadius: "15px", background: "#fff" }}>
                 <span style={{ color: "#6258f5", fontSize: "var(--text-meta)", fontWeight: 600 }}>{String(index + 1).padStart(2, "0")}</span>
                 <strong style={{ marginTop: "13px", fontSize: "var(--text-helper)", lineHeight: 1.5 }}>{t(`hub.architecture.study.steps.${step.key}.title`)}</strong>
-                <Link href={contextHref(context && step.copilot ? "/workspace?copilot=1" : step.href)} style={{ marginTop: "auto", paddingTop: "14px", color: "#4c43ce", fontSize: "var(--text-helper)", fontWeight: 600, textDecoration: "none" }}>{t(`hub.architecture.study.steps.${step.key}.action`)} ↗</Link>
+                {step.href ? <Link href={contextHref(context && step.copilot ? "/workspace?copilot=1" : step.href)} style={{ marginTop: "auto", paddingTop: "14px", color: "#4c43ce", fontSize: "var(--text-helper)", fontWeight: 600, textDecoration: "none" }}>{t(`hub.architecture.study.steps.${step.key}.action`)} ↗</Link> : <span style={{ marginTop: "auto", paddingTop: "14px", color: "#706c88", fontSize: "var(--text-helper)", fontWeight: 600 }}>{t(`hub.architecture.study.steps.${step.key}.action`)}</span>}
               </li>
             ))}
           </ol>

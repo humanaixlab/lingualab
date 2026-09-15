@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { createOpenAiOutput } from "../../lib/ai-stream";
 
 const MAX_TEXT_LENGTH = 12000;
 
@@ -222,20 +223,13 @@ Use exactly this structure:
 
   try {
     const client = new OpenAI({ apiKey });
-    const response = await client.responses.create({
-      model: "gpt-4.1-mini",
-      input: prompt,
-    });
-
-    const interpretation = parseJson(response.output_text);
-
-    if (!isValidInterpretation(interpretation)) {
-      throw new Error("Interpreter response did not match the expected shape.");
-    }
-
+    const generated = await createOpenAiOutput({ client, req, res, request: { model: "gpt-4.1-mini", input: prompt }, parse: parseJson, validate: isValidInterpretation, envelope: (interpretation) => ({ interpretation, preview: false }) });
+    if (generated.streamed) return;
+    const interpretation = generated.value;
     return res.status(200).json({ interpretation, preview: false });
   } catch (error) {
     console.error("research-interpreter failed", error);
+    if (error.aiStreamHandled) return;
 
     return res.status(500).json({
       error:

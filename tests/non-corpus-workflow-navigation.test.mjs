@@ -74,3 +74,12 @@ test("project execution roads preserve project context and avoid repeated or gen
     assert.doesNotMatch(JSON.stringify(roadmap), /\/tools\/analyze|\/research-report/);
   }
 });
+
+test("the study overview does not link interpretation or reporting to premature duplicate destinations", () => {
+  const hub = source("pages/ar-tools.js");
+  assert.match(hub, /\{ key: "analysis", href: "\/tools\/analyze" \}/);
+  assert.match(hub, /\{ key: "interpretation", href: null \}/);
+  assert.match(hub, /\{ key: "report", href: null \}/);
+  assert.doesNotMatch(hub, /\{ key: "interpretation", href: "\/tools\/analyze" \}/);
+  assert.doesNotMatch(hub, /\{ key: "report", href: "\/research-report" \}/);
+});

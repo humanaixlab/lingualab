@@ -8,6 +8,8 @@ import { createReportContext } from "../lib/report-context";
 import { readResearchContext, researchContextHref } from "../lib/research-context";
 import DataSourceIndicator from "../components/DataSourceIndicator";
 import PageGuidance from "../components/PageGuidance";
+import ProgressiveAiOutput from "../components/ProgressiveAiOutput";
+import { fetchAiJson } from "../lib/ai-stream";
 
 const stages = ["idea", "data", "analysis", "interpretation", "writing"];
 
@@ -59,6 +61,7 @@ export default function ResearchAdvisorPage() {
   const [advisor, setAdvisor] = useState(null);
   const [status, setStatus] = useState("idle");
   const [error, setError] = useState("");
+  const [progressText, setProgressText] = useState("");
   const [datasetContext, setDatasetContext] = useState(null);
 
   useEffect(() => {
@@ -111,6 +114,7 @@ export default function ResearchAdvisorPage() {
     });
     setAdvisor(null);
     setError("");
+    setProgressText("");
   }
 
   function clearDatasetContext() {
@@ -131,25 +135,23 @@ export default function ResearchAdvisorPage() {
 
     try {
       const uiLanguage = normalizeAdvisorUiLanguage(language);
-      const response = await fetch("/api/research-advisor", {
+      const payload = await fetchAiJson("/api/research-advisor", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...form, uiLanguage }),
-      });
-      const payload = await response.json();
-
-      if (!response.ok) {
-        if (response.status === 503) {
-          setAdvisor(buildDemoAdvisor(form.researchGoal, form.dataDescription, form.currentStage, t));
-          setStatus("preview");
-          return;
-        }
-        throw new Error(payload.error || t("advisor.requestError"));
-      }
+      }, setProgressText);
 
       setAdvisor(payload.advisor);
+      setProgressText("");
       setStatus("success");
     } catch (requestError) {
+      if (requestError.partialText) setProgressText(requestError.partialText);
+      if (/not configured/i.test(requestError.message || "")) {
+        setAdvisor(buildDemoAdvisor(form.researchGoal, form.dataDescription, form.currentStage, t));
+        setProgressText("");
+        setStatus("preview");
+        return;
+      }
       setError(requestError.message || t("advisor.genericError"));
       setStatus("error");
     }
@@ -291,6 +293,7 @@ export default function ResearchAdvisorPage() {
           </form>
 
           <aside className={styles.resultCard} aria-live="polite">
+            <ProgressiveAiOutput text={progressText} language={language} active={status === "loading"} label={t("advisor.loading")} />
             {!advisor ? (
               <div className={styles.emptyState}>
                 <div className={styles.spark}>✦</div>

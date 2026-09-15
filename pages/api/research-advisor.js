@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { advisorOutputLanguageInstruction, normalizeAdvisorUiLanguage } from "../../lib/advisor-language";
+import { createOpenAiOutput } from "../../lib/ai-stream";
 
 const MAX_FIELD_LENGTH = 4000;
 const ALLOWED_STAGES = new Set(["idea", "data", "analysis", "interpretation", "writing"]);
@@ -91,19 +92,13 @@ ${outputLanguageInstruction}`;
 
   try {
     const client = new OpenAI({ apiKey });
-    const response = await client.responses.create({
-      model: "gpt-4.1-mini",
-      input: prompt,
-    });
-
-    const advisor = parseAdvisorJson(response.output_text);
-    if (!validateAdvisor(advisor)) {
-      throw new Error("Advisor response did not match the expected shape.");
-    }
-
+    const generated = await createOpenAiOutput({ client, req, res, request: { model: "gpt-4.1-mini", input: prompt }, parse: parseAdvisorJson, validate: validateAdvisor, envelope: (advisor) => ({ advisor }) });
+    if (generated.streamed) return;
+    const advisor = generated.value;
     return res.status(200).json({ advisor });
   } catch (error) {
     console.error("research-advisor failed", error);
+    if (error.aiStreamHandled) return;
     return res.status(500).json({
       error: "The advisor could not generate a reliable plan. Please try again.",
     });
