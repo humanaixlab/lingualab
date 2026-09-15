@@ -43,11 +43,6 @@ export default function ScientificFoundations({ pathId, language = "en" }) {
     setMessage(saved.ok ? copy.saved : copy.storageError);
   }
 
-  function togglePlatform(referenceId) {
-    const selected = state.suggestedPlatformReferenceIds.includes(referenceId);
-    persist({ ...state, suggestedPlatformReferenceIds: selected ? state.suggestedPlatformReferenceIds.filter((id) => id !== referenceId) : [...state.suggestedPlatformReferenceIds, referenceId] });
-  }
-
   function submit(event) {
     event.preventDefault();
     const id = editingId || `researcher-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -82,10 +77,8 @@ export default function ScientificFoundations({ pathId, language = "en" }) {
           <div><dt>{copy.type}</dt><dd>{reference.referenceType[locale]}</dd></div>
           <div className={styles.full}><dt>{copy.note}</dt><dd>{reference.note[locale]}</dd></div>
         </dl>
-        <label className={styles.suggestion}><input type="checkbox" checked={state.suggestedPlatformReferenceIds.includes(reference.id)} onChange={() => togglePlatform(reference.id)} />{copy.suggested}</label>
       </article>)}
     </div>
-    <p className={styles.suggestionNote}>{copy.suggestionOnly}</p>
 
     <div className={styles.researcherHeader}><div><h3>{copy.researcher}</h3><p>{copy.researcherIntro}</p></div></div>
     {state.researcherReferences.length ? <div className={styles.researcherList}>{state.researcherReferences.map((reference) => <article key={reference.id}>
@@ -103,6 +96,7 @@ export default function ScientificFoundations({ pathId, language = "en" }) {
         <label>{copy.source}<input dir="ltr" type="text" value={form.doiOrUrl} onChange={(event) => setForm({ ...form, doiOrUrl: event.target.value })} /></label>
       </div>
       <label className={styles.suggestion}><input type="checkbox" checked={form.suggestedForReport} onChange={(event) => setForm({ ...form, suggestedForReport: event.target.checked })} />{copy.suggested}</label>
+      <p className={styles.suggestionNote}>{copy.suggestionOnly}</p>
       <div className={styles.formActions}><button type="submit">{copy.save}</button>{editingId && <button type="button" onClick={() => { setEditingId(""); setForm(EMPTY_FORM); setMessage(""); }}>{copy.cancel}</button>}</div>
       {message && <p role="status">{message}</p>}
     </form>

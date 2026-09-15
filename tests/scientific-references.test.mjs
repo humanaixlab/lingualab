@@ -95,6 +95,8 @@ test("all seven executable paths mount the shared bilingual reference framework"
   for (const label of ["الأساس العلمي للمسار", "Scientific Foundations", "مراجع الباحث", "Researcher References", "مرجع مقترح للتضمين في التقرير", "Suggested for the research report"]) assert.match(component, new RegExp(label));
   assert.match(component, /setEditingId/);
   assert.match(component, /researcherReferences\.filter/);
+  assert.doesNotMatch(component, /togglePlatform|suggestedPlatformReferenceIds\.includes/);
+  assert.match(component, /checked=\{form\.suggestedForReport\}/);
   assert.match(component, /reference\.isPlaceholder \? styles\.placeholder : styles\.approved/);
   assert.match(component, /reference\.doiOrUrl \? <a/);
   assert.match(source("lib/scientific-references.js"), /isPlaceholder: false/);
