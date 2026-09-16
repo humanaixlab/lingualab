@@ -71,7 +71,7 @@ export default function Projects() {
 
   return <main className={styles.page}>
     <Head><title>{copy.pageTitle}</title></Head>
-    <nav className={styles.nav} aria-label={locale === "ar" ? "التنقل الرئيسي" : "Primary navigation"}><Link href="/" className={styles.brand}><span className={styles.brandMark}>L</span><span>LinguaLab</span></Link><div className={styles.navLinks}><Link href="/">{copy.home}</Link><Link href="/ar-tools">{copy.research}</Link><Link href="/projects" aria-current="page">{copy.projects}</Link></div></nav>
+    <nav className={styles.nav} aria-label={locale === "ar" ? "التنقل الرئيسي" : "Primary navigation"}><Link href="/" className={styles.brand}><span className={styles.brandMark}>L</span><span>LinguaLab</span></Link><div className={styles.navLinks}><Link href="/">{copy.home}</Link><Link href="/research-planner">{copy.research}</Link><Link href="/projects" aria-current="page">{copy.projects}</Link></div></nav>
     <header className={styles.hero}><p className={styles.eyebrow}>{copy.eyebrow}</p><h1>{copy.title}</h1><p className={styles.lead}>{copy.lead}</p><ol className={styles.journey}>{copy.journey.map((step, index) => <li key={step}><span>{index + 1}</span>{step}</li>)}</ol></header>
     <PageGuidance language={locale} steps={PROJECT_GUIDANCE[locale]} />
 

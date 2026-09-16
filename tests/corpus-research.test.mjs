@@ -22,7 +22,7 @@ test("corpus research exposes exactly the create and analyze preview modules in 
   assert.deepEqual(CORPUS_MODULES, ["create", "analyze"]);
   const page = source("pages/tools/corpus-research.js");
   for (const label of ["إنشاء مدونة جديدة", "تحليل المدونة", "Create Corpus", "Corpus Analysis", "تجريب بحثي", "Research Preview", "يظل الباحث مسؤولًا"]) assert.match(page, new RegExp(label));
-  assert.doesNotMatch(source("pages/ar-tools.js"), /\/tools\/corpus-research/);
+  assert.doesNotMatch(source("pages/research-planner.js"), /\/tools\/corpus-research/);
   assert.match(source("lib/research-paths.js"), /href: "\/tools\/corpus-research"[^\n]+Research Preview[^\n]+تجريب بحثي/);
 });
 

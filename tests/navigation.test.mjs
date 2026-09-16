@@ -15,13 +15,16 @@ test("Home exposes exactly the four canonical intent destinations", () => {
   const home = source("pages/index.js");
   const goals = home.slice(home.indexOf("const goals = ["), home.indexOf("const workflow = ["));
   for (const [key, href] of [
-    ["research", "/ar-tools"], ["analyze", "/tools/analyze"], ["build", "/tools/prompt"], ["learn", "/student-dashboard"],
+    ["research", "/research-planner"], ["analyze", "/tools/analyze"], ["build", "/tools/prompt"], ["learn", "/learning-center"],
   ]) {
     assert.match(goals, new RegExp(`key: "${key}"[\\s\\S]*?href: "${href.replaceAll("/", "\\/")}"`));
   }
   assert.equal((goals.match(/key: /g) || []).length, 4);
+  assert.match(source("lib/i18n/en.js"), /build: \{ label: "Build", title: "Create a structured research prompt"/);
+  assert.match(source("lib/i18n/ar.js"), /build: \{ label: "البناء", title: "أنشئ تعليمات بحثية منظّمة"/);
+  assert.doesNotMatch(source("lib/i18n/en.js"), /title: "Build a research workflow"/);
   assert.match(source("lib/i18n/en.js"), /Capabilities overview/);
-  assert.match(home, /href="\/ar-tools#all-tools"/);
+  assert.match(home, /href="\/research-planner#all-tools"/);
 });
 
 test("Home describes Semantic Lab as semantic analysis in both languages", () => {
@@ -38,10 +41,10 @@ test("Home gives researchers exactly four bilingual onboarding steps without exp
   const steps = home.slice(home.indexOf("const onboardingSteps = ["), home.indexOf("const capabilities = ["));
   assert.equal((steps.match(/key: /g) || []).length, 4);
   for (const [key, href] of [
-    ["linguistic", "/ar-tools#research-paths"],
-    ["computational", "/ar-tools#build-tools"],
+    ["linguistic", "/research-planner#research-paths"],
+    ["computational", "/research-planner#build-tools"],
     ["study", "/research-advisor"],
-    ["output", "/research-report"],
+    ["output", "/tools/analyze#quick-analysis"],
   ]) assert.match(steps, new RegExp(`key: "${key}"[\\s\\S]*?href: "${href.replaceAll("/", "\\/")}"`));
   assert.match(home, /aria-labelledby="research-onboarding-title"/);
   assert.match(source("lib/i18n/en.js"), /How do I start my research in LinguaLab\?/);
@@ -59,7 +62,7 @@ test("Home explains the complete bilingual computational research journey before
 
   assert.deepEqual(workflowKeys, ["understand", "prepare", "choose", "apply", "view", "evaluate", "interpret", "errors", "improve"]);
   assert.match(journey, /home\.computationalJourney\.steps/);
-  assert.match(journey, /href="\/ar-tools#build-tools"/);
+  assert.match(journey, /href="\/research-planner#build-tools"/);
   for (const label of ["Understand Data", "Prepare Data", "Choose Task", "Apply Method", "View Results", "Evaluate", "Interpret", "Analyze Errors", "Improve"])
     assert.match(en, new RegExp(label));
   for (const label of ["أفهم البيانات", "أجهزها", "أختار المهمة", "أطبق الطريقة", "أرى النتائج", "أقيّمها", "أفسرها", "أحلل الأخطاء", "أحسن التجربة"])
@@ -96,20 +99,20 @@ test("Home keeps compact branding, typography, workflow cards, and separated exe
 });
 
 test("the computational workflow section retains compatible directory anchors and tool returns", () => {
-  const hub = source("pages/ar-tools.js");
+  const hub = source("pages/research-planner.js");
   assert.match(hub, /id="all-tools"/);
   assert.match(hub, /id="build-tools"/);
   assert.match(hub, /aria-labelledby="computational-workflows-title"/);
   assert.ok(hub.indexOf('mode="linguistic"') < hub.indexOf('id="all-tools"'));
 
-  assert.match(source("components/Layout.js"), /backHref = "\/ar-tools#all-tools"/);
-  assert.match(source("pages/tools/colab.js"), /backHref="\/ar-tools#build-tools"/);
+  assert.match(source("components/Layout.js"), /backHref = "\/research-planner#all-tools"/);
+  assert.match(source("pages/tools/colab.js"), /backHref="\/research-planner#build-tools"/);
 
   for (const path of [
     "components/Layout.js",
     "pages/index.js",
-    "pages/ar-tools.js",
-    "pages/student-dashboard.js",
+    "pages/research-planner.js",
+    "pages/learning-center.js",
     "pages/tools/frequency.js",
     "pages/tools/pos.js",
     "pages/tools/colab.js",
@@ -122,8 +125,8 @@ test("corpus-analysis tools retain a safe standalone return and contextual path 
   assert.match(source("pages/tools/pos.js"), /backHref="\/tools\/analyze"/);
 });
 
-test("Research Hub retains context-aware research destinations", () => {
-  const hub = source("pages/ar-tools.js");
+test("Research Planner retains context-aware research destinations", () => {
+  const hub = source("pages/research-planner.js");
   assert.match(hub, /researchContextHref\(href, context\)/);
   assert.match(hub, /contextHref\("\/research-advisor"\)/);
   assert.match(hub, /"\/workspace\?copilot=1"/);
@@ -132,8 +135,8 @@ test("Research Hub retains context-aware research destinations", () => {
   assert.match(hub, /<ResearchPaths language=\{language\} mode="linguistic" \/>/);
 });
 
-test("Research Hub separates linguistic paths, computational work, and study completion", () => {
-  const hub = source("pages/ar-tools.js");
+test("Research Planner separates linguistic paths, computational work, and study completion", () => {
+  const hub = source("pages/research-planner.js");
   const paths = source("components/ResearchPaths.js");
   assert.match(paths, /Linguistic Research Paths/);
   assert.match(paths, /المسارات اللغوية/);
@@ -147,7 +150,7 @@ test("Research Hub separates linguistic paths, computational work, and study com
 });
 
 test("completed previews are activated once in their canonical Hub locations", () => {
-  const hub = source("pages/ar-tools.js");
+  const hub = source("pages/research-planner.js");
   const paths = source("lib/research-paths.js");
   for (const route of ["corpus-research", "morphology-syntax", "semantics", "discourse-analysis", "pragmatics"])
     assert.equal((paths.match(new RegExp(`href: "\\/tools\\/${route}"`, "g")) || []).length, 1);
@@ -160,11 +163,11 @@ test("completed previews are activated once in their canonical Hub locations", (
     assert.doesNotMatch(hub, new RegExp(`link: "\\/tools\\/${route}"`));
 });
 
-test("main Research Hub navigation uses one consistent name", () => {
+test("main Research Planner navigation uses one consistent name", () => {
   for (const path of ["pages/research-advisor.js"]) {
     const page = source(path);
     const navigation = page.slice(page.indexOf("<nav"), page.indexOf("</nav>"));
-    assert.match(navigation, /href="\/ar-tools"[^>]*>\{t\("nav\.researchHub"\)\}<\/Link>/);
+    assert.match(navigation, /href="\/research-planner"[^>]*>\{t\("nav\.researchHub"\)\}<\/Link>/);
     assert.doesNotMatch(navigation, /Research Tools/);
   }
   const workspace = source("pages/workspace.js");
@@ -174,8 +177,8 @@ test("main Research Hub navigation uses one consistent name", () => {
   assert.match(workspace, /Start with your research dataset/);
 });
 
-test("Learning Hub identifies operational links as learning paths", () => {
-  const learning = source("pages/student-dashboard.js");
+test("Learning Center identifies operational links as learning paths", () => {
+  const learning = source("pages/learning-center.js");
   assert.match(learning, /learning\.pathsTitle/);
   assert.match(source("lib/i18n/en.js"), /Choose a learning path to practice/);
   for (const href of ["/tools/analyze", "/tools/prompt", "/tools/code", "/tools/excel"])
@@ -209,6 +212,6 @@ test("Frequency, POS, and Colab remain renderable as standalone routes", async (
     vm.createContext(scope);
     vm.runInContext(code, scope);
     const html = renderToStaticMarkup(React.createElement(exports.default));
-    assert.match(html, name === "colab" ? /href="\/ar-tools#build-tools"/ : /href="\/tools\/analyze"/);
+    assert.match(html, name === "colab" ? /href="\/research-planner#build-tools"/ : /href="\/tools\/analyze"/);
   }
 });

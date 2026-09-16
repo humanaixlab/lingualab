@@ -13,7 +13,7 @@ test("corpus tools remain safe standalone and return contextually inside their p
     else assert.match(page, /inCorpusPath \? "\/research-paths\/corpus-linguistics" : "\/tools\/analyze"/);
     assert.match(page, /العودة إلى مركز التحليل/);
     assert.match(page, /Back to Analyze/);
-    if (name === "pos") assert.doesNotMatch(page, /backHref="\/ar-tools|backHref="\/research/);
+    if (name === "pos") assert.doesNotMatch(page, /backHref="\/research-planner|backHref="\/research/);
   }
 });
 
@@ -37,10 +37,10 @@ test("N-gram display labels are neutral while internal values remain numeric", (
   assert.doesNotMatch(page, /اختاري|ألصقي|اكتبي|حددي/);
 });
 
-test("Prompt Assistant localizes display copy without changing API values", () => {
+test("Prompt Builder localizes display copy without changing API values", () => {
   const page = source("pages/tools/prompt.js");
-  assert.match(page, /Prompt Assistant/);
-  assert.match(page, /مساعد التعليمات/);
+  assert.match(page, /Prompt Builder/);
+  assert.match(page, /أداة بناء التعليمات/);
   assert.match(page, /أنشئ تعليمات واضحة ومنظمة لمهام البحث والتحليل والكتابة/);
   for (const value of ["Text analysis", "Summarization", "Academic writing", "Academic", "Simple", "Formal", "Creative"]) {
     assert.ok(page.includes(`"${value}"`));
@@ -52,7 +52,7 @@ test("Analyze is the single corpus-tool hub and Build shows a coherent sequence"
   const analyze = source("pages/tools/analyze.js");
   for (const name of corpusPages) assert.ok(analyze.includes(`/tools/${name}`));
   assert.match(analyze, /AI Research Interpreter as a later stage/);
-  const hub = source("pages/ar-tools.js");
+  const hub = source("pages/research-planner.js");
   assert.match(source("lib/i18n/en.js"), /Data → Prepare → Configure → Run → Evaluate → Interpret → Improve/);
   assert.match(hub, /language === "ar" \? "فتح الأداة" : "Open tool"/);
 });

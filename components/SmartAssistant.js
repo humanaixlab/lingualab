@@ -13,7 +13,7 @@ export default function SmartAssistant() {
   const [answers, setAnswers] = useState([]);
   const [level, setLevel] = useState("beginner");
   const pathContext = readResearchPathContext(router.asPath, router.pathname);
-  const hubPathId = router.pathname === "/ar-tools" ? router.asPath?.split("#")[1]?.split("?")[0] : null;
+  const hubPathId = router.pathname === "/research-planner" ? router.asPath?.split("#")[1]?.split("?")[0] : null;
   const guidance = getAssistantGuidance(router.pathname, language, {
     level,
     pathId: pathContext?.pathId || hubPathId,

@@ -10,7 +10,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 const require = createRequire(import.meta.url);
 const swc = require("next/dist/build/swc");
 await swc.loadBindings();
-const hubSource = readFileSync(new URL("../pages/ar-tools.js", import.meta.url), "utf8");
+const hubSource = readFileSync(new URL("../pages/research-planner.js", import.meta.url), "utf8");
 const helperSource = readFileSync(new URL("../lib/research-context.js", import.meta.url), "utf8").replaceAll("export function", "function").replaceAll("export const", "const");
 const workspaceSource = readFileSync(new URL("../pages/workspace.js", import.meta.url), "utf8");
 const { code } = await swc.transform(hubSource, {
@@ -20,7 +20,7 @@ const { code } = await swc.transform(hubSource, {
 const current = { source: "dataset-understanding", handoffId: "current-five", fileName: "current.csv", rows: 5, createdAt: new Date().toISOString() };
 const query = "?from=workspace&handoffId=current-five";
 const hubCopy = {
-  "nav.openWorkspace": "Open Workspace", "nav.researchAdvisor": "Research Advisor", "hub.pageName": "Research Hub", "hub.heroTitle": "Choose the next step in your research workflow.", "hub.heroText": "Research journey", "hub.currentDataset": "Current dataset: {filename} · {count} records",
+  "nav.openWorkspace": "Open Workspace", "nav.researchAdvisor": "Research Advisor", "hub.pageName": "Research Planner", "hub.heroTitle": "Choose the next step in your research workflow.", "hub.heroText": "Research journey", "hub.currentDataset": "Current dataset: {filename} · {count} records",
   "hub.architecture.computational.eyebrow": "02 · COMPUTATIONAL WORK", "hub.architecture.computational.title": "Data & Computational Workflows", "hub.architecture.computational.subtitle": "What task do I perform on the data?", "hub.architecture.computational.text": "Computational work", "hub.architecture.computational.sequence": "Prepare data to evaluation",
   "hub.architecture.study.eyebrow": "03 · RESEARCH WORKFLOW", "hub.architecture.study.title": "Build Your Study", "hub.architecture.study.subtitle": "How do I design and complete the research study?", "hub.architecture.study.text": "Study workflow", "hub.architecture.guidance.title": "Choose your starting point",
 };
@@ -55,7 +55,7 @@ function harness(saved = null, search = "") {
     },
     require(name) {
       if (name === "react") return { ...React, useEffect: (fn) => { effect = fn; }, useState: () => [context, (value) => { context = value; }] };
-      if (name === "next/router") return { useRouter: () => ({ asPath: "/ar-tools" + search }) };
+      if (name === "next/router") return { useRouter: () => ({ asPath: "/research-planner" + search }) };
       if (name === "next/link") return function MockLink({ children, ...props }) { return React.createElement("a", props, children); };
       if (name === "../lib/research-context") return { readResearchContext: scope.readResearchContext, researchContextHref: scope.researchContextHref, RESEARCH_CONTEXT_TTL_MS: 30 * 60 * 1000 };
       if (name === "../components/LanguageProvider") return { useLanguage: () => ({ language: "en", direction: "ltr", t: testTranslate }) };
@@ -120,7 +120,7 @@ test("Workspace hands off fresh metadata, replacing stale context without raw ro
   assert.notEqual(saved.handoffId, "stale");
   assert.equal(saved.rawRows, undefined);
   const url = new URL(h.scope.window.location.href, "https://example.test");
-  assert.equal(url.pathname, "/ar-tools");
+  assert.equal(url.pathname, "/research-planner");
   assert.equal(url.searchParams.get("handoffId"), saved.handoffId);
   assert.equal(h.scope.readResearchContext(url.search).rows, 5);
   h.scope.result = null;
@@ -148,7 +148,7 @@ test("Analyze adapter makes labeled Arabic metadata interpretable without planne
   const adapted = h.scope.analyzeContext({ ...current, labelColumn: "label", arabicPercent: 100 });
   const plan = h.scope.buildPlan(adapted);
   assert.equal(plan.title, "Start with the strongest testable signal.");
-  assert.equal(plan.eyebrow, "AI ANALYSIS PLANNER · ARABIC DATA");
+  assert.equal(plan.eyebrow, "ANALYZE · ARABIC DATA");
   assert.equal(h.scope.buildPlan(h.scope.analyzeContext({ ...current, labelColumn: "Not detected", arabicPercent: 0 })).title, "Explore the corpus before choosing a model.");
   assert.equal(h.scope.analyzeContext(null), null);
 });

@@ -14,13 +14,13 @@ const expectedRoutes = [
   "/tools/ngrams",
   "/tools/pos",
   "/research-advisor",
-  "/ar-tools",
+  "/research-planner",
   "/research-report",
   "/tools/prompt",
   "/tools/code",
   "/tools/excel",
   "/tools/colab",
-  "/student-dashboard",
+  "/learning-center",
 ];
 
 test("contextual assistant covers every requested core and tool route", () => {
@@ -53,11 +53,11 @@ test("technical guidance is attached to the relevant analysis page", () => {
   assert.match(getAssistantGuidance("/tools/frequency", "en").suggestions[2].question, /raw.*normalized frequency/i);
 });
 
-test("home and Research Hub receive distinct page-specific guidance", () => {
+test("home and Research Planner receive distinct page-specific guidance", () => {
   assert.equal(getAssistantGuidance("/", "en").contextId, "home");
-  assert.equal(getAssistantGuidance("/ar-tools", "ar").contextId, "research");
+  assert.equal(getAssistantGuidance("/research-planner", "ar").contextId, "research");
   assert.match(getAssistantGuidance("/", "ar").suggestions[0].question, /أبدأ/);
-  assert.match(getAssistantGuidance("/ar-tools", "en").suggestions[0].question, /research stage/i);
+  assert.match(getAssistantGuidance("/research-planner", "en").suggestions[0].question, /research stage/i);
 });
 
 test("invalid language values safely use English guidance", () => {
@@ -78,15 +78,15 @@ test("all seven research paths provide distinct bilingual contextual guidance", 
     "language-technology",
   ]);
   for (const pathId of ASSISTANT_RESEARCH_PATHS) {
-    const english = getAssistantGuidance("/ar-tools", "en", { pathId });
-    const arabic = getAssistantGuidance("/ar-tools", "ar", { pathId });
+    const english = getAssistantGuidance("/research-planner", "en", { pathId });
+    const arabic = getAssistantGuidance("/research-planner", "ar", { pathId });
     assert.equal(english.pathId, pathId);
     assert.equal(arabic.pathId, pathId);
     assert.equal(english.suggestions.length, 4);
     assert.equal(arabic.suggestions.length, 4);
   }
-  assert.match(getAssistantGuidance("/ar-tools", "en", { pathId: "corpus-linguistics" }).suggestions[1].question, /Frequency.*Concordance/);
-  assert.match(getAssistantGuidance("/ar-tools", "ar", { pathId: "language-technology" }).suggestions[3].question, /Colab/);
+  assert.match(getAssistantGuidance("/research-planner", "en", { pathId: "corpus-linguistics" }).suggestions[1].question, /Frequency.*Concordance/);
+  assert.match(getAssistantGuidance("/research-planner", "ar", { pathId: "language-technology" }).suggestions[3].question, /Colab/);
 });
 
 test("Beginner and Advanced levels produce different bounded guidance", () => {
@@ -110,11 +110,11 @@ test("known visible terms add only page-safe technical context", () => {
 
 test("unavailable paths never suggest launching nonexistent tools", () => {
   for (const pathId of ["semantics", "information-extraction"]) {
-    const result = getAssistantGuidance("/ar-tools", "en", { pathId });
+    const result = getAssistantGuidance("/research-planner", "en", { pathId });
     assert.match(result.suggestions.map((item) => item.answer).join(" "), /no dedicated|No dedicated|not runnable|cannot be launched|Coming next/i);
     assert.ok(result.suggestions.every((item) => !("href" in item)));
   }
-  const discourse = getAssistantGuidance("/ar-tools", "en", { pathId: "discourse-pragmatics" });
+  const discourse = getAssistantGuidance("/research-planner", "en", { pathId: "discourse-pragmatics" });
   assert.match(discourse.suggestions.map((item) => item.answer).join(" "), /Discourse Analysis research preview/);
   assert.doesNotMatch(discourse.suggestions.map((item) => item.answer).join(" "), /No dedicated tool/);
 });

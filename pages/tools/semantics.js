@@ -35,7 +35,7 @@ const GUIDANCE = {
 
 const COPY = {
   ar: {
-    pageTitle: "الدلالة · تجريب بحثي", back: "العودة إلى مركز البحث", eyebrow: "الدلالة", title: "مختبر الدلالة",
+    pageTitle: "الدلالة · تجريب بحثي", back: "العودة إلى مخطط البحث", eyebrow: "الدلالة", title: "مختبر الدلالة",
     lead: "منطقة تجريب بحثية لفحص التشابه الدلالي (Semantic Similarity)، واكتشاف الموضوعات، والتجميع الدلالي (Semantic Grouping) بمراجعة الباحث.", badge: "تجريب بحثي",
     notice: "المخرجات مقترحات تحليلية مدعومة بالذكاء الاصطناعي، ويظل الباحث مسؤولًا عن التحقق من النتائج واعتمادها في الاستخدام البحثي.",
     choose: "اختر أداة", firstText: "النص العربي الأول", secondText: "النص العربي الثاني", text: "النص العربي", texts: "النصوص العربية القصيرة", textPlaceholder: "ألصق النص العربي هنا…", textsPlaceholder: "أدخل نصًا قصيرًا في كل سطر…",
@@ -45,7 +45,7 @@ const COPY = {
     summary: "ملخص المراجعات المحلية", filter: "تصفية حسب الأداة", all: "كل الأدوات", total: "إجمالي الحالات المراجعة", accepted: "عدد المقبول", edited: "عدد المعدل", rejected: "عدد المرفوض", noCases: "لا توجد حالات مراجعة محفوظة لهذا الاختيار.",
   },
   en: {
-    pageTitle: "Semantics · Research Preview", back: "Back to Research Hub", eyebrow: "SEMANTICS", title: "Semantics Lab",
+    pageTitle: "Semantics · Research Preview", back: "Back to Research Planner", eyebrow: "SEMANTICS", title: "Semantics Lab",
     lead: "A research experimentation area for reviewing semantic similarity, topic, and grouping suggestions.", badge: "Research Preview",
     notice: "Outputs are AI-supported analytical suggestions. The researcher remains responsible for verifying and approving results for research use.",
     choose: "Choose a tool", firstText: "First Arabic text", secondText: "Second Arabic text", text: "Arabic text", texts: "Short Arabic texts", textPlaceholder: "Paste Arabic text here…", textsPlaceholder: "Enter one short text per line…",
@@ -126,7 +126,7 @@ export default function SemanticsTool() {
   return <>
     <Head><title>{copy.pageTitle} · LinguaLab</title></Head>
     <main className={styles.page}>
-      <Link className={styles.back} href="/ar-tools#semantics">← {copy.back}</Link>
+      <Link className={styles.back} href="/research-planner#semantics">← {copy.back}</Link>
       <header className={styles.header}><div><p className={styles.eyebrow}>{copy.eyebrow}</p><h1>{copy.title}</h1><p>{copy.lead}</p></div><span className={styles.previewBadge}>{copy.badge}</span></header>
       <p className={styles.notice}>{copy.notice}</p>
       <PageGuidance language={locale} steps={GUIDANCE[locale]} />

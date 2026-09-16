@@ -174,7 +174,7 @@ export default function NlpBuilderPage() {
   }
 
   return <><Head><title>{copy.head}</title><meta name="description" content={copy.lead} /></Head><main className={styles.page} dir={locale === "ar" ? "rtl" : "ltr"}>
-    <Link className={styles.back} href="/ar-tools#build-tools">← {copy.back}</Link>
+    <Link className={styles.back} href="/research-planner#build-tools">← {copy.back}</Link>
     <header className={styles.hero}><div><p>{copy.eyebrow}</p><h1>{copy.title}</h1><strong>{copy.subtitle}</strong><span>{copy.lead}</span></div><small>{copy.preview}</small></header>
     <p className={styles.notice}>{copy.notice}</p>
     <DataSourceIndicator language={locale} mode="standalone" />

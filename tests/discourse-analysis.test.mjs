@@ -81,7 +81,7 @@ test("reviewed cases use guarded localStorage and retain at most 100 records", (
 
 test("Discourse & Pragmatics is the single canonical path for the research preview", () => {
   const page = source("pages/tools/discourse-analysis.js");
-  const hub = source("pages/ar-tools.js");
+  const hub = source("pages/research-planner.js");
   const paths = source("lib/research-paths.js");
   const api = source("pages/api/discourse-analysis.js");
   for (const label of ["تحليل الموقف", "التحفظ والتوكيد", "العلاقات الخطابية", "تجريب بحثي", "قبول", "تعديل", "رفض"])

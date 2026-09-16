@@ -59,7 +59,7 @@ test("reviewed Pragmatics cases use guarded bounded localStorage", () => {
 test("canonical Discourse & Pragmatics path exposes both previews without a general-tools section", () => {
   const path = RESEARCH_PATHS.find((item) => item.id === "discourse-pragmatics");
   assert.deepEqual(path.available.map((tool) => tool.href), ["/tools/discourse-analysis", "/tools/pragmatics"]);
-  const hub = source("pages/ar-tools.js");
+  const hub = source("pages/research-planner.js");
   assert.doesNotMatch(hub, /key: "pragmatics"|link: "\/tools\/pragmatics"/);
   const page = source("pages/tools/pragmatics.js");
   for (const label of ["الأفعال الكلامية", "الاستلزام الحواري", "الإشارة والسياق", "تجريب بحثي", "قبول", "تعديل", "رفض"]) assert.match(page, new RegExp(label));

@@ -62,7 +62,7 @@ test("semantic reviews use guarded bounded localStorage only", () => {
 test("Semantics route is bilingual, responsibility-labeled, and activated only in its linguistic path", () => {
   const page = source("pages/tools/semantics.js");
   for (const label of ["التشابه الدلالي", "اكتشاف الموضوع", "التجميع الدلالي", "تجريب بحثي", "يظل الباحث مسؤولًا", "Research Preview"]) assert.match(page, new RegExp(label));
-  assert.doesNotMatch(source("pages/ar-tools.js"), /\/tools\/semantics/);
+  assert.doesNotMatch(source("pages/research-planner.js"), /\/tools\/semantics/);
   assert.match(source("lib/research-paths.js"), /href: "\/tools\/semantics"[^\n]+Research Preview[^\n]+تجريب بحثي/);
   assert.doesNotMatch(page, /validated|definitive|academically approved/i);
 });

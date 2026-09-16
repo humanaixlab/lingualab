@@ -166,7 +166,33 @@
   transform: translateY(-1px);
 }
 
+.analysisCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 3px 0 4px 8px;
+  padding: 10px 14px;
+  border: 1px solid rgba(98, 88, 245, 0.28);
+  border-radius: 11px;
+  color: #5148d9;
+  background: #fff;
+  font-size: var(--text-button);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+[dir="rtl"] .analysisCta {
+  margin-right: 8px;
+  margin-left: 0;
+}
+
+.analysisCta:hover {
+  border-color: #6258f5;
+  background: #f4f2ff;
+}
+
 .primaryCta:focus-visible,
+.analysisCta:focus-visible,
 .tools a:focus-visible,
 .guide summary:focus-visible {
   outline: 3px solid rgba(65, 111, 233, 0.36);
@@ -283,7 +309,8 @@
   .pathHeader { margin-bottom: 17px; padding-bottom: 14px; }
   .toolBlock,
   .coming { padding: 15px; }
-  .primaryCta { width: 100%; justify-content: center; }
+  .primaryCta,
+  .analysisCta { width: 100%; justify-content: center; margin-inline: 0; box-sizing: border-box; }
 }
 
 @media (prefers-reduced-motion: reduce) {

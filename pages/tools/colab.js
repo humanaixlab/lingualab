@@ -29,7 +29,7 @@ export default function ColabPage() {
   }, [router.asPath]);
 
   return (
-    <Layout title={copy.title} description={copy.description} backHref="/ar-tools#build-tools" backLabel={language === "ar" ? "العودة إلى البناء" : "Back to Build"} dataSource={handoff ? "transferred" : "standalone"}>
+    <Layout title={copy.title} description={copy.description} backHref="/research-planner#build-tools" backLabel={language === "ar" ? "العودة إلى البناء" : "Back to Build"} dataSource={handoff ? "transferred" : "standalone"}>
       <div style={{ direction, color: "#111827" }}>
         <ComputationalWorkbench language={language} methodType="environment" stages={WORKBENCH[language].map(([label, detail]) => ({ label, detail }))} />
         {handoff && (

@@ -4,15 +4,15 @@ import { useLanguage } from "./LanguageProvider";
 import DataSourceIndicator from "./DataSourceIndicator";
 import { readResearchPathContext, researchPathNavigation } from "../lib/research-path-context";
 
-export default function Layout({ title, children, backHref = "/ar-tools#all-tools", backLabel, description, dataSource }) {
+export default function Layout({ title, children, backHref = "/research-planner#all-tools", backLabel, description, dataSource }) {
   const { direction, language, t } = useLanguage();
   const router = useRouter();
   const fromLearn = router.query?.from === "learn";
   const pathContext = readResearchPathContext(router.asPath, router.pathname);
   const pathNavigation = researchPathNavigation(pathContext, language, title);
-  const effectiveBackHref = pathNavigation?.href || (fromLearn ? "/student-dashboard" : backHref);
+  const effectiveBackHref = pathNavigation?.href || (fromLearn ? "/learning-center" : backHref);
   const effectiveBackLabel = pathNavigation?.backLabel || (fromLearn
-    ? language === "ar" ? "العودة إلى مركز التعلّم" : "Back to Learn"
+    ? language === "ar" ? "العودة إلى مركز التعلّم" : "Back to Learning Center"
     : backLabel || t("common.backToAllTools"));
   return (
     <div

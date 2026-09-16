@@ -89,7 +89,7 @@ test("one compact bilingual assistant is mounted globally with contextual route 
   assert.match(app, /import SmartAssistant from "\.\.\/components\/SmartAssistant"/);
   assert.match(app, /<SmartAssistant \/>/);
   assert.doesNotMatch(layout, /SmartAssistant/);
-  for (const route of ["/", "/workspace", "/ar-tools", "/tools/analyze", "/research-advisor", "/research-report", "/student-dashboard", "/tools/frequency", "/tools/concordance", "/tools/ngrams", "/tools/pos", "/tools/prompt", "/tools/code", "/tools/excel", "/tools/colab"]) {
+  for (const route of ["/", "/workspace", "/research-planner", "/tools/analyze", "/research-advisor", "/research-report", "/learning-center", "/tools/frequency", "/tools/concordance", "/tools/ngrams", "/tools/pos", "/tools/prompt", "/tools/code", "/tools/excel", "/tools/colab"]) {
     assert.ok(guidance.includes(`"${route}"`), `missing assistant route: ${route}`);
   }
   assert.match(assistant, /const \[isOpen, setIsOpen\] = useState\(false\)/);

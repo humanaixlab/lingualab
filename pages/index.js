@@ -6,7 +6,7 @@ import { useLanguage } from "../components/LanguageProvider";
 const goals = [
   {
     key: "research",
-    href: "/ar-tools",
+    href: "/research-planner",
     icon: "01",
   },
   {
@@ -21,7 +21,7 @@ const goals = [
   },
   {
     key: "learn",
-    href: "/student-dashboard",
+    href: "/learning-center",
     icon: "04",
   },
 ];
@@ -31,10 +31,10 @@ const workflow = ["understand", "prepare", "choose", "apply", "view", "evaluate"
 const computationalAreas = ["data", "preparation", "results", "improvement"];
 
 const onboardingSteps = [
-  { key: "linguistic", href: "/ar-tools#research-paths" },
-  { key: "computational", href: "/ar-tools#build-tools" },
+  { key: "linguistic", href: "/research-planner#research-paths" },
+  { key: "computational", href: "/research-planner#build-tools" },
   { key: "study", href: "/research-advisor" },
-  { key: "output", href: "/research-report" },
+  { key: "output", href: "/tools/analyze#quick-analysis" },
 ];
 
 const capabilities = [
@@ -114,8 +114,9 @@ export default function HomePage() {
           <div className={styles.navLinks}>
             <a href="#workspace">{t("home.navWorkspace")}</a>
             <a href="#capabilities">{t("home.navExplore")}</a>
-            <Link href="/student-dashboard">{t("nav.learn")}</Link>
+            <Link href="/learning-center">{t("nav.learn")}</Link>
             <Link href="/projects">{t("nav.projects")}</Link>
+            <Link href="/platform">{t("nav.platform")}</Link>
           </div>
 
           <Link href="/workspace" className={styles.navCta}>
@@ -322,7 +323,7 @@ export default function HomePage() {
 
           <div className={styles.computationalMessage}>
             <p>{t("home.computationalJourney.message")}</p>
-            <Link href="/ar-tools#build-tools" className={styles.computationalLink}>
+            <Link href="/research-planner#build-tools" className={styles.computationalLink}>
               {t("home.computationalJourney.action")} <ArrowIcon />
             </Link>
           </div>
@@ -333,7 +334,7 @@ export default function HomePage() {
             <p className={styles.eyebrow}>{t("home.capabilitiesEyebrow")}</p>
             <h2>{t("home.capabilitiesTitle")}</h2>
             <p>{t("home.capabilitiesText")}</p>
-            <Link href="/ar-tools#all-tools" className={styles.secondaryButton}>
+            <Link href="/research-planner#all-tools" className={styles.secondaryButton}>
               {t("home.browse")}
             </Link>
           </div>
@@ -354,7 +355,7 @@ export default function HomePage() {
             <p className={styles.eyebrow}>{t("home.partnerEyebrow")}</p>
             <h2>{t("home.partnerTitle")}</h2>
             <p>{t("home.partnerText")}</p>
-            <Link href="/smart-home" className={styles.secondaryDarkButton}>
+            <Link href="/research-advisor" className={styles.secondaryDarkButton}>
               {t("home.meetAssistant")}
             </Link>
           </div>
@@ -393,7 +394,7 @@ export default function HomePage() {
             <span className={styles.brandMark}>L</span>
             <span>LinguaLab</span>
           </Link>
-          <p>{t("home.footer")} · <Link href="/platform-inventory">{t("home.inventory")}</Link></p>
+          <p>{t("home.footer")} · <Link href="/platform">{t("nav.platform")}</Link></p>
           <span>{t("home.edition")}</span>
         </footer>
       </main>

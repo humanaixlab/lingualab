@@ -108,7 +108,7 @@ test("the page is bilingual, editable, exportable, and keeps AI review optional"
   const page = source("pages/tools/nlp-builder.js");
   const builder = source("lib/nlp-builder.js");
   const api = source("pages/api/nlp-builder.js");
-  const hub = source("pages/ar-tools.js");
+  const hub = source("pages/research-planner.js");
   assert.match(page, /بناء المعالجة اللغوية حاسوبيًا/);
   assert.match(builder, /Design a linguistic algorithm/);
   assert.match(page, /How does the machine see this/);

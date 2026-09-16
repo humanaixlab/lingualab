@@ -163,7 +163,7 @@ function analyzeDataset(fileName, headers, rows) {
   let recommendation = {
     title: "Explore your Arabic corpus",
     description: "Start with frequency, concordance, and recurring phrase analysis to understand the data before modeling.",
-    href: "/ar-tools",
+    href: "/research-planner",
     action: "Explore corpus",
     type: "Corpus exploration",
   };
@@ -687,9 +687,9 @@ export default function WorkspacePage() {
       const handoffId = window.crypto.randomUUID();
       const copilotMetadata = hubCopilotMetadata(result, datasetRows, selectedTextColumn, selectedLabelColumn);
       sessionStorage.setItem("lingualab-advisor-context", JSON.stringify({ ...buildAdvisorContext(result), handoffId, copilotMetadata }));
-      window.location.href = `/ar-tools?from=workspace&handoffId=${encodeURIComponent(handoffId)}`;
+      window.location.href = `/research-planner?from=workspace&handoffId=${encodeURIComponent(handoffId)}`;
     } catch {
-      window.location.href = "/ar-tools";
+      window.location.href = "/research-planner";
     }
   }
 

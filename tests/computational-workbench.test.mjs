@@ -9,7 +9,7 @@ test("the computational section presents the complete bilingual research cycle",
   const ar = source("lib/i18n/ar.js");
   assert.match(en, /Data → Prepare → Configure → Run → Evaluate → Interpret → Improve/);
   assert.match(ar, /البيانات ← التجهيز ← إعداد المهمة ← التشغيل ← التقييم ← التفسير ← التحسين/);
-  assert.match(source("pages/ar-tools.js"), /hub\.architecture\.computational\.sequence/);
+  assert.match(source("pages/research-planner.js"), /hub\.architecture\.computational\.sequence/);
 });
 
 test("every canonical computational tool exposes the shared workbench", () => {

@@ -43,6 +43,10 @@ async function renderPage(path, language, router = { query: {}, isReady: true, p
       if (module === "../lib/applied-projects") return { APPLIED_PROJECT_BY_PROJECT_ID, APPLIED_SECTORS, filterAppliedProjects };
       if (module === "../lib/social-impact-projects") return { SOCIAL_IMPACT_DOMAINS, SOCIAL_IMPACT_PROJECTS, SOCIAL_PROBLEM_MAPPINGS, filterSocialImpactProjects };
       if (module === "../lib/project-display-labels") return { getProjectTaskLabel, getProjectToolLabel };
+      if (module === "../lib/research-path-context") return {
+        LEARNING_PATH_SECTION: "learning-center",
+        researchPathHref: (href, pathId, sourceSection) => `${href}?from=research-path&pathId=${pathId}&sourcePath=${pathId}&sourceSection=${sourceSection}&selectedDomain=linguistic&workflow=corpus-analysis`,
+      };
       if (module === "../styles/Projects.module.css") return new Proxy({}, { get: (_, key) => String(key) });
       throw new Error(`Unexpected module: ${module}`);
     },
@@ -53,18 +57,20 @@ async function renderPage(path, language, router = { query: {}, isReady: true, p
 
 const awaitImportJsxRuntime = await import("react/jsx-runtime");
 
-test("Learning Hub keeps its compatible route, progress logic, and tool learning links", async () => {
-  const page = source("pages/student-dashboard.js");
-  const en = await renderPage("pages/student-dashboard.js", "en");
-  const ar = await renderPage("pages/student-dashboard.js", "ar");
-  assert.match(en, /Learning Hub/);
+test("Learning Center keeps its compatible route, progress logic, and tool learning links", async () => {
+  const page = source("pages/learning-center.js");
+  const en = await renderPage("pages/learning-center.js", "en");
+  const ar = await renderPage("pages/learning-center.js", "ar");
+  assert.match(en, /Learning Center/);
   assert.match(ar, /مركز التعلّم/);
   assert.doesNotMatch(`${en}${ar}`, /Student Dashboard|لوحة الطالبة/);
   assert.match(page, /lingualab-learning-progress/);
   assert.match(page, /completedCount/);
   assert.match(page, /togglePath/);
   assert.match(page, /resetProgress/);
+  assert.match(page, /researchPathHref\(path\.href, path\.researchPath, LEARNING_PATH_SECTION\)/);
   assert.match(page, /`\$\{path\.href\}\?from=learn`/);
+  assert.match(en, /href="\/tools\/analyze\?from=research-path[^\"]+sourceSection=learning-center[^\"]+#quick-analysis"/);
 });
 
 test("Projects is a bilingual research navigator without persistence or fake upload", async () => {
@@ -121,7 +127,7 @@ function localizedForTest(value) {
 }
 
 test("visible learning navigation no longer uses the Student Dashboard identity", () => {
-  for (const path of ["pages/projects.js", "pages/profile.js", "pages/student-dashboard.js"])
+  for (const path of ["pages/projects.js", "pages/learning-center.js"])
     assert.doesNotMatch(source(path), /Student Dashboard|لوحة الطالبة/);
-  assert.match(source("pages/profile.js"), /href="\/student-dashboard">مركز التعلّم/);
+  assert.match(source("pages/learning-center.js"), /learning\.title/);
 });

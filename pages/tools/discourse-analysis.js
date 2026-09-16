@@ -30,7 +30,7 @@ const TOOL_COPY = {
 const COPY = {
   ar: {
     pageTitle: "تحليل الخطاب · تجريب بحثي",
-    back: "العودة إلى مركز البحث",
+    back: "العودة إلى مخطط البحث",
     eyebrow: "تحليل الخطاب والتداولية",
     title: "مختبر تحليل الخطاب",
     lead: "منطقة تجريب بحثية لترميز ظواهر خطابية محددة بمراجعة الباحث.",
@@ -73,7 +73,7 @@ const COPY = {
   },
   en: {
     pageTitle: "Discourse Analysis · Research Preview",
-    back: "Back to Research Hub",
+    back: "Back to Research Planner",
     eyebrow: "DISCOURSE & PRAGMATICS",
     title: "Discourse Analysis Lab",
     lead: "A research experimentation area for annotating defined discourse phenomena with researcher review.",
@@ -241,7 +241,7 @@ export default function DiscourseAnalysisTool() {
     <>
       <Head><title>{copy.pageTitle} · LinguaLab</title></Head>
       <main className={styles.page}>
-        <Link className={styles.back} href="/ar-tools#discourse-pragmatics">← {copy.back}</Link>
+        <Link className={styles.back} href="/research-planner#discourse-pragmatics">← {copy.back}</Link>
         <header className={styles.header}>
           <div><p className={styles.eyebrow}>{copy.eyebrow}</p><h1>{copy.title}</h1><p>{copy.lead}</p></div>
           <span className={styles.previewBadge}>{copy.badge}</span>

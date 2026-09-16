@@ -12,13 +12,13 @@ const memoryStorage = () => {
 };
 
 const workflows = [
-  ["morphology-syntax", "morphology-syntax", "/ar-tools#morphology-syntax"],
-  ["semantics", "semantics", "/ar-tools#semantics"],
-  ["discourse-analysis", "discourse-pragmatics", "/ar-tools#discourse-pragmatics"],
-  ["pragmatics", "discourse-pragmatics", "/ar-tools#discourse-pragmatics"],
-  ["text-classification", "text-classification", "/ar-tools#build-tools"],
-  ["information-extraction", "information-extraction", "/ar-tools#build-tools"],
-  ["nlp-experiments", "nlp-experiments", "/ar-tools#build-tools"],
+  ["morphology-syntax", "morphology-syntax", "/research-planner#morphology-syntax"],
+  ["semantics", "semantics", "/research-planner#semantics"],
+  ["discourse-analysis", "discourse-pragmatics", "/research-planner#discourse-pragmatics"],
+  ["pragmatics", "discourse-pragmatics", "/research-planner#discourse-pragmatics"],
+  ["text-classification", "text-classification", "/research-planner#build-tools"],
+  ["information-extraction", "information-extraction", "/research-planner#build-tools"],
+  ["nlp-experiments", "nlp-experiments", "/research-planner#build-tools"],
 ];
 
 test("reviewed non-corpus results preserve source, AI, human decision, and final output through report handoff", () => {
@@ -76,7 +76,7 @@ test("project execution roads preserve project context and avoid repeated or gen
 });
 
 test("the study overview does not link interpretation or reporting to premature duplicate destinations", () => {
-  const hub = source("pages/ar-tools.js");
+  const hub = source("pages/research-planner.js");
   assert.match(hub, /\{ key: "analysis", href: "\/tools\/analyze" \}/);
   assert.match(hub, /\{ key: "interpretation", href: null \}/);
   assert.match(hub, /\{ key: "report", href: null \}/);

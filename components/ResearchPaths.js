@@ -85,6 +85,11 @@ export default function ResearchPaths({ language, mode = "all" }) {
                 {path.cta[locale]} <span aria-hidden="true">→</span>
               </Link>
             )}
+            {path.analyzeHref && (
+              <Link className={styles.analysisCta} href={`${researchPathHref(path.analyzeHref, path.id)}#quick-analysis`}>
+                {path.analyzeCta[locale]} <span aria-hidden="true">→</span>
+              </Link>
+            )}
 
             <div className={`${styles.toolBlock} ${path.available.length ? styles.availableBlock : styles.unavailableBlock}`}>
               <h4>{copy.available}</h4>

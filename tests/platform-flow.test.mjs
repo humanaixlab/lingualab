@@ -92,9 +92,9 @@ test("result CTAs, research progression, Build backs, and Learn returns use cano
   assert.match(source("pages/workspace.js"), /onClick=\{openAnalyze\}/);
   assert.match(source("pages/tools/analyze.js"), /createReportContext\(sourceTool, analysisType, payload\)/);
   for (const name of ["prompt", "code", "excel", "colab"])
-    assert.match(source(`pages/tools/${name}.js`), /backHref="\/ar-tools#build-tools"/);
-  assert.match(source("pages/student-dashboard.js"), /`\$\{path\.href\}\?from=learn`/);
-  assert.match(source("components/Layout.js"), /fromLearn \? "\/student-dashboard" : backHref/);
+    assert.match(source(`pages/tools/${name}.js`), /backHref="\/research-planner#build-tools"/);
+  assert.match(source("pages/learning-center.js"), /`\$\{path\.href\}\?from=learn`/);
+  assert.match(source("components/Layout.js"), /fromLearn \? "\/learning-center" : backHref/);
 });
 
 test("data-source indicators distinguish project context, transferred results, and standalone input", () => {

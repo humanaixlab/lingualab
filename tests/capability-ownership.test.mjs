@@ -44,7 +44,7 @@ test("owner routes and the audited hub return anchors are not orphaned", () => {
     "/research-advisor": "pages/research-advisor.js",
   };
   for (const owner of Object.values(TOOL_OWNERS)) assert.ok(source(routeFiles[owner.route]).length > 0);
-  const hub = source("pages/ar-tools.js");
+  const hub = source("pages/research-planner.js");
   assert.match(hub, /id="build-tools"/);
   assert.match(hub, /id="research-paths"/);
 });

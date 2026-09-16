@@ -94,8 +94,8 @@ test("direct Analyze stays generic and valid corpus handoffs switch to contextua
   const page = source("pages/tools/analyze.js");
   assert.match(page, /const isCorpusInterpretation = sourceAnalysis\?\.pathId === "corpus-linguistics"/);
   assert.match(page, /!isCorpusInterpretation && <section className=\{styles\.hero\}/);
-  assert.match(page, /!isCorpusInterpretation && <section className=\{styles\.toolDirectory\} aria-labelledby="research-path-entry-title"/);
-  assert.match(page, /!isCorpusInterpretation && <section className=\{styles\.toolDirectory\} aria-labelledby="corpus-tools-title"/);
+  assert.match(page, /!isCorpusInterpretation && !hasSelectedResearchPath && <section className=\{styles\.toolDirectory\} aria-labelledby="research-path-entry-title"/);
+  assert.match(page, /!isCorpusInterpretation && !hasSelectedResearchPath && <section className=\{styles\.toolDirectory\} aria-labelledby="corpus-tools-title"/);
   assert.match(page, /!isCorpusInterpretation && <section[\s\S]*className=\{styles\.planner\}/);
   assert.match(page, /isCorpusInterpretation \? <ContextualCorpusResult/);
   assert.match(page, /تفسير نتائج لسانيات المدونات/);

@@ -127,7 +127,7 @@ export default function PragmaticsTool() {
   return <>
     <Head><title>{copy.pageTitle} · LinguaLab</title></Head>
     <main className={styles.page}>
-      <Link className={styles.back} href="/ar-tools#discourse-pragmatics">← {copy.back}</Link>
+      <Link className={styles.back} href="/research-planner#discourse-pragmatics">← {copy.back}</Link>
       <header className={styles.header}><div><p className={styles.eyebrow}>{copy.eyebrow}</p><h1>{copy.title}</h1><p>{copy.lead}</p></div><span className={styles.previewBadge}>{copy.badge}</span></header>
       <p className={styles.notice}>{copy.notice}</p>
       <section aria-labelledby="pragmatics-tools-title"><h2 id="pragmatics-tools-title">{copy.choose}</h2><div className={styles.toolTabs} role="tablist" aria-label={copy.choose}>

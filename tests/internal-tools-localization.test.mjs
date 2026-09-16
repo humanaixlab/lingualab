@@ -6,8 +6,8 @@ const source = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "u
 
 test("remaining Build and writing tools provide complete bilingual display copy", () => {
   const expectations = {
-    "pages/tools/prompt.js": ["Prompt Assistant", "مساعد التعليمات", "Task type", "نوع المهمة", "Writing style", "أسلوب الكتابة"],
-    "pages/tools/code.js": ["AI Code Assistant", "مساعد البرمجة بالذكاء الاصطناعي", "Programming language", "لغة البرمجة", "Experience level", "مستوى الخبرة", "Research coding task", "مهمة البرمجة البحثية", "Beginner", "مبتدئ"],
+    "pages/tools/prompt.js": ["Prompt Builder", "أداة بناء التعليمات", "Task type", "نوع المهمة", "Writing style", "أسلوب الكتابة"],
+    "pages/tools/code.js": ["Code Builder", "أداة بناء الكود", "Programming language", "لغة البرمجة", "Experience level", "مستوى الخبرة", "Research coding task", "مهمة البرمجة البحثية", "Beginner", "مبتدئ"],
     "pages/tools/excel.js": ["Spreadsheet Explorer", "مستكشف الجداول", "Choose file", "اختر ملفًا", "No file chosen", "لم يتم اختيار ملف", "No spreadsheet selected", "لم يتم تحديد جدول"],
     "pages/tools/colab.js": ["Google Colab Workspace", "مساحة Google Colab", "Copy response", "نسخ الناتج", "Start now", "ابدأ الآن"],
   };
@@ -27,12 +27,12 @@ test("display translations preserve Code and Prompt internal option values", () 
   assert.match(prompt, /const STYLE_VALUES = \["Academic", "Simple", "Formal", "Creative"\]/);
 });
 
-test("tool homes use dedicated Research Hub anchors", () => {
-  const hub = source("pages/ar-tools.js");
+test("tool homes use dedicated Research Planner anchors", () => {
+  const hub = source("pages/research-planner.js");
   assert.match(hub, /id="build-tools"/);
   assert.match(hub, /id="writing-tools"/);
-  for (const path of ["pages/tools/code.js", "pages/tools/excel.js", "pages/tools/colab.js"]) assert.match(source(path), /backHref="\/ar-tools#build-tools"/);
-  assert.match(source("pages/tools/prompt.js"), /backHref="\/ar-tools#build-tools"/);
+  for (const path of ["pages/tools/code.js", "pages/tools/excel.js", "pages/tools/colab.js"]) assert.match(source(path), /backHref="\/research-planner#build-tools"/);
+  assert.match(source("pages/tools/prompt.js"), /backHref="\/research-planner#build-tools"/);
   for (const path of ["frequency", "concordance", "ngrams"])
     assert.match(source(`pages/tools/${path}.js`), /inCorpusPath \? "\/research-paths\/corpus-linguistics" : "\/tools\/analyze"/);
   assert.match(source("pages/tools/pos.js"), /backHref="\/tools\/analyze"/);

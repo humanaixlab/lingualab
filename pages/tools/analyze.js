@@ -11,11 +11,12 @@ import { useLanguage } from "../../components/LanguageProvider";
 import ProgressiveAiOutput from "../../components/ProgressiveAiOutput";
 import { fetchAiJson } from "../../lib/ai-stream";
 import { createProjectHandoff, incomingHandoffPreview, readProjectHandoff } from "../../lib/structured-handoff";
+import { LEARNING_PATH_SECTION, RESEARCH_PATH_SECTION, readResearchPathContext, researchPathLabel } from "../../lib/research-path-context";
 
 const DEFAULT_PLAN = {
   variant: "default",
   eyebrowVariant: "default",
-  eyebrow: "AI ANALYSIS PLANNER",
+  eyebrow: "ANALYZE",
   title: "A clear path from data to evidence.",
   summary:
     "LinguaLab recommends a focused sequence: understand the signal, explain the pattern, then turn the findings into a research-ready report.",
@@ -162,7 +163,7 @@ function buildPlan(context) {
         ]
       : DEFAULT_PLAN.steps,
     eyebrow: hasArabic
-      ? "AI ANALYSIS PLANNER · ARABIC DATA"
+      ? "ANALYZE · ARABIC DATA"
       : DEFAULT_PLAN.eyebrow,
   };
 }
@@ -180,16 +181,27 @@ export default function Analyzer() {
   const [projectHandoff, setProjectHandoff] = useState(null);
   const [acceptedProject, setAcceptedProject] = useState(null);
   const [projectTarget, setProjectTarget] = useState("");
+  const [researchPathContext, setResearchPathContext] = useState(null);
   const router = useRouter();
   const isCorpusInterpretation = sourceAnalysis?.pathId === "corpus-linguistics" && Boolean(CORPUS_TOOL_LABELS[sourceAnalysis?.sourceTool]);
+  const hasSelectedResearchPath = Boolean(researchPathContext?.selectedPath);
+  const fromLearningPath = researchPathContext?.sourceSection === LEARNING_PATH_SECTION;
+  const fromResearchPlanner = researchPathContext?.sourceSection === RESEARCH_PATH_SECTION;
+  const returnDestination = fromLearningPath || router.query?.from === "learn"
+    ? { href: "/learning-center", label: language === "ar" ? "العودة إلى مركز التعلّم" : "Back to Learning Center" }
+    : fromResearchPlanner
+      ? { href: `/research-planner#${researchPathContext.selectedPath}`, label: language === "ar" ? "العودة إلى مخطط البحث" : "Back to Research Planner" }
+      : null;
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
       const nextContext = analyzeContext(readResearchContext(window.location.search));
       const handoff = readAnalysisHandoff(window.location.search);
       const incomingProject = readProjectHandoff("analyze", window.location.search);
+      const selectedResearchPath = readResearchPathContext(router.asPath, router.pathname);
       setContext(nextContext);
       setSourceAnalysis(handoff);
       setProjectHandoff(incomingProject);
+      setResearchPathContext(selectedResearchPath);
       if (handoff) {
         setText(handoff.text);
         setResult(analyzeTextValue(handoff.text));
@@ -198,7 +210,7 @@ export default function Analyzer() {
       }
     });
     return () => window.cancelAnimationFrame(frame);
-  }, [router.asPath]);
+  }, [router.asPath, router.pathname]);
 
   const mergeProjectContext = () => {
     if (!projectHandoff) return;
@@ -377,8 +389,9 @@ const interpretResults = async () => {
           <div className={styles.navLinks}>
             {isCorpusInterpretation ? (
               <Link href="/research-paths/corpus-linguistics">{language === "ar" ? "مسار لسانيات المدونات" : "Corpus Linguistics path"}</Link>
+            ) : returnDestination ? (
+              <Link href={returnDestination.href}>{returnDestination.label}</Link>
             ) : <>
-              {router.query?.from === "learn" && <Link href="/student-dashboard">{language === "ar" ? "العودة إلى مركز التعلّم" : "Back to Learn"}</Link>}
               <Link href="/workspace">{t("nav.workspace")}</Link>
               <Link href="/research-advisor">{t("nav.researchAdvisor")}</Link>
             </>}
@@ -398,14 +411,29 @@ const interpretResults = async () => {
           </div>
         </section>}
 
-        {!isCorpusInterpretation && <section className={styles.toolDirectory} aria-labelledby="research-path-entry-title">
+        {!isCorpusInterpretation && !hasSelectedResearchPath && <section className={styles.toolDirectory} aria-labelledby="research-path-entry-title">
           <div>
             <p className={styles.sectionLabel}>{language === "ar" ? "المسارات البحثية" : "RESEARCH PATHS"}</p>
             <h2 id="research-path-entry-title">{language === "ar" ? "استكشف حسب المسار البحثي" : "Explore by Research Path"}</h2>
             <p>{language === "ar" ? "اختر مجالًا في اللسانيات الحاسوبية، ثم افتح أدوات التحليل المتاحة ضمنه." : "Choose a computational-linguistics area, then open the analysis tools currently available within it."}</p>
           </div>
           <div className={styles.toolLinks}>
-            <Link href="/ar-tools#research-paths">{language === "ar" ? "عرض المسارات البحثية" : "View research paths"} <span aria-hidden="true">↗</span></Link>
+            <Link href="/research-planner#research-paths">{language === "ar" ? "عرض المسارات البحثية" : "View research paths"} <span aria-hidden="true">↗</span></Link>
+          </div>
+        </section>}
+
+        {!isCorpusInterpretation && hasSelectedResearchPath && <section className={styles.toolDirectory} aria-labelledby="selected-research-path-title">
+          <div>
+            <p className={styles.sectionLabel}>{language === "ar" ? "المسار المختار" : "SELECTED RESEARCH PATH"}</p>
+            <h2 id="selected-research-path-title">{researchPathLabel(researchPathContext.selectedPath, language)}</h2>
+            <p>{language === "ar" ? "تم استلام اختيار المسار من الخطوة السابقة، لذلك لن يُطلب منك اختياره مرة أخرى. يمكنك متابعة التحليل مباشرة." : "The path selected in the previous step has been received, so Analyze will not ask you to choose it again. Continue directly with the analysis."}</p>
+            <dl className={styles.contextIdentity}>
+              <div><dt>{language === "ar" ? "المجال" : "Domain"}</dt><dd>{language === "ar" ? "لساني" : "Linguistic"}</dd></div>
+              <div><dt>{language === "ar" ? "مسار العمل" : "Workflow"}</dt><dd>{language === "ar" ? "تحليل المدونة" : "Corpus analysis"}</dd></div>
+            </dl>
+          </div>
+          <div className={styles.toolLinks}>
+            <a href="#quick-analysis">{language === "ar" ? "متابعة التحليل" : "Continue analysis"} <span aria-hidden="true">↓</span></a>
           </div>
         </section>}
 
@@ -424,7 +452,7 @@ const interpretResults = async () => {
 
         {projectHandoff && <section className={styles.toolDirectory}><div><p className={styles.sectionLabel}>{language === "ar" ? "سياق مشروع وارد" : "INCOMING PROJECT CONTEXT"}</p><h2>{language === "ar" ? "راجع قبل دمج السياق" : "Review before merging context"}</h2><p>{language === "ar" ? "لم تُستبدل حالة التحليل الحالية. لن تُستخدم المعلومات إلا بعد قبولك." : "The current Analyze state has not been replaced. Nothing is used until you accept it."}</p><pre dir="ltr">{JSON.stringify(incomingHandoffPreview(projectHandoff).payload, null, 2)}</pre></div><div className={styles.toolLinks}><button type="button" onClick={mergeProjectContext}>{language === "ar" ? "قبول ودمج" : "Accept and merge"}</button><button type="button" onClick={() => setProjectHandoff(null)}>{language === "ar" ? "تجاهل" : "Keep current state"}</button></div></section>}
 
-        {!isCorpusInterpretation && <section className={styles.toolDirectory} aria-labelledby="corpus-tools-title">
+        {!isCorpusInterpretation && !hasSelectedResearchPath && <section className={styles.toolDirectory} aria-labelledby="corpus-tools-title">
           <div>
             <p className={styles.sectionLabel}>{language === "ar" ? "أدوات التحليل" : "ANALYSIS TOOLS"}</p>
             <h2 id="corpus-tools-title">{language === "ar" ? "لسانيات المدونات (Corpus Linguistics)" : "Corpus Linguistics"}</h2>

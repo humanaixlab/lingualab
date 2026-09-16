@@ -27,7 +27,7 @@ const GUIDANCE = {
 
 const COPY = {
   ar: {
-    head: "لسانيات المدونات · تجريب بحثي", back: "العودة إلى مركز البحث", eyebrow: "لسانيات المدونات", title: "مختبر أبحاث المدونات", badge: "تجريب بحثي",
+    head: "لسانيات المدونات · تجريب بحثي", back: "العودة إلى مخطط البحث", eyebrow: "لسانيات المدونات", title: "مختبر أبحاث المدونات", badge: "تجريب بحثي",
     lead: "أنشئ مدونة عربية أولية وافحص نتائج ناتجة عن حساب حتمي (Deterministic Computation) قبل مراجعة التفسير المدعوم بالذكاء الاصطناعي.", notice: "المخرجات مقترحات تحليلية مدعومة بالذكاء الاصطناعي، ويظل الباحث مسؤولًا عن التحقق من النتائج واعتمادها في الاستخدام البحثي.",
     create: "إنشاء مدونة جديدة", createDesc: "اجمع نصوصًا عربية مع بيانات وصفية بسيطة، وافحص الجاهزية والتكرار.", analyze: "تحليل المدونة", analyzeDesc: "نفّذ تحليل التكرار والسياقات والمتتاليات اللفظية محليًا، ثم اطلب تفسيرًا اختياريًا.",
     paste: "النص العربي", pastePlaceholder: "ألصق نصًا عربيًا لإضافته إلى المدونة…", files: "رفع ملفات نصية عربية", fileHelp: "يمكن اختيار عدة ملفات نصية. تبقى النصوص محفوظة محليًا على هذا الجهاز فقط.",
@@ -39,7 +39,7 @@ const COPY = {
     metadataFields: "حقول وصفية مقترحة", inclusionCriteria: "معايير الإدراج", exclusionCriteria: "معايير الاستبعاد", textTypes: "أنواع النصوص المناسبة", corpusStructure: "بنية مقترحة للمدونة", readinessIssues: "مسائل الجاهزية", summary: "الملخص", patterns: "أنماط تستحق المراجعة", researchQuestions: "أسئلة بحثية ممكنة", caution: "تنبيه منهجي", onePerLine: "عنصر واحد في كل سطر", clear: "مسح المدونة المحلية", confirmClear: "مسح جميع نصوص هذه المدونة ومراجعاتها المحلية؟", arabicRequired: "أدخل نصًا عربيًا صالحًا. لم تُضف الملفات التي لا تحتوي على نص عربي.",
   },
   en: {
-    head: "Corpus Linguistics · Research Preview", back: "Back to Research Hub", eyebrow: "CORPUS LINGUISTICS", title: "Corpus Research Lab", badge: "Research Preview",
+    head: "Corpus Linguistics · Research Preview", back: "Back to Research Planner", eyebrow: "CORPUS LINGUISTICS", title: "Corpus Research Lab", badge: "Research Preview",
     lead: "Build an initial Arabic corpus and inspect deterministic results before reviewing AI-supported interpretation.", notice: "Outputs are AI-supported analytical suggestions. The researcher remains responsible for verifying and approving results for research use.",
     create: "Create Corpus", createDesc: "Combine Arabic texts with simple metadata, then inspect readiness and duplicates.", analyze: "Corpus Analysis", analyzeDesc: "Run frequency, contexts, and N-gram analysis locally, then request optional interpretation.",
     paste: "Arabic text", pastePlaceholder: "Paste Arabic text to add to the corpus…", files: "Upload Arabic text files", fileHelp: "You may select multiple text files. Text remains stored only on this device.",
@@ -184,7 +184,7 @@ export default function CorpusResearch() {
   return <>
     <Head><title>{copy.head} · LinguaLab</title></Head>
     <main className={styles.page}>
-      <Link className={styles.back} href="/ar-tools#all-tools">← {copy.back}</Link>
+      <Link className={styles.back} href="/research-planner#all-tools">← {copy.back}</Link>
       <header className={styles.header}><div><p className={styles.eyebrow}>{copy.eyebrow}</p><h1>{copy.title}</h1><p>{copy.lead}</p></div><span className={styles.previewBadge}>{copy.badge}</span></header>
       <p className={styles.notice}>{copy.notice}</p>
       <PageGuidance language={locale} steps={GUIDANCE[locale]} />

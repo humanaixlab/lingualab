@@ -141,7 +141,7 @@ export default function CorpusLinguisticsPath() {
     <>
       <Head><title>{copy.title} · LinguaLab</title></Head>
       <main className={styles.page}>
-        <Link className={styles.back} href="/ar-tools#corpus-linguistics">← {copy.back}</Link>
+        <Link className={styles.back} href="/research-planner#corpus-linguistics">← {copy.back}</Link>
         <header className={styles.header}>
           <p className={styles.eyebrow}>{copy.eyebrow}</p>
           <h1>{copy.title}</h1>

@@ -4,7 +4,7 @@ import test from "node:test";
 import { ACTIVE_TOOLS, FUTURE_PLAN_ARCHITECTURE, INCLUDED_DATASETS, PROJECT_OUTPUT_TYPES, RESEARCH_AREAS, USER_ACTIVITY_ARCHITECTURE, getPlatformInventorySummary } from "../lib/platform-inventory.js";
 import { PROJECT_CATALOG } from "../lib/project-catalog.js";
 
-const page = fs.readFileSync(new URL("../pages/platform-inventory.js", import.meta.url), "utf8");
+const page = fs.readFileSync(new URL("../pages/platform/inventory.js", import.meta.url), "utf8");
 
 test("inventory reports exact active routes and canonical research areas", () => {
   assert.equal(ACTIVE_TOOLS.length, 18);

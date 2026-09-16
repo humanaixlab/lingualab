@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import { RESEARCH_PATHS } from "../lib/research-paths.js";
-import { CORPUS_PATH_HUB_SECTION, readResearchPathContext, researchPathHref, researchPathNavigation } from "../lib/research-path-context.js";
+import { CORPUS_PATH_HUB_SECTION, LEARNING_PATH_SECTION, readResearchPathContext, researchPathHref, researchPathNavigation } from "../lib/research-path-context.js";
 
 const source = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
@@ -71,7 +71,7 @@ test("path-aware back navigation accepts only the canonical tool and path pairin
   const context = readResearchPathContext(href, "/tools/frequency");
   assert.deepEqual(context, { pathId: "corpus-linguistics", sourcePath: "corpus-linguistics", sourceSection: "research-paths" });
   assert.deepEqual(researchPathNavigation(context, "en", "Frequency"), {
-    href: "/ar-tools#corpus-linguistics",
+    href: "/research-planner#corpus-linguistics",
     backLabel: "Back to Corpus Linguistics",
     crumbs: ["Research Path", "Corpus Linguistics", "Frequency"],
   });
@@ -92,6 +92,27 @@ test("the Corpus Linguistics hub preserves lightweight path context and returns 
   assert.equal(readResearchPathContext(invalid, "/tools/pos"), null);
 });
 
+test("Analyze reuses a valid selected path while direct entry remains context-free", () => {
+  const plannerHref = researchPathHref("/tools/analyze", "corpus-linguistics");
+  const learningHref = researchPathHref("/tools/analyze", "corpus-linguistics", LEARNING_PATH_SECTION);
+  const expectedBase = {
+    pathId: "corpus-linguistics",
+    sourcePath: "corpus-linguistics",
+    selectedPath: "corpus-linguistics",
+    selectedDomain: "linguistic",
+    workflow: "corpus-analysis",
+  };
+  assert.deepEqual(readResearchPathContext(plannerHref, "/tools/analyze"), { ...expectedBase, sourceSection: "research-paths" });
+  assert.deepEqual(readResearchPathContext(learningHref, "/tools/analyze"), { ...expectedBase, sourceSection: "learning-center" });
+  assert.equal(readResearchPathContext("/tools/analyze", "/tools/analyze"), null);
+  assert.equal(readResearchPathContext(plannerHref.replace("workflow=corpus-analysis", "workflow=semantic-analysis"), "/tools/analyze"), null);
+
+  const analyze = source("pages/tools/analyze.js");
+  assert.match(analyze, /!hasSelectedResearchPath && <section className=\{styles\.toolDirectory\} aria-labelledby="research-path-entry-title"/);
+  assert.match(analyze, /hasSelectedResearchPath && <section className=\{styles\.toolDirectory\} aria-labelledby="selected-research-path-title"/);
+  assert.match(analyze, /setResearchPathContext\(selectedResearchPath\)/);
+});
+
 test("Coming next capabilities are non-interactive and never receive routes", () => {
   for (const path of RESEARCH_PATHS) {
     for (const item of [...path.coming.en, ...path.coming.ar]) assert.equal(typeof item, "string");
@@ -103,16 +124,16 @@ test("Coming next capabilities are non-interactive and never receive routes", ()
 });
 
 test("canonical homes remain separated across Analyze, Build, Research, Workspace, and Learn", () => {
-  const hub = source("pages/ar-tools.js");
+  const hub = source("pages/research-planner.js");
   const analyze = source("pages/tools/analyze.js");
-  assert.match(analyze, /href="\/ar-tools#research-paths"/);
+  assert.match(analyze, /href="\/research-planner#research-paths"/);
   assert.doesNotMatch(analyze, /href="\/tools\/(frequency|concordance|ngrams|pos)"/);
   assert.match(analyze, /href="\/research-paths\/corpus-linguistics"/);
   assert.match(source("lib/i18n/en.js"), /Data → Prepare → Configure → Run → Evaluate → Interpret → Improve/);
   assert.match(hub, /id="writing-tools"/);
   assert.match(source("lib/research-paths.js"), /href: "\/tools\/prompt"[^\n]+contextual: true/);
   assert.doesNotMatch(source("pages/workspace.js"), /<ResearchPaths|RESEARCH_PATHS\.map/);
-  assert.doesNotMatch(source("pages/student-dashboard.js"), /<ResearchPaths|RESEARCH_PATHS\.map/);
+  assert.doesNotMatch(source("pages/learning-center.js"), /<ResearchPaths|RESEARCH_PATHS\.map/);
   assert.match(source("pages/_app.js"), /<SmartAssistant \/>/);
 });
 
@@ -179,7 +200,7 @@ test("ready paths use their existing canonical homes without duplicate hubs", ()
   assert.equal(classification.available.some((tool) => /sentiment|logistic|svm/i.test(tool.href)), false);
 
   const technology = RESEARCH_PATHS.find((path) => path.id === "language-technology");
-  assert.equal(technology.ctaHref, "/ar-tools#build-tools");
+  assert.equal(technology.ctaHref, "/research-planner#build-tools");
   assert.equal(technology.hubHref, undefined);
   assert.deepEqual(technology.available.filter((tool) => !tool.contextual).map((tool) => tool.href), [
     "/tools/excel",
@@ -208,20 +229,20 @@ test("secondary paths retain bilingual scientific tool terminology", () => {
 
   const technology = RESEARCH_PATHS.find((path) => path.id === "language-technology");
   assert.match(technology.available.find((tool) => tool.href === "/tools/excel").ar, /\(Spreadsheet Explorer\)$/);
-  assert.match(technology.available.find((tool) => tool.href === "/tools/code").ar, /\(AI Code Assistant\)$/);
-  assert.match(technology.available.find((tool) => tool.href === "/tools/prompt").ar, /\(Prompt Assistant\)$/);
+  assert.match(technology.available.find((tool) => tool.href === "/tools/code").ar, /\(Code Builder\)$/);
+  assert.match(technology.available.find((tool) => tool.href === "/tools/prompt").ar, /\(Prompt Builder\)$/);
 });
 
 test("Research Paths layer preserves the existing assistant and Workspace role", () => {
-  assert.match(source("pages/ar-tools.js"), /<ResearchPaths language=\{language\} mode="linguistic" \/>/);
+  assert.match(source("pages/research-planner.js"), /<ResearchPaths language=\{language\} mode="linguistic" \/>/);
   assert.match(source("pages/_app.js"), /<SmartAssistant \/>/);
   const workspace = source("pages/workspace.js");
   assert.doesNotMatch(workspace, /ResearchPaths|RESEARCH_PATHS|Explore by Research Path|استكشف حسب المسار البحثي/);
 });
 
-test("Research Hub renders only the four canonical linguistic paths", () => {
+test("Research Planner renders only the four canonical linguistic paths", () => {
   const component = source("components/ResearchPaths.js");
-  const hub = source("pages/ar-tools.js");
+  const hub = source("pages/research-planner.js");
   assert.match(component, /LINGUISTIC_PATH_IDS = new Set\(\["corpus-linguistics", "morphology-syntax", "semantics", "discourse-pragmatics"\]\)/);
   assert.match(component, /mode === "linguistic" \? RESEARCH_PATHS\.filter/);
   assert.match(hub, /mode="linguistic"/);
@@ -258,6 +279,6 @@ test("visual hierarchy preserves every educational field, link, CTA, and collaps
   assert.deepEqual(Object.fromEntries(RESEARCH_PATHS.filter((path) => path.cta).map((path) => [path.id, path.hubHref || path.ctaHref])), {
     "corpus-linguistics": "/research-paths/corpus-linguistics",
     "text-classification": "/workspace",
-    "language-technology": "/ar-tools#build-tools",
+    "language-technology": "/research-planner#build-tools",
   });
 });

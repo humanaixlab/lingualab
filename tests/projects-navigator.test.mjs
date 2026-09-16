@@ -45,7 +45,7 @@ test("Projects remains navigation-only and separates result layers", () => {
 
 test("every project links to real canonical, data, and tool destinations without duplicate workflow detours", () => {
   const routeFiles = new Set([
-    "/", "/ar-tools", "/workspace", "/research-report", "/research-paths/corpus-linguistics", "/tools/analyze", "/tools/prompt",
+    "/", "/research-planner", "/workspace", "/research-report", "/research-paths/corpus-linguistics", "/tools/analyze", "/tools/prompt",
     ...Object.values(PROJECT_TOOL_ROUTES),
   ]);
   for (const project of PROJECT_CATALOG) {

@@ -3,6 +3,7 @@ import { IBM_Plex_Sans_Arabic, Inter } from "next/font/google";
 import { LanguageProvider, useLanguage } from "../components/LanguageProvider";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import SmartAssistant from "../components/SmartAssistant";
+import ToolDocumentationLink from "../components/ToolDocumentationLink";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -29,6 +30,7 @@ function LocalizedApp({ Component, pageProps }) {
       dir={direction}
     >
       <LanguageSwitcher />
+      <ToolDocumentationLink />
       <Component {...pageProps} />
       <SmartAssistant />
     </div>

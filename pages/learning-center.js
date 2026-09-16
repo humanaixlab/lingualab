@@ -2,12 +2,14 @@ import Link from "next/link";
 import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 import { useLanguage } from "../components/LanguageProvider";
+import { LEARNING_PATH_SECTION, researchPathHref } from "../lib/research-path-context";
 
 const learningPaths = [
   {
     id: "text-analysis",
     copyKey: "text",
     href: "/tools/analyze",
+    researchPath: "corpus-linguistics",
     completed: false,
   },
   {
@@ -36,7 +38,12 @@ export default function LearningHubPage() {
 
   useEffect(() => {
     let restoreTimer;
-    const saved = localStorage.getItem("lingualab-learning-progress");
+    let saved = null;
+    try {
+      saved = localStorage.getItem("lingualab-learning-progress");
+    } catch {
+      return undefined;
+    }
 
     if (!saved) return undefined;
 
@@ -60,15 +67,19 @@ export default function LearningHubPage() {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem(
-      "lingualab-learning-progress",
-      JSON.stringify(
-        paths.map(({ id, completed }) => ({
-          id,
-          completed,
-        }))
-      )
-    );
+    try {
+      localStorage.setItem(
+        "lingualab-learning-progress",
+        JSON.stringify(
+          paths.map(({ id, completed }) => ({
+            id,
+            completed,
+          }))
+        )
+      );
+    } catch {
+      // Progress remains available for the current page session.
+    }
   }, [paths]);
 
   const completedCount = useMemo(
@@ -98,6 +109,10 @@ export default function LearningHubPage() {
     );
   };
 
+  const practiceHref = (path) => path.researchPath
+    ? `${researchPathHref(path.href, path.researchPath, LEARNING_PATH_SECTION)}#quick-analysis`
+    : `${path.href}?from=learn`;
+
   return (
     <main style={styles.page}>
       <Head><title>{t("learning.title")} | LinguaLab</title></Head>
@@ -112,7 +127,7 @@ export default function LearningHubPage() {
             <Link href="/workspace" style={styles.navLink}>
               {t("nav.openWorkspace")}
             </Link>
-            <Link href="/ar-tools" style={styles.navLink}>
+            <Link href="/research-planner" style={styles.navLink}>
               {t("nav.researchHub")}
             </Link>
             <Link href="/research-advisor" style={styles.navLink}>
@@ -189,7 +204,7 @@ export default function LearningHubPage() {
                 <p style={styles.cardDescription}>{t(`learning.paths.${path.copyKey}.description`)}</p>
 
                 <div style={styles.cardFooter}>
-                  <Link href={`${path.href}?from=learn`} style={styles.primaryAction}>
+                  <Link href={practiceHref(path)} style={styles.primaryAction}>
                     {t(`learning.paths.${path.copyKey}.action`)}
                   </Link>
 

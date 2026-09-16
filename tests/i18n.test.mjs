@@ -154,7 +154,7 @@ test("English and Arabic dictionaries have identical complete key structure", ()
 });
 
 test("all literal core translation keys resolve in both real dictionaries", () => {
-  const files = ["pages/index.js", "pages/ar-tools.js", "pages/workspace.js", "pages/tools/analyze.js", "pages/research-advisor.js", "pages/research-report.js", "pages/student-dashboard.js", "components/Layout.js", "components/SmartAssistant.js"];
+  const files = ["pages/index.js", "pages/research-planner.js", "pages/workspace.js", "pages/tools/analyze.js", "pages/research-advisor.js", "pages/research-report.js", "pages/learning-center.js", "components/Layout.js", "components/SmartAssistant.js"];
   const used = new Set(files.flatMap((path) => [...source(path).matchAll(/\bt\(["']([^"']+)["']/g)].map((match) => match[1])));
   for (const path of used) {
     assert.notEqual(lookup(en, path), undefined, `missing English key used by core UI: ${path}`);
@@ -190,13 +190,13 @@ test("Analyze labels only explicitly Arabic labeled data as Arabic", () => {
 });
 
 test("language switching is isolated from routes, internal values, context, and handoffs", () => {
-  const joined = ["pages/index.js", "pages/ar-tools.js", "pages/workspace.js", "pages/tools/analyze.js", "pages/research-advisor.js"].map(source).join("\n");
-  for (const route of ["/ar-tools", "/tools/analyze", "/tools/prompt", "/student-dashboard", "/api/research-advisor", "/api/research-copilot", "/api/research-interpreter"]) assert.ok(joined.includes(route));
+  const joined = ["pages/index.js", "pages/research-planner.js", "pages/workspace.js", "pages/tools/analyze.js", "pages/research-advisor.js"].map(source).join("\n");
+  for (const route of ["/research-planner", "/tools/analyze", "/tools/prompt", "/learning-center", "/api/research-advisor", "/api/research-copilot", "/api/research-interpreter"]) assert.ok(joined.includes(route));
   for (const value of ["classification", "exploration", "supervised_classification", "analysis"]) assert.ok(joined.includes(value));
   assert.doesNotMatch(source("components/LanguageProvider.js"), /sessionStorage|router|location|reload|fetch\(/);
   assert.doesNotMatch(source("lib/research-context.js"), /lingualab-ui-language/);
   assert.doesNotMatch(source("lib/tool-handoff.js"), /lingualab-ui-language/);
-  for (const path of ["pages/workspace.js", "pages/ar-tools.js", "pages/research-advisor.js", "pages/tools/analyze.js"]) assert.doesNotMatch(source(path), /\}, \[[^\]]*language[^\]]*\]\);/);
+  for (const path of ["pages/workspace.js", "pages/research-planner.js", "pages/research-advisor.js", "pages/tools/analyze.js"]) assert.doesNotMatch(source(path), /\}, \[[^\]]*language[^\]]*\]\);/);
 });
 
 test("dataset, user, and AI content keeps automatic direction", () => {

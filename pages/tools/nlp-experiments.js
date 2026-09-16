@@ -101,7 +101,7 @@ export default function NlpExperiments() {
   }
 
   return <><Head><title>{copy.head} · LinguaLab</title></Head><main className={styles.page}>
-    <Link className={styles.back} href="/ar-tools#build-tools">← {copy.back}</Link><header className={styles.header}><div><p className={styles.eyebrow}>{copy.eyebrow}</p><h1>{copy.title}</h1><p>{copy.lead}</p></div><span className={styles.previewBadge}>{copy.badge}</span></header><p className={styles.notice}>{copy.notice}</p>
+    <Link className={styles.back} href="/research-planner#build-tools">← {copy.back}</Link><header className={styles.header}><div><p className={styles.eyebrow}>{copy.eyebrow}</p><h1>{copy.title}</h1><p>{copy.lead}</p></div><span className={styles.previewBadge}>{copy.badge}</span></header><p className={styles.notice}>{copy.notice}</p>
     <PageGuidance language={locale} steps={GUIDANCE[locale]} />
     <section className={styles.executionExplanation} aria-labelledby="nlp-execution-title">
       <div className={styles.executionHeading}><div><p>{copy.executionType}</p><h2 id="nlp-execution-title">{copy.executionTitle}</h2></div><span>{locale === "ar" ? "مخرج منظم · تحقق برمجي · مراجعة الباحث" : "Structured output · Programmatic validation · Researcher review"}</span></div>
