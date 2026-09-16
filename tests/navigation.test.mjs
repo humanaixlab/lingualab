@@ -11,17 +11,18 @@ const swc = require("next/dist/build/swc");
 await swc.loadBindings();
 const source = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("Home exposes exactly the four canonical intent destinations", () => {
+test("Home exposes exactly three distinct canonical intent destinations", () => {
   const home = source("pages/index.js");
   const goals = home.slice(home.indexOf("const goals = ["), home.indexOf("const workflow = ["));
   for (const [key, href] of [
-    ["research", "/research-planner"], ["analyze", "/tools/analyze"], ["build", "/tools/prompt"], ["learn", "/learning-center"],
+    ["research", "/research-planner"], ["analyze", "/tools/analyze"], ["learn", "/learning-center"],
   ]) {
     assert.match(goals, new RegExp(`key: "${key}"[\\s\\S]*?href: "${href.replaceAll("/", "\\/")}"`));
   }
-  assert.equal((goals.match(/key: /g) || []).length, 4);
-  assert.match(source("lib/i18n/en.js"), /build: \{ label: "Build", title: "Create a structured research prompt"/);
-  assert.match(source("lib/i18n/ar.js"), /build: \{ label: "البناء", title: "أنشئ تعليمات بحثية منظّمة"/);
+  assert.equal((goals.match(/key: /g) || []).length, 3);
+  assert.doesNotMatch(goals, /\/tools\/prompt|key: "build"/);
+  assert.doesNotMatch(source("lib/i18n/en.js"), /title: "Create a structured research prompt"/);
+  assert.doesNotMatch(source("lib/i18n/ar.js"), /title: "أنشئ تعليمات بحثية منظّمة"/);
   assert.doesNotMatch(source("lib/i18n/en.js"), /title: "Build a research workflow"/);
   assert.match(source("lib/i18n/en.js"), /Capabilities overview/);
   assert.match(home, /href="\/research-planner#all-tools"/);

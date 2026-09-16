@@ -67,6 +67,7 @@ export default function ReferencesPage() {
                 {reference.edition && <p><strong>{language === "ar" ? "الطبعة:" : "Edition:"}</strong> {reference.edition[language]}</p>}
                 {reference.isbn && <p><strong>ISBN:</strong> {reference.isbn}</p>}
                 <p>{reference.note[language]}</p>
+                {reference.doiOrUrl && <a className={styles.referenceSource} href={reference.doiOrUrl} target="_blank" rel="noopener noreferrer">{language === "ar" ? "فتح المصدر الرسمي" : "Open official source"}</a>}
               </article>
             ))}
           </div>

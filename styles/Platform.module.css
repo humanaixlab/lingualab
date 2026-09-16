@@ -258,6 +258,16 @@ a.card:hover {
   line-height: 1.62;
 }
 
+.referenceSource {
+  display: inline-flex;
+  margin-top: 16px;
+  color: #45645a;
+  font-size: .86rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .referenceMeta {
   display: flex;
   flex-wrap: wrap;

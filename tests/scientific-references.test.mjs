@@ -34,14 +34,19 @@ test("seven paths expose exactly three approved platform references", () => {
   assert.equal(total, 21);
 });
 
-test("approved bibliographic details are preserved exactly without inferred source data", () => {
+test("approved bibliographic details keep only the previously verified official sources", () => {
   const allReferences = Object.values(SCIENTIFIC_FOUNDATIONS).flatMap((foundation) => foundation.platformReferences);
-  assert.ok(allReferences.every((reference) => reference.doiOrUrl === null));
+  const linked = allReferences.filter((reference) => reference.doiOrUrl);
+  assert.equal(linked.length, 9);
+  assert.ok(linked.every((reference) => /^https:\/\/(library\.ksaa\.gov\.sa|ksupress\.ksu\.edu\.sa)\//.test(reference.doiOrUrl)));
+  assert.ok(allReferences.filter((reference) => !reference.doiOrUrl).every((reference) => reference.doiOrUrl === null));
 
   const corpusBook = SCIENTIFIC_FOUNDATIONS["corpus-linguistics"].platformReferences[0];
   assert.equal(corpusBook.author.ar, "صالح بن فهد العصيمي (محرر)، ومجموعة من الباحثين");
   assert.equal(corpusBook.title.ar, "المدونات اللغوية العربية: بناؤها وطرائق الإفادة منها");
   assert.equal(corpusBook.isbn, "9786039066484");
+  assert.equal(corpusBook.doiOrUrl, "https://library.ksaa.gov.sa/links/epubs/Arabic-Corpora.pdf");
+  assert.equal(SCIENTIFIC_FOUNDATIONS["corpus-linguistics"].platformReferences[1].doiOrUrl, "https://library.ksaa.gov.sa/index/book/141");
 
   const treebank = SCIENTIFIC_FOUNDATIONS["morphology-syntax"].platformReferences[2];
   assert.equal(treebank.publisher, null);
@@ -60,11 +65,18 @@ test("approved bibliographic details are preserved exactly without inferred sour
     assert.equal(translatedBook.translator.ar, "هند سليمان الخليفة");
     assert.equal(translatedBook.year, 2014);
     assert.equal(translatedBook.isbn, "9786035072571");
+    assert.equal(translatedBook.doiOrUrl, "https://ksupress.ksu.edu.sa/ar/books/6635/9786035072571");
   }
 
   for (const pathId of ["text-classification", "nlp-experiments"]) {
     assert.equal(SCIENTIFIC_FOUNDATIONS[pathId].platformReferences[1].isbn, "9786038221532");
+    assert.equal(SCIENTIFIC_FOUNDATIONS[pathId].platformReferences[1].doiOrUrl, "https://library.ksaa.gov.sa/links/epubs/essential-app.pdf");
   }
+  for (const pathId of ["text-classification", "information-extraction"])
+    assert.equal(SCIENTIFIC_FOUNDATIONS[pathId].platformReferences[2].doiOrUrl, "https://library.ksaa.gov.sa/links/epubs/maeayir_alhawsabat_allughawiat_alearabia.pdf");
+
+  for (const id of ["corpus-standards-2025", "syntax-treebank-2017", "discourse-yaqout-2021", "extraction-jomaa-2024", "nlp-jomaa-2024"])
+    assert.equal(allReferences.find((reference) => reference.id === id).doiOrUrl, null);
 });
 
 test("researcher references are normalized, bounded, editable by replacement, and isolated by path", () => {
@@ -114,6 +126,13 @@ test("all seven executable paths mount the shared bilingual reference framework"
   assert.match(component, /checked=\{form\.suggestedForReport\}/);
   assert.match(component, /reference\.isPlaceholder \? styles\.placeholder : styles\.approved/);
   assert.match(component, /reference\.doiOrUrl \? <a/);
+  assert.match(component, /فتح المصدر الرسمي/);
+  assert.match(component, /Open official source/);
+  assert.match(component, /rel="noopener noreferrer"/);
+  const directory = source("pages/platform/references.js");
+  assert.match(directory, /فتح المصدر الرسمي/);
+  assert.match(directory, /Open official source/);
+  assert.match(directory, /rel="noopener noreferrer"/);
   assert.match(source("lib/scientific-references.js"), /isPlaceholder: false/);
   assert.doesNotMatch(source("lib/scientific-references.js"), /placeholderReference|isPlaceholder: true/);
 });

@@ -15,14 +15,9 @@ const goals = [
     icon: "02",
   },
   {
-    key: "build",
-    href: "/tools/prompt",
-    icon: "03",
-  },
-  {
     key: "learn",
     href: "/learning-center",
-    icon: "04",
+    icon: "03",
   },
 ];
 
