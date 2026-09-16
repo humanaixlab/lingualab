@@ -45,9 +45,10 @@ test("Learning Center cards never directly open production tools", () => {
 
 test("production handoffs appear only after a correct understanding check", () => {
   const page = source("pages/learning-center/[lesson].js");
+  const interactions = source("components/learning/LessonMicroInteractions.js");
   assert.match(page, /const answeredCorrectly = submitted && selectedAnswer === lesson\.check\.correctIndex/);
   assert.match(page, /answeredCorrectly \? \([\s\S]*learningApplicationHref\(lesson\.id\)/);
-  assert.doesNotMatch(page, /fetch\(|\/api\/|type="file"|createAnalysisHandoff|createReportContext/);
+  assert.doesNotMatch(`${page}\n${interactions}`, /fetch\(|\/api\/|type="file"|createAnalysisHandoff|createReportContext/);
 });
 
 test("lesson application links preserve context without creating duplicate workflows", () => {

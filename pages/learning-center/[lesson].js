@@ -2,6 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useState } from "react";
 import { useLanguage } from "../../components/LanguageProvider";
+import { LessonMicroInteractions, ProgressiveWorkedExample } from "../../components/learning/LessonMicroInteractions";
 import {
   LEARNING_LESSON_IDS,
   learningApplicationHref,
@@ -22,6 +23,7 @@ const copy = {
     retry: "Review the explanation and try again.",
     application: "Application step",
     locked: "Complete the understanding check to open the optional production-tool application.",
+    nextExampleStep: "Next example step",
   },
   ar: {
     back: "العودة إلى مركز التعلّم",
@@ -35,6 +37,7 @@ const copy = {
     retry: "راجع الشرح ثم حاول مرة أخرى.",
     application: "مرحلة التطبيق",
     locked: "أكمل اختبار الفهم لفتح الانتقال الاختياري إلى الأداة الإنتاجية.",
+    nextExampleStep: "الخطوة التالية في المثال",
   },
 };
 
@@ -53,7 +56,21 @@ export default function LearningLessonPage({ lessonId }) {
 
   const checkAnswer = (event) => {
     event.preventDefault();
-    if (selectedAnswer !== null) setSubmitted(true);
+    if (selectedAnswer === null) return;
+    setSubmitted(true);
+    if (selectedAnswer !== lesson.check.correctIndex) return;
+    try {
+      const saved = JSON.parse(localStorage.getItem("lingualab-learning-progress") || "[]");
+      const current = Array.isArray(saved) ? saved : [];
+      localStorage.setItem("lingualab-learning-progress", JSON.stringify(
+        LEARNING_LESSON_IDS.map((id) => ({
+          id,
+          completed: id === lesson.id || Boolean(current.find((item) => item.id === id)?.completed),
+        }))
+      ));
+    } catch {
+      // The lesson and its handoff remain available when browser storage is blocked.
+    }
   };
 
   return (
@@ -84,12 +101,15 @@ export default function LearningLessonPage({ lessonId }) {
 
         <section className={styles.lessonSection}>
           <p className={styles.sectionLabel}>{ui.concept}</p>
-          <div className={styles.conceptGrid}>
-            {lesson.concepts.map((concept) => (
-              <article className={styles.conceptCard} key={concept.title.en}>
-                <h2>{text(concept.title)}</h2>
-                <p>{text(concept.text)}</p>
-              </article>
+          <div className={styles.conceptStream}>
+            {lesson.concepts.map((concept, index) => (
+              <div className={styles.conceptUnit} key={concept.title.en}>
+                <article className={styles.conceptCard}>
+                  <h2>{text(concept.title)}</h2>
+                  <p>{text(concept.text)}</p>
+                </article>
+                <LessonMicroInteractions lessonId={lesson.id} locale={locale} afterConcept={index} />
+              </div>
             ))}
           </div>
         </section>
@@ -98,8 +118,11 @@ export default function LearningLessonPage({ lessonId }) {
           <article className={styles.learningCard}>
             <p className={styles.sectionLabel}>{ui.example}</p>
             <h2>{text(lesson.example.title)}</h2>
-            <p className={styles.sample}>{text(lesson.example.sample)}</p>
-            <ol>{lesson.example.steps.map((step) => <li key={step.en}>{text(step)}</li>)}</ol>
+            <ProgressiveWorkedExample
+              example={lesson.example}
+              locale={locale}
+              label={ui.nextExampleStep}
+            />
           </article>
 
           <article className={styles.learningCard}>
