@@ -10,6 +10,7 @@ import styles from "../../styles/Analyze.module.css";
 import { useLanguage } from "../../components/LanguageProvider";
 import ProgressiveAiOutput from "../../components/ProgressiveAiOutput";
 import { fetchAiJson } from "../../lib/ai-stream";
+import { createProjectHandoff, incomingHandoffPreview, readProjectHandoff } from "../../lib/structured-handoff";
 
 const DEFAULT_PLAN = {
   variant: "default",
@@ -176,14 +177,19 @@ export default function Analyzer() {
   const [progressText, setProgressText] = useState("");
   const [context, setContext] = useState(null);
   const [sourceAnalysis, setSourceAnalysis] = useState(null);
+  const [projectHandoff, setProjectHandoff] = useState(null);
+  const [acceptedProject, setAcceptedProject] = useState(null);
+  const [projectTarget, setProjectTarget] = useState("");
   const router = useRouter();
   const isCorpusInterpretation = sourceAnalysis?.pathId === "corpus-linguistics" && Boolean(CORPUS_TOOL_LABELS[sourceAnalysis?.sourceTool]);
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
       const nextContext = analyzeContext(readResearchContext(window.location.search));
       const handoff = readAnalysisHandoff(window.location.search);
+      const incomingProject = readProjectHandoff("analyze", window.location.search);
       setContext(nextContext);
       setSourceAnalysis(handoff);
+      setProjectHandoff(incomingProject);
       if (handoff) {
         setText(handoff.text);
         setResult(analyzeTextValue(handoff.text));
@@ -193,6 +199,22 @@ export default function Analyzer() {
     });
     return () => window.cancelAnimationFrame(frame);
   }, [router.asPath]);
+
+  const mergeProjectContext = () => {
+    if (!projectHandoff) return;
+    setAcceptedProject({ ...incomingHandoffPreview(projectHandoff), provenance: { ...projectHandoff.provenance, status: "accepted", researcherDecision: "merge" } });
+    const incomingText = projectHandoff.payload.datasetContext || projectHandoff.payload.datasetDescription || "";
+    if (!text.trim() && incomingText) setText(incomingText);
+    setProjectHandoff(null);
+  };
+
+  const transferProject = (target) => {
+    if (!result) return;
+    const payload = target === "code"
+      ? { task: "Revise the implementation that produced or prepares this analysis.", requiredChange: "Review preprocessing, derived features, or evaluation code based on the observed result.", outputSchema: ["wordCount", "sentenceCount", "topWords"], importantErrors: interpretation?.limitations ? [interpretation.limitations] : [], metrics: [`wordCount=${result.wordCount}`, `sentenceCount=${result.sentenceCount}`], codeContext: "No executable code is transferred from Analyze." }
+      : { analysisType: sourceAnalysis?.analysisType || "descriptive-text-analysis", resultSummary: `Words: ${result.wordCount}; sentences: ${result.sentenceCount}; frequent items: ${result.topWords.map(([word, count]) => `${word}=${count}`).join(", ")}`, metrics: [`wordCount=${result.wordCount}`, `sentenceCount=${result.sentenceCount}`], importantErrors: interpretation?.limitations ? [interpretation.limitations] : [], datasetDescription: acceptedProject?.payload?.datasetContext || context?.dataDescription || "User-provided text in Analyze", knownLimitations: ["Interpret results in relation to the research question and data collection method"] };
+    window.location.href = createProjectHandoff("analyze", target, payload, { sourceStateId: "analyze-current-result" });
+  };
 
   const plan = useMemo(() => buildPlan(context), [context]);
   const planVariant = plan.variant;
@@ -399,6 +421,8 @@ const interpretResults = async () => {
             <p className={styles.caution}>{language === "ar" ? "تنبيه منهجي: يجب تفسير التكرارات والسياقات والمتتاليات في ضوء حجم المدونة وطريقة جمعها وسؤال البحث. التفسير المدعوم بالذكاء الاصطناعي اقتراح يخضع لمراجعة الباحث ولا يغيّر النتائج المحسوبة." : "Methodological caution: frequencies, contexts, and N-grams must be interpreted in light of corpus size, collection method, and the research question. AI-supported interpretation is a suggestion subject to researcher review and does not alter computed results."}</p>
           </> : <DataSourceIndicator language={language} mode={context ? "projectContext" : "standalone"} />}
         </div>
+
+        {projectHandoff && <section className={styles.toolDirectory}><div><p className={styles.sectionLabel}>{language === "ar" ? "سياق مشروع وارد" : "INCOMING PROJECT CONTEXT"}</p><h2>{language === "ar" ? "راجع قبل دمج السياق" : "Review before merging context"}</h2><p>{language === "ar" ? "لم تُستبدل حالة التحليل الحالية. لن تُستخدم المعلومات إلا بعد قبولك." : "The current Analyze state has not been replaced. Nothing is used until you accept it."}</p><pre dir="ltr">{JSON.stringify(incomingHandoffPreview(projectHandoff).payload, null, 2)}</pre></div><div className={styles.toolLinks}><button type="button" onClick={mergeProjectContext}>{language === "ar" ? "قبول ودمج" : "Accept and merge"}</button><button type="button" onClick={() => setProjectHandoff(null)}>{language === "ar" ? "تجاهل" : "Keep current state"}</button></div></section>}
 
         {!isCorpusInterpretation && <section className={styles.toolDirectory} aria-labelledby="corpus-tools-title">
           <div>
@@ -686,6 +710,7 @@ const interpretResults = async () => {
               </button>}
             </section>
           )}
+          {result && !isCorpusInterpretation && <section className={styles.toolDirectory}><div><p className={styles.sectionLabel}>{language === "ar" ? "الخطوة المالكة التالية" : "NEXT OWNER-SPECIFIC STEP"}</p><h2>{language === "ar" ? "تابع المشروع دون إعادة بناء النتيجة" : "Continue without rebuilding the result"}</h2><p>{language === "ar" ? "عدّل التنفيذ في أداة بناء الكود، أو استخدم ملخص النتيجة في تصميم البحث ومنهجيته." : "Revise implementation in Code Builder, or use the result summary in Research for study design and methodology."}</p></div><div className={styles.toolLinks}><button type="button" onClick={() => setProjectTarget("code")}>{language === "ar" ? "التعديل في أداة بناء الكود" : "Modify in Code Builder"}</button><button type="button" onClick={() => setProjectTarget("research")}>{language === "ar" ? "الاستخدام في البحث" : "Use in Research"}</button></div>{projectTarget && <div><p>{language === "ar" ? "ستُنقل النتيجة المنظمة فقط، ولن يُنقل النص الخام تلقائيًا." : "Only structured result context will transfer; raw text is not transferred automatically."}</p><button type="button" onClick={() => transferProject(projectTarget)}>{language === "ar" ? "تأكيد النقل" : "Confirm transfer"}</button><button type="button" onClick={() => setProjectTarget("")}>{language === "ar" ? "إلغاء" : "Cancel"}</button></div>}</section>}
         </section>
       </main>
     </>

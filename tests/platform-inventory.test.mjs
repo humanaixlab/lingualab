@@ -7,7 +7,7 @@ import { PROJECT_CATALOG } from "../lib/project-catalog.js";
 const page = fs.readFileSync(new URL("../pages/platform-inventory.js", import.meta.url), "utf8");
 
 test("inventory reports exact active routes and canonical research areas", () => {
-  assert.equal(ACTIVE_TOOLS.length, 17);
+  assert.equal(ACTIVE_TOOLS.length, 18);
   assert.equal(new Set(ACTIVE_TOOLS.map((tool) => tool.route)).size, ACTIVE_TOOLS.length);
   for (const tool of ACTIVE_TOOLS) assert.ok(fs.existsSync(new URL(`../pages${tool.route}.js`, import.meta.url)), tool.route);
   assert.equal(RESEARCH_AREAS.filter((area) => area.kind === "linguistic").length, 4);

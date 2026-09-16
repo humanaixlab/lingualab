@@ -10,6 +10,7 @@ import DataSourceIndicator from "../components/DataSourceIndicator";
 import PageGuidance from "../components/PageGuidance";
 import ProgressiveAiOutput from "../components/ProgressiveAiOutput";
 import { fetchAiJson } from "../lib/ai-stream";
+import { createProjectHandoff, incomingHandoffPreview, readProjectHandoff } from "../lib/structured-handoff";
 
 const stages = ["idea", "data", "analysis", "interpretation", "writing"];
 
@@ -63,6 +64,9 @@ export default function ResearchAdvisorPage() {
   const [error, setError] = useState("");
   const [progressText, setProgressText] = useState("");
   const [datasetContext, setDatasetContext] = useState(null);
+  const [projectHandoff, setProjectHandoff] = useState(null);
+  const [acceptedProject, setAcceptedProject] = useState(null);
+  const [projectTarget, setProjectTarget] = useState("");
 
   useEffect(() => {
     let frameId;
@@ -94,6 +98,40 @@ export default function ResearchAdvisorPage() {
       if (frameId) window.cancelAnimationFrame(frameId);
     };
   }, []);
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => setProjectHandoff(readProjectHandoff("research", window.location.search)));
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
+
+  function mergeProjectContext() {
+    if (!projectHandoff) return;
+    const preview = incomingHandoffPreview(projectHandoff);
+    setAcceptedProject({ ...preview, provenance: { ...projectHandoff.provenance, status: "accepted", researcherDecision: "merge" } });
+    setForm((current) => {
+      const p = projectHandoff.payload;
+      const goal = p.phenomenon ? `Study ${p.phenomenon} using the approved computational design.` : p.resultSummary ? `Interpret the available ${p.analysisType || "analysis"} in relation to the research question.` : current.researchGoal;
+      const details = [p.operationalDefinition, p.unitOfAnalysis && `Unit: ${p.unitOfAnalysis}`, p.annotationScheme?.length && `Annotation: ${p.annotationScheme.join(", ")}`, p.algorithmSpec, p.resultSummary, p.datasetDescription, ...(p.limitations || []), ...(p.knownLimitations || [])].filter(Boolean).join("\n");
+      return {
+        ...current,
+        researchGoal: current.researchGoal || goal,
+        dataDescription: current.dataDescription || details,
+        currentStage: current.currentStage && current.currentStage !== "idea"
+          ? current.currentStage
+          : p.resultSummary ? "interpretation" : "analysis",
+      };
+    });
+    setProjectHandoff(null);
+  }
+
+  function transferProject(target) {
+    try {
+      const payload = target === "nlp-builder"
+        ? { researchQuestion: form.researchGoal, linguisticDomain: "To be confirmed from the research question", proposedData: form.dataDescription, methodologicalConstraints: advisor?.caution ? [advisor.caution] : [], knownPhenomenon: form.researchGoal, projectTitle: form.researchGoal.slice(0, 200) }
+        : { analysisTask: advisor?.recommendedMethod || form.question || form.researchGoal, datasetContext: form.dataDescription, researchQuestion: form.researchGoal, requestedOutputs: advisor?.steps || [], methodologicalConstraints: advisor?.caution ? [advisor.caution] : [] };
+      window.location.href = createProjectHandoff("research", target, payload, { sourceStateId: "research-advisor-current" });
+    } catch { setError(t("advisor.genericError")); }
+  }
 
   const canSubmit = useMemo(
     () => form.researchGoal.trim() && form.dataDescription.trim() && status !== "loading",
@@ -210,6 +248,8 @@ export default function ResearchAdvisorPage() {
         </section>
 
         <PageGuidance language={language} steps={GUIDANCE[language === "ar" ? "ar" : "en"]} />
+
+        {projectHandoff && <section className={styles.workspace}><div className={styles.formCard}><p className={styles.step}>{language === "ar" ? "سياق مشروع وارد" : "INCOMING PROJECT CONTEXT"}</p><h2>{language === "ar" ? "راجع السياق قبل استخدامه في البحث" : "Review context before using it in Research"}</h2><p>{language === "ar" ? "لن تُستبدل صياغتك الحالية تلقائيًا." : "Your current research form will not be replaced automatically."}</p><pre dir="ltr">{JSON.stringify(incomingHandoffPreview(projectHandoff).payload, null, 2)}</pre><div className={styles.actions}><button type="button" onClick={mergeProjectContext}>{language === "ar" ? "قبول ودمج" : "Accept and merge"}</button><button type="button" onClick={() => setProjectHandoff(null)}>{language === "ar" ? "الاحتفاظ بالحالة الحالية" : "Keep current state"}</button></div></div></section>}
 
         <section className={styles.workspace}>
           <form className={styles.formCard} onSubmit={submit}>
@@ -341,13 +381,20 @@ export default function ResearchAdvisorPage() {
                   <div>
                     <span>{t("advisor.doNext")}</span><strong dir="auto">{advisor.nextAction}</strong>
                   </div>
-                  <Link href={researchContextHref("/tools/analyze", datasetContext)}>{language === "ar" ? "متابعة التحليل" : "Continue analysis"}</Link>
+                  {datasetContext && <Link href={researchContextHref("/tools/analyze", datasetContext)}>{language === "ar" ? "متابعة تحليل مجموعة البيانات الحالية" : "Continue current dataset analysis"}</Link>}
                 </section>
 
                 <p className={styles.caution} dir="auto"><strong>{t("advisor.caution")}</strong> {advisor.caution}</p>
                 <button className={styles.submitButton} type="button" onClick={generateAdvisorReport}>
                   {language === "ar" ? "إنشاء تقرير" : "Generate Report"}
                 </button>
+                <section className={styles.nextAction}>
+                  <div><span>{language === "ar" ? "المالك التالي" : "NEXT OWNER"}</span><strong>{language === "ar" ? "انقل فقط المهمة الجديدة المطلوبة" : "Transfer only the new owner-specific task"}</strong></div>
+                  <button type="button" onClick={() => setProjectTarget("nlp-builder")}>{language === "ar" ? "تصميم النهج الحاسوبي في NLP Builder" : "Design computational approach in NLP Builder"}</button>
+                  <button type="button" onClick={() => setProjectTarget("analyze")}>{language === "ar" ? "التشغيل في Analyze" : "Run in Analyze"}</button>
+                </section>
+                {acceptedProject && <p className={styles.caution}>{language === "ar" ? "سياق مقبول من" : "Accepted context from"}: {acceptedProject.source} · {acceptedProject.provenance.status}</p>}
+                {projectTarget && <section className={styles.methodBox}><span>{language === "ar" ? "معاينة النقل" : "TRANSFER PREVIEW"}</span><p>{projectTarget === "nlp-builder" ? form.researchGoal : form.dataDescription}</p><button type="button" onClick={() => transferProject(projectTarget)}>{language === "ar" ? "تأكيد النقل" : "Confirm transfer"}</button><button type="button" onClick={() => setProjectTarget("")}>{language === "ar" ? "إلغاء" : "Cancel"}</button></section>}
               </div>
             )}
           </aside>

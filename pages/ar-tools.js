@@ -7,6 +7,7 @@ import DataSourceIndicator from "../components/DataSourceIndicator";
 import ResearchPaths from "../components/ResearchPaths";
 
 const computationalTools = [
+  { key: "nlpBuilder", link: "/tools/nlp-builder", icon: "B" },
   { key: "classificationPreview", link: "/tools/text-classification-research", icon: "TC", preview: true },
   { key: "informationExtraction", link: "/tools/information-extraction", icon: "IE", preview: true },
   { key: "nlpExperiments", link: "/tools/nlp-experiments", icon: "NLP", preview: true },
@@ -76,7 +77,9 @@ export default function ArabicToolsPage() {
         <DataSourceIndicator language={language} mode={context ? "projectContext" : "standalone"} />
         {context && <p role="status" dir="auto" style={{ margin: "0 0 20px", padding: "12px 16px", border: "1px solid rgba(112, 91, 255, 0.2)", borderRadius: "12px", background: "#efedff", color: "#4c43ce", fontSize: "13px" }}>{t("hub.currentDataset", { filename: context.fileName, count: context.rows.toLocaleString(language) })}</p>}
 
-        <ResearchPaths language={language} mode="linguistic" />
+        <div id="research-paths" style={{ scrollMarginTop: "24px" }}>
+          <ResearchPaths language={language} mode="linguistic" />
+        </div>
 
         <section id="all-tools" aria-labelledby="computational-workflows-title" style={sectionStyle}>
           <div id="build-tools" style={{ scrollMarginTop: "24px" }}>

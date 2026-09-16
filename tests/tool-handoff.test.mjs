@@ -67,6 +67,7 @@ function page(name, storage = session(), search = "") {
       if (module === "../../components/ComputationalWorkbench") return function MockWorkbench() { return null; };
       if (module === "../../components/LanguageProvider") return { useLanguage: () => ({ language: "en", direction: "ltr" }) };
       if (module === "../../lib/tool-handoff") return { createToolHandoff: scope.createToolHandoff, readToolHandoff: scope.readToolHandoff, codeTask: scope.codeTask };
+      if (module === "../../lib/structured-handoff") return { createProjectHandoff: () => "", incomingHandoffPreview: (value) => value, projectHandoffTask: () => "", readProjectHandoff: () => null };
       if (module === "xlsx") return {
         read: () => ({ SheetNames: ["Sheet1", "Sheet2"], Sheets: { Sheet1: {}, Sheet2: {} } }),
         utils: { sheet_to_json: () => [["text", "label"], ["PRIVATE CELL SENTINEL", "SECRET VALUE"]] },
