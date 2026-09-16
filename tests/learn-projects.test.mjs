@@ -11,6 +11,7 @@ import { ARABIC_CHALLENGE_FAMILIES, CHALLENGE_BY_ID } from "../lib/arabic-challe
 import { APPLIED_PROJECT_BY_PROJECT_ID, APPLIED_SECTORS, filterAppliedProjects } from "../lib/applied-projects.js";
 import { SOCIAL_IMPACT_DOMAINS, SOCIAL_IMPACT_PROJECTS, SOCIAL_PROBLEM_MAPPINGS, filterSocialImpactProjects } from "../lib/social-impact-projects.js";
 import { getProjectTaskLabel, getProjectToolLabel } from "../lib/project-display-labels.js";
+import { learningLessonRoute } from "../lib/learning-lessons.js";
 
 const require = createRequire(import.meta.url);
 const swc = require("next/dist/build/swc");
@@ -43,10 +44,7 @@ async function renderPage(path, language, router = { query: {}, isReady: true, p
       if (module === "../lib/applied-projects") return { APPLIED_PROJECT_BY_PROJECT_ID, APPLIED_SECTORS, filterAppliedProjects };
       if (module === "../lib/social-impact-projects") return { SOCIAL_IMPACT_DOMAINS, SOCIAL_IMPACT_PROJECTS, SOCIAL_PROBLEM_MAPPINGS, filterSocialImpactProjects };
       if (module === "../lib/project-display-labels") return { getProjectTaskLabel, getProjectToolLabel };
-      if (module === "../lib/research-path-context") return {
-        LEARNING_PATH_SECTION: "learning-center",
-        researchPathHref: (href, pathId, sourceSection) => `${href}?from=research-path&pathId=${pathId}&sourcePath=${pathId}&sourceSection=${sourceSection}&selectedDomain=linguistic&workflow=corpus-analysis`,
-      };
+      if (module === "../lib/learning-lessons") return { learningLessonRoute };
       if (module === "../styles/Projects.module.css") return new Proxy({}, { get: (_, key) => String(key) });
       throw new Error(`Unexpected module: ${module}`);
     },
@@ -57,7 +55,7 @@ async function renderPage(path, language, router = { query: {}, isReady: true, p
 
 const awaitImportJsxRuntime = await import("react/jsx-runtime");
 
-test("Learning Center keeps its compatible route, progress logic, and tool learning links", async () => {
+test("Learning Center keeps progress and opens dedicated lessons instead of production tools", async () => {
   const page = source("pages/learning-center.js");
   const en = await renderPage("pages/learning-center.js", "en");
   const ar = await renderPage("pages/learning-center.js", "ar");
@@ -68,9 +66,10 @@ test("Learning Center keeps its compatible route, progress logic, and tool learn
   assert.match(page, /completedCount/);
   assert.match(page, /togglePath/);
   assert.match(page, /resetProgress/);
-  assert.match(page, /researchPathHref\(path\.href, path\.researchPath, LEARNING_PATH_SECTION\)/);
-  assert.match(page, /`\$\{path\.href\}\?from=learn`/);
-  assert.match(en, /href="\/tools\/analyze\?from=research-path[^\"]+sourceSection=learning-center[^\"]+#quick-analysis"/);
+  for (const id of ["text-analysis", "prompt-practice", "code-learning", "data-learning"])
+    assert.match(en, new RegExp(`href="/learning-center/${id}"`));
+  assert.doesNotMatch(page, /\/tools\/(analyze|prompt|code|excel)/);
+  assert.doesNotMatch(`${en}${ar}`, /href="\/tools\//);
 });
 
 test("Projects is a bilingual research navigator without persistence or fake upload", async () => {

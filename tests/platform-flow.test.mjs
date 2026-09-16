@@ -93,7 +93,9 @@ test("result CTAs, research progression, Build backs, and Learn returns use cano
   assert.match(source("pages/tools/analyze.js"), /createReportContext\(sourceTool, analysisType, payload\)/);
   for (const name of ["prompt", "code", "excel", "colab"])
     assert.match(source(`pages/tools/${name}.js`), /backHref="\/research-planner#build-tools"/);
-  assert.match(source("pages/learning-center.js"), /`\$\{path\.href\}\?from=learn`/);
+  assert.doesNotMatch(source("pages/learning-center.js"), /\/tools\/(analyze|prompt|code|excel)/);
+  assert.match(source("pages/learning-center/\[lesson\].js"), /answeredCorrectly \? \(/);
+  assert.match(source("lib/learning-lessons.js"), /\?from=learn&lesson=\$\{id\}/);
   assert.match(source("components/Layout.js"), /fromLearn \? "\/learning-center" : backHref/);
 });
 

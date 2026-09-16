@@ -178,12 +178,13 @@ test("main Research Planner navigation uses one consistent name", () => {
   assert.match(workspace, /Start with your research dataset/);
 });
 
-test("Learning Center identifies operational links as learning paths", () => {
+test("Learning Center cards open educational lessons rather than production tools", () => {
   const learning = source("pages/learning-center.js");
   assert.match(learning, /learning\.pathsTitle/);
   assert.match(source("lib/i18n/en.js"), /Choose a learning path to practice/);
-  for (const href of ["/tools/analyze", "/tools/prompt", "/tools/code", "/tools/excel"])
-    assert.ok(learning.includes(`href: "${href}"`));
+  for (const id of ["text-analysis", "prompt-practice", "code-learning", "data-learning"])
+    assert.ok(learning.includes(`learningLessonRoute("${id}")`));
+  assert.doesNotMatch(learning, /\/tools\/(analyze|prompt|code|excel)/);
 });
 
 test("Frequency, POS, and Colab remain renderable as standalone routes", async () => {

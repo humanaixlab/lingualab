@@ -2,32 +2,31 @@ import Link from "next/link";
 import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 import { useLanguage } from "../components/LanguageProvider";
-import { LEARNING_PATH_SECTION, researchPathHref } from "../lib/research-path-context";
+import { learningLessonRoute } from "../lib/learning-lessons";
 
 const learningPaths = [
   {
     id: "text-analysis",
     copyKey: "text",
-    href: "/tools/analyze",
-    researchPath: "corpus-linguistics",
+    lessonHref: learningLessonRoute("text-analysis"),
     completed: false,
   },
   {
     id: "prompt-practice",
     copyKey: "prompt",
-    href: "/tools/prompt",
+    lessonHref: learningLessonRoute("prompt-practice"),
     completed: false,
   },
   {
     id: "code-learning",
     copyKey: "code",
-    href: "/tools/code",
+    lessonHref: learningLessonRoute("code-learning"),
     completed: false,
   },
   {
     id: "data-learning",
     copyKey: "data",
-    href: "/tools/excel",
+    lessonHref: learningLessonRoute("data-learning"),
     completed: false,
   },
 ];
@@ -108,10 +107,6 @@ export default function LearningHubPage() {
       }))
     );
   };
-
-  const practiceHref = (path) => path.researchPath
-    ? `${researchPathHref(path.href, path.researchPath, LEARNING_PATH_SECTION)}#quick-analysis`
-    : `${path.href}?from=learn`;
 
   return (
     <main style={styles.page}>
@@ -204,7 +199,7 @@ export default function LearningHubPage() {
                 <p style={styles.cardDescription}>{t(`learning.paths.${path.copyKey}.description`)}</p>
 
                 <div style={styles.cardFooter}>
-                  <Link href={practiceHref(path)} style={styles.primaryAction}>
+                  <Link href={path.lessonHref} style={styles.primaryAction}>
                     {t(`learning.paths.${path.copyKey}.action`)}
                   </Link>
 
