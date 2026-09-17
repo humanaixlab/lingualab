@@ -1,0 +1,90 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { LANGUAGE_TO_APPLICATION_EXAMPLES, WHY_THIS_PATH, WHY_THIS_STEP } from "../lib/language-to-application.js";
+
+const read = (file) => readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
+const planner = read("pages/research-planner.js");
+const bridge = read("components/FromLanguageToApplication.js");
+const paths = read("components/ResearchPaths.js");
+const whyThisPath = read("components/WhyThisPath.js");
+const builder = read("pages/tools/nlp-builder.js");
+
+assert.match(planner, /FromLanguageToApplication/);
+assert.match(bridge, /من اللغة إلى التطبيق/);
+assert.match(bridge, /From Language to Application/);
+assert.match(bridge, /useState/);
+assert.match(bridge, /Reveal next step/);
+assert.match(bridge, /aria-pressed/);
+assert.equal(LANGUAGE_TO_APPLICATION_EXAMPLES.length, 4);
+for (const example of LANGUAGE_TO_APPLICATION_EXAMPLES) {
+  assert.ok(example.goal.en && example.problem.en && example.stages.en.length > 4);
+  assert.ok(example.evaluation.en && example.errors.en && example.limitation.en);
+}
+const grammar = LANGUAGE_TO_APPLICATION_EXAMPLES.find((item) => item.id === "grammar-agreement");
+assert.deepEqual(grammar.capabilities.en, ["Morphology", "Syntax"]);
+assert.match(grammar.limitation.en, /do not equal a complete grammar checker/);
+const classification = LANGUAGE_TO_APPLICATION_EXAMPLES.find((item) => item.id === "classification");
+assert.match(classification.limitation.en, /not requirements for every NLP workflow/);
+const rule = LANGUAGE_TO_APPLICATION_EXAMPLES.find((item) => item.id === "rule");
+assert.match(rule.algorithm.en, /Python is an implementation language, not the algorithm/);
+assert.match(bridge, /application is not an algorithm/i);
+
+assert.match(paths, /WhyThisPath/);
+assert.equal(Object.keys(WHY_THIS_PATH).length, 7);
+for (const [id, guide] of Object.entries(WHY_THIS_PATH)) {
+  for (const field of ["problem", "computer", "capability", "limit"]) {
+    assert.ok(guide[field].en && guide[field].ar, `${id} ${field} is bilingual`);
+  }
+  assert.ok(guide.contributions.en.length >= 3 && guide.contributions.ar.length >= 3, `${id} contributions are bilingual`);
+  assert.ok(guide.contributions.ar.every((item) => /[\u0600-\u06FF]/.test(item)), `${id} Arabic chips are localized`);
+  assert.match(guide.limit.en, /not|does not/i, id);
+}
+assert.match(WHY_THIS_PATH["morphology-syntax"].limit.en, /grammar checker/);
+assert.match(WHY_THIS_PATH["morphology-syntax"].limit.ar, /مدققًا نحويًا كاملًا/);
+assert.match(whyThisPath, /const locale = language === "ar" \? "ar" : "en"/);
+assert.doesNotMatch(whyThisPath, /const text = \(value\) => value/);
+assert.doesNotMatch(whyThisPath, /English fallback/);
+assert.match(whyThisPath, /ما الذي يحتاج الحاسوب إلى تمثيله أو تحديده؟/);
+assert.match(whyThisPath, /item\.problem\[locale\]/);
+assert.match(whyThisPath, /item\.contributions\[locale\]/);
+
+assert.match(builder, /WhyThisStep/);
+assert.deepEqual(Object.keys(WHY_THIS_STEP).sort(), ["algorithm", "annotation", "error-analysis", "evaluation", "representation"]);
+assert.match(WHY_THIS_STEP.annotation.en, /does not automatically know/);
+assert.match(WHY_THIS_STEP.representation.en, /consistent computational form/);
+assert.match(WHY_THIS_STEP.evaluation.en, /Executing an algorithm does not demonstrate/);
+assert.match(WHY_THIS_STEP["error-analysis"].en, /metric does not explain why/i);
+assert.equal((builder.match(/<WhyThisStep/g) || []).length, 5, "guidance is used at meaningful stages, not every step");
+
+// Scope guardrails: this completion does not restart unrelated product work.
+assert.ok(read("pages/learning-center.js").includes("Learning"));
+assert.ok(read("lib/structured-handoff.js").includes("createProjectHandoff"));
+assert.ok(read("lib/research-paths.js").includes("Corpus Linguistics"));
+assert.ok(!planner.includes("Project Lab"));
+console.log("language-to-application guidance checks passed");
+
+const phenomenonBridge = read("components/LinguisticPhenomenonBridge.js");
+const researchPaths = read("components/ResearchPaths.js");
+const { PATH_PHENOMENON_BRIDGES } = await import("../lib/language-to-application.js");
+assert.deepEqual(Object.keys(PATH_PHENOMENON_BRIDGES).sort(), Object.keys(WHY_THIS_PATH).sort());
+for (const [pathId, examples] of Object.entries(PATH_PHENOMENON_BRIDGES)) {
+  assert.ok(examples.length >= 2, `${pathId} has at least two phenomenon examples`);
+  for (const example of examples) {
+    for (const field of ["title", "languageExample", "phenomenon", "information", "task", "pathAction", "contribution", "boundary"]) assert.ok(example[field].en && example[field].ar, `${pathId}/${example.id} ${field} is bilingual`);
+    assert.ok(example.representation.content.en && example.representation.content.ar, `${pathId}/${example.id} shows a bilingual representation`);
+  }
+}
+assert.match(PATH_PHENOMENON_BRIDGES["morphology-syntax"][0].representation.content.en, /Gender=Masc/);
+assert.match(PATH_PHENOMENON_BRIDGES["information-extraction"][0].representation.content.en, /PERSON/);
+assert.match(PATH_PHENOMENON_BRIDGES["text-classification"][0].representation.content.en, /class_label/);
+assert.doesNotMatch(PATH_PHENOMENON_BRIDGES["corpus-linguistics"][0].information.en, /label/i);
+assert.match(PATH_PHENOMENON_BRIDGES["language-technology"][0].information.en, /Morphological features.*syntactic relation/);
+assert.match(phenomenonBridge, /useState/);
+assert.match(phenomenonBridge, /setRevealed\(1\)/);
+assert.match(phenomenonBridge, /aria-pressed/);
+assert.match(phenomenonBridge, /dir=\{locale === "ar" \? "rtl" : "ltr"\}/);
+assert.match(phenomenonBridge, /<pre dir=\{value.direction\}/);
+assert.match(phenomenonBridge, /revealed === labels\[locale\]\.length && selected\.handoff === "nlp-builder"/);
+assert.ok(researchPaths.indexOf("<WhyThisPath") < researchPaths.indexOf("<LinguisticPhenomenonBridge"));
+assert.ok(researchPaths.indexOf("<LinguisticPhenomenonBridge") < researchPaths.indexOf("toolBlock"));
+assert.doesNotMatch(whyThisPath, /المشكلة:[\s\S]{0,160}→[\s\S]{0,160}القدرة:/);

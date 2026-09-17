@@ -60,6 +60,8 @@ function harness(saved = null, search = "") {
       if (name === "../lib/research-context") return { readResearchContext: scope.readResearchContext, researchContextHref: scope.researchContextHref, RESEARCH_CONTEXT_TTL_MS: 30 * 60 * 1000 };
       if (name === "../components/LanguageProvider") return { useLanguage: () => ({ language: "en", direction: "ltr", t: testTranslate }) };
       if (name === "../components/ResearchPaths") return function MockResearchPaths() { return React.createElement("section", { "data-testid": "research-paths" }); };
+      if (name === "../components/FromLanguageToApplication") return function MockFromLanguageToApplication() { return React.createElement("section", { "data-testid": "from-language-to-application" }); };
+      if (name === "../components/LinguisticPhenomenonBridge") return function MockLinguisticPhenomenonBridge() { return React.createElement("section", { "data-testid": "phenomenon-bridge" }); };
       return require(name);
     },
   };
