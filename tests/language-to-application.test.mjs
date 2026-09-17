@@ -6,6 +6,7 @@ const read = (file) => readFileSync(new URL(`../${file}`, import.meta.url), "utf
 const planner = read("pages/research-planner.js");
 const bridge = read("components/FromLanguageToApplication.js");
 const paths = read("components/ResearchPaths.js");
+const whyThisPath = read("components/WhyThisPath.js");
 const builder = read("pages/tools/nlp-builder.js");
 
 assert.match(planner, /FromLanguageToApplication/);
@@ -31,10 +32,21 @@ assert.match(bridge, /application is not an algorithm/i);
 assert.match(paths, /WhyThisPath/);
 assert.equal(Object.keys(WHY_THIS_PATH).length, 7);
 for (const [id, guide] of Object.entries(WHY_THIS_PATH)) {
-  assert.ok(guide.problem && guide.computer && guide.capability && guide.contributions.length >= 3 && guide.limit, id);
-  assert.match(guide.limit, /not|does not/i, id);
+  for (const field of ["problem", "computer", "capability", "limit"]) {
+    assert.ok(guide[field].en && guide[field].ar, `${id} ${field} is bilingual`);
+  }
+  assert.ok(guide.contributions.en.length >= 3 && guide.contributions.ar.length >= 3, `${id} contributions are bilingual`);
+  assert.ok(guide.contributions.ar.every((item) => /[\u0600-\u06FF]/.test(item)), `${id} Arabic chips are localized`);
+  assert.match(guide.limit.en, /not|does not/i, id);
 }
-assert.match(WHY_THIS_PATH["morphology-syntax"].limit, /grammar checker/);
+assert.match(WHY_THIS_PATH["morphology-syntax"].limit.en, /grammar checker/);
+assert.match(WHY_THIS_PATH["morphology-syntax"].limit.ar, /مدققًا نحويًا كاملًا/);
+assert.match(whyThisPath, /const locale = language === "ar" \? "ar" : "en"/);
+assert.doesNotMatch(whyThisPath, /const text = \(value\) => value/);
+assert.doesNotMatch(whyThisPath, /English fallback/);
+assert.match(whyThisPath, /ما الذي يحتاج الحاسوب إلى تمثيله أو تحديده؟/);
+assert.match(whyThisPath, /item\.problem\[locale\]/);
+assert.match(whyThisPath, /item\.contributions\[locale\]/);
 
 assert.match(builder, /WhyThisStep/);
 assert.deepEqual(Object.keys(WHY_THIS_STEP).sort(), ["algorithm", "annotation", "error-analysis", "evaluation", "representation"]);
