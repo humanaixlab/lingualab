@@ -62,3 +62,29 @@ assert.ok(read("lib/structured-handoff.js").includes("createProjectHandoff"));
 assert.ok(read("lib/research-paths.js").includes("Corpus Linguistics"));
 assert.ok(!planner.includes("Project Lab"));
 console.log("language-to-application guidance checks passed");
+
+const phenomenonBridge = read("components/LinguisticPhenomenonBridge.js");
+const researchPaths = read("components/ResearchPaths.js");
+const { PATH_PHENOMENON_BRIDGES } = await import("../lib/language-to-application.js");
+assert.deepEqual(Object.keys(PATH_PHENOMENON_BRIDGES).sort(), Object.keys(WHY_THIS_PATH).sort());
+for (const [pathId, examples] of Object.entries(PATH_PHENOMENON_BRIDGES)) {
+  assert.ok(examples.length >= 2, `${pathId} has at least two phenomenon examples`);
+  for (const example of examples) {
+    for (const field of ["title", "languageExample", "phenomenon", "information", "task", "pathAction", "contribution", "boundary"]) assert.ok(example[field].en && example[field].ar, `${pathId}/${example.id} ${field} is bilingual`);
+    assert.ok(example.representation.content.en && example.representation.content.ar, `${pathId}/${example.id} shows a bilingual representation`);
+  }
+}
+assert.match(PATH_PHENOMENON_BRIDGES["morphology-syntax"][0].representation.content.en, /Gender=Masc/);
+assert.match(PATH_PHENOMENON_BRIDGES["information-extraction"][0].representation.content.en, /PERSON/);
+assert.match(PATH_PHENOMENON_BRIDGES["text-classification"][0].representation.content.en, /class_label/);
+assert.doesNotMatch(PATH_PHENOMENON_BRIDGES["corpus-linguistics"][0].information.en, /label/i);
+assert.match(PATH_PHENOMENON_BRIDGES["language-technology"][0].information.en, /Morphological features.*syntactic relation/);
+assert.match(phenomenonBridge, /useState/);
+assert.match(phenomenonBridge, /setRevealed\(1\)/);
+assert.match(phenomenonBridge, /aria-pressed/);
+assert.match(phenomenonBridge, /dir=\{locale === "ar" \? "rtl" : "ltr"\}/);
+assert.match(phenomenonBridge, /<pre dir=\{value.direction\}/);
+assert.match(phenomenonBridge, /revealed === labels\[locale\]\.length && selected\.handoff === "nlp-builder"/);
+assert.ok(researchPaths.indexOf("<WhyThisPath") < researchPaths.indexOf("<LinguisticPhenomenonBridge"));
+assert.ok(researchPaths.indexOf("<LinguisticPhenomenonBridge") < researchPaths.indexOf("toolBlock"));
+assert.doesNotMatch(whyThisPath, /المشكلة:[\s\S]{0,160}→[\s\S]{0,160}القدرة:/);
