@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   SCIENTIFIC_FOUNDATIONS,
   emptyScientificReferenceState,
@@ -12,10 +12,10 @@ const EMPTY_FORM = { author: "", year: "", title: "", publisher: "", doiOrUrl: "
 
 const COPY = {
   ar: {
-    title: "الأساس العلمي للمسار", intro: "مراجع منهجية عربية اختارتها المنصة من القائمة المعتمدة لدعم هذا المسار.", platform: "مراجع المنصة", approved: "مرجع معتمد من قائمة المنصة", placeholder: "عنصر مؤقت — لم يُضف مرجع حقيقي أو موثّق بعد", author: "المؤلف", translator: "المترجم", year: "السنة", edition: "الطبعة", referenceTitle: "العنوان", publisher: "المجلة / الناشر", isbn: "ISBN", source: "المصدر الرسمي", openOfficial: "فتح المصدر الرسمي", type: "نوع المرجع", note: "صلة المرجع بالمنهجية", notSupplied: "غير متوفر في القائمة المعتمدة", suggested: "مرجع مقترح للتضمين في التقرير", suggestionOnly: "علامة اقتراح فقط؛ لن يُدرج المرجع أو يُستشهد به تلقائيًا في التقرير.", researcher: "مراجع الباحث", researcherIntro: "أضف مراجعك الخاصة بصورة منفصلة. تبقى مسؤولية التحقق منها واختيار إدراجها في التقرير للباحث.", add: "إضافة مرجع", edit: "تعديل المرجع", save: "حفظ المرجع", cancel: "إلغاء", delete: "حذف", editAction: "تعديل", empty: "لم تُضف مراجع للباحث في هذا المسار بعد.", required: "أكمل المؤلف والسنة والعنوان والمجلة أو الناشر.", saved: "حُفظت المراجع محليًا على هذا الجهاز.", storageError: "تعذر الحفظ المحلي. لم تُرسل المراجع إلى أي خدمة خارجية.", limitation: "الحفظ محلي في هذا المتصفح والجهاز فقط، ولا يزامن المراجع مع أجهزة أخرى أو يضيفها إلى التقرير تلقائيًا.",
+    title: "الأساس العلمي للمسار", intro: "مراجع منهجية عربية اختارتها المنصة من القائمة المعتمدة لدعم هذا المسار.", platform: "مراجع المنصة", approved: "مرجع معتمد من قائمة المنصة", placeholder: "عنصر مؤقت — لم يُضف مرجع حقيقي أو موثّق بعد", author: "المؤلف", translator: "المترجم", year: "السنة", edition: "الطبعة", referenceTitle: "العنوان", publisher: "المجلة / الناشر", isbn: "ISBN", source: "المصدر الرسمي", openOfficial: "فتح المصدر الرسمي", type: "نوع المرجع", note: "صلة المرجع بالمنهجية", notSupplied: "غير متوفر في القائمة المعتمدة", suggested: "مرجع مقترح للتضمين في التقرير", suggestionOnly: "علامة اقتراح فقط؛ لن يُدرج المرجع أو يُستشهد به تلقائيًا في التقرير.", researcher: "مراجع الباحث", researcherIntro: "أضف مراجعك الخاصة بصورة منفصلة. تبقى مسؤولية التحقق منها واختيار إدراجها في التقرير للباحث.", add: "إضافة مرجع", edit: "تعديل المرجع", save: "حفظ المرجع", cancel: "إلغاء", delete: "حذف", editAction: "تعديل", empty: "لم تُضف مراجع للباحث في هذا المسار بعد.", required: "أكمل المؤلف والسنة والعنوان والمجلة أو الناشر.", saved: "حُفظت المراجع محليًا على هذا الجهاز.", storageError: "تعذر الحفظ المحلي. لم تُرسل المراجع إلى أي خدمة خارجية.", limitation: "الحفظ محلي في هذا المتصفح والجهاز فقط، ولا يزامن المراجع مع أجهزة أخرى أو يضيفها إلى التقرير تلقائيًا.", show: "استكشف المراجع", hide: "إخفاء المراجع", verifiedCount: "مراجع موثقة", previous: "المراجع السابقة", next: "المراجع التالية",
   },
   en: {
-    title: "Scientific Foundations", intro: "Arabic methodological references curated by the platform from the approved list to support this path.", platform: "Platform references", approved: "Approved platform-list reference", placeholder: "Placeholder — no real or verified reference has been added yet", author: "Author", translator: "Translator", year: "Year", edition: "Edition", referenceTitle: "Title", publisher: "Journal / publisher", isbn: "ISBN", source: "Official source", openOfficial: "Open official source", type: "Reference type", note: "Why it supports the methodology", notSupplied: "Not supplied in the approved list", suggested: "Suggested for the research report", suggestionOnly: "Suggestion flag only; the reference will not be inserted or cited automatically in the report.", researcher: "Researcher References", researcherIntro: "Add your own references separately. Verification and final report inclusion remain the researcher's responsibility.", add: "Add reference", edit: "Edit reference", save: "Save reference", cancel: "Cancel", delete: "Delete", editAction: "Edit", empty: "No researcher references have been added for this path.", required: "Complete author, year, title, and journal or publisher.", saved: "References were saved locally on this device.", storageError: "Local saving is unavailable. References were not sent to any external service.", limitation: "References are stored only in this browser on this device. They are not synced across devices or inserted into reports automatically.",
+    title: "Scientific Foundations", intro: "Arabic methodological references curated by the platform from the approved list to support this path.", platform: "Platform references", approved: "Approved platform-list reference", placeholder: "Placeholder — no real or verified reference has been added yet", author: "Author", translator: "Translator", year: "Year", edition: "Edition", referenceTitle: "Title", publisher: "Journal / publisher", isbn: "ISBN", source: "Official source", openOfficial: "Open official source", type: "Reference type", note: "Why it supports the methodology", notSupplied: "Not supplied in the approved list", suggested: "Suggested for the research report", suggestionOnly: "Suggestion flag only; the reference will not be inserted or cited automatically in the report.", researcher: "Researcher References", researcherIntro: "Add your own references separately. Verification and final report inclusion remain the researcher's responsibility.", add: "Add reference", edit: "Edit reference", save: "Save reference", cancel: "Cancel", delete: "Delete", editAction: "Edit", empty: "No researcher references have been added for this path.", required: "Complete author, year, title, and journal or publisher.", saved: "References were saved locally on this device.", storageError: "Local saving is unavailable. References were not sent to any external service.", limitation: "References are stored only in this browser on this device. They are not synced across devices or inserted into reports automatically.", show: "Explore references", hide: "Hide references", verifiedCount: "verified references", previous: "Previous references", next: "Next references",
   },
 };
 
@@ -27,6 +27,8 @@ export default function ScientificFoundations({ pathId, language = "en" }) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState("");
   const [message, setMessage] = useState("");
+  const [expanded, setExpanded] = useState(false);
+  const carouselRef = useRef(null);
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
@@ -61,47 +63,62 @@ export default function ScientificFoundations({ pathId, language = "en" }) {
     setMessage("");
   }
 
+  function scrollCarousel(direction) {
+    const node = carouselRef.current;
+    if (!node) return;
+    const amount = Math.max(280, Math.min(node.clientWidth * 0.82, 720));
+    node.scrollBy({ left: direction * amount, behavior: "smooth" });
+  }
+
+  const verifiedCount = foundation.platformReferences.filter((reference) => !reference.isPlaceholder).length;
+
   return <section className={styles.foundations} aria-labelledby={`${pathId}-scientific-foundations`}>
-    <header><p>{foundation.title[locale]}</p><h2 id={`${pathId}-scientific-foundations`}>{copy.title}</h2><span>{copy.intro}</span></header>
-    <h3>{copy.platform}</h3>
-    <div className={styles.platformGrid}>
-      {foundation.platformReferences.map((reference) => <article className={styles.platformReference} key={reference.id}>
-        <strong className={reference.isPlaceholder ? styles.placeholder : styles.approved}>{reference.isPlaceholder ? copy.placeholder : copy.approved}</strong>
-        <dl>
-          <div><dt>{copy.author}</dt><dd>{reference.author[locale]}</dd></div>
-          {reference.translator && <div><dt>{copy.translator}</dt><dd>{reference.translator[locale]}</dd></div>}
-          <div><dt>{copy.year}</dt><dd>{reference.year || copy.pending}</dd></div>
-          {reference.edition && <div><dt>{copy.edition}</dt><dd>{reference.edition[locale]}</dd></div>}
-          <div><dt>{copy.referenceTitle}</dt><dd>{reference.title[locale]}</dd></div>
-          <div><dt>{copy.publisher}</dt><dd>{reference.publisher?.[locale] || copy.notSupplied}</dd></div>
-          {reference.isbn && <div><dt>{copy.isbn}</dt><dd dir="ltr">{reference.isbn}</dd></div>}
-          <div><dt>{copy.source}</dt><dd>{reference.doiOrUrl ? <a href={reference.doiOrUrl} target="_blank" rel="noopener noreferrer">{copy.openOfficial}</a> : copy.notSupplied}</dd></div>
-          <div><dt>{copy.type}</dt><dd>{reference.referenceType[locale]}</dd></div>
-          <div className={styles.full}><dt>{copy.note}</dt><dd>{reference.note[locale]}</dd></div>
-        </dl>
-      </article>)}
-    </div>
+    <button className={styles.summaryBar} type="button" aria-expanded={expanded} aria-controls={`${pathId}-reference-panel`} onClick={() => setExpanded((value) => !value)}>
+      <span className={styles.summaryIdentity}><span className={styles.sparkle} aria-hidden="true">✦</span><span><strong id={`${pathId}-scientific-foundations`}>{copy.title}</strong><small>{verifiedCount} {copy.verifiedCount}</small></span></span>
+      <span className={styles.summaryAction}>{expanded ? copy.hide : copy.show}<span aria-hidden="true">{expanded ? "⌃" : "⌄"}</span></span>
+    </button>
 
-    <div className={styles.researcherHeader}><div><h3>{copy.researcher}</h3><p>{copy.researcherIntro}</p></div></div>
-    {state.researcherReferences.length ? <div className={styles.researcherList}>{state.researcherReferences.map((reference) => <article key={reference.id}>
-      <div><strong>{reference.title}</strong><span>{reference.author} · {reference.year} · {reference.publisher}</span>{reference.doiOrUrl && <small dir="auto">{reference.doiOrUrl}</small>}{reference.suggestedForReport && <em>{copy.suggested}</em>}</div>
-      <div className={styles.actions}><button type="button" onClick={() => startEdit(reference)}>{copy.editAction}</button><button type="button" onClick={() => persist({ ...state, researcherReferences: state.researcherReferences.filter((item) => item.id !== reference.id) })}>{copy.delete}</button></div>
-    </article>)}</div> : <p className={styles.empty}>{copy.empty}</p>}
-
-    <form className={styles.referenceForm} onSubmit={submit}>
-      <h3>{editingId ? copy.edit : copy.add}</h3>
-      <div className={styles.fields}>
-        <label>{copy.author}<input required value={form.author} onChange={(event) => setForm({ ...form, author: event.target.value })} /></label>
-        <label>{copy.year}<input required inputMode="numeric" maxLength={20} value={form.year} onChange={(event) => setForm({ ...form, year: event.target.value })} /></label>
-        <label className={styles.wide}>{copy.referenceTitle}<input required value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} /></label>
-        <label>{copy.publisher}<input required value={form.publisher} onChange={(event) => setForm({ ...form, publisher: event.target.value })} /></label>
-        <label>{copy.source}<input dir="ltr" type="text" value={form.doiOrUrl} onChange={(event) => setForm({ ...form, doiOrUrl: event.target.value })} /></label>
+    {expanded && <div id={`${pathId}-reference-panel`} className={styles.panel}>
+      <header><p>{foundation.title[locale]}</p><span>{copy.intro}</span></header>
+      <div className={styles.carouselHeading}><h3>{copy.platform}</h3><div className={styles.carouselActions}><button type="button" onClick={() => scrollCarousel(-1)} aria-label={copy.previous}>‹</button><button type="button" onClick={() => scrollCarousel(1)} aria-label={copy.next}>›</button></div></div>
+      <div className={styles.platformCarousel} ref={carouselRef} tabIndex="0" aria-label={copy.platform}>
+        {foundation.platformReferences.map((reference) => <article className={styles.platformReference} key={reference.id}>
+          <strong className={reference.isPlaceholder ? styles.placeholder : styles.approved}>{reference.isPlaceholder ? copy.placeholder : copy.approved}</strong>
+          <h4>{reference.title[locale]}</h4>
+          <p className={styles.citation}>{reference.author[locale]} · {reference.year || copy.notSupplied}</p>
+          <dl>
+            {reference.translator && <div><dt>{copy.translator}</dt><dd>{reference.translator[locale]}</dd></div>}
+            {reference.edition && <div><dt>{copy.edition}</dt><dd>{reference.edition[locale]}</dd></div>}
+            <div><dt>{copy.publisher}</dt><dd>{reference.publisher?.[locale] || copy.notSupplied}</dd></div>
+            {reference.isbn && <div><dt>{copy.isbn}</dt><dd dir="ltr">{reference.isbn}</dd></div>}
+            <div><dt>{copy.type}</dt><dd>{reference.referenceType[locale]}</dd></div>
+            <div><dt>{copy.note}</dt><dd>{reference.note[locale]}</dd></div>
+          </dl>
+          <div className={styles.sourceLink}>{reference.doiOrUrl ? <a href={reference.doiOrUrl} target="_blank" rel="noopener noreferrer">{copy.openOfficial} ↗</a> : <span>{copy.notSupplied}</span>}</div>
+        </article>)}
       </div>
-      <label className={styles.suggestion}><input type="checkbox" checked={form.suggestedForReport} onChange={(event) => setForm({ ...form, suggestedForReport: event.target.checked })} />{copy.suggested}</label>
-      <p className={styles.suggestionNote}>{copy.suggestionOnly}</p>
-      <div className={styles.formActions}><button type="submit">{copy.save}</button>{editingId && <button type="button" onClick={() => { setEditingId(""); setForm(EMPTY_FORM); setMessage(""); }}>{copy.cancel}</button>}</div>
-      {message && <p role="status">{message}</p>}
-    </form>
-    <p className={styles.limitation}>{copy.limitation}</p>
+
+      <div className={styles.researcherHeader}><div><h3>{copy.researcher}</h3><p>{copy.researcherIntro}</p></div></div>
+      {state.researcherReferences.length ? <div className={styles.researcherList}>{state.researcherReferences.map((reference) => <article key={reference.id}>
+        <div><strong>{reference.title}</strong><span>{reference.author} · {reference.year} · {reference.publisher}</span>{reference.doiOrUrl && <small dir="auto">{reference.doiOrUrl}</small>}{reference.suggestedForReport && <em>{copy.suggested}</em>}</div>
+        <div className={styles.actions}><button type="button" onClick={() => startEdit(reference)}>{copy.editAction}</button><button type="button" onClick={() => persist({ ...state, researcherReferences: state.researcherReferences.filter((item) => item.id !== reference.id) })}>{copy.delete}</button></div>
+      </article>)}</div> : <p className={styles.empty}>{copy.empty}</p>}
+
+      <form className={styles.referenceForm} onSubmit={submit}>
+        <h3>{editingId ? copy.edit : copy.add}</h3>
+        <div className={styles.fields}>
+          <label>{copy.author}<input required value={form.author} onChange={(event) => setForm({ ...form, author: event.target.value })} /></label>
+          <label>{copy.year}<input required inputMode="numeric" maxLength={20} value={form.year} onChange={(event) => setForm({ ...form, year: event.target.value })} /></label>
+          <label className={styles.wide}>{copy.referenceTitle}<input required value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} /></label>
+          <label>{copy.publisher}<input required value={form.publisher} onChange={(event) => setForm({ ...form, publisher: event.target.value })} /></label>
+          <label>{copy.source}<input dir="ltr" type="text" value={form.doiOrUrl} onChange={(event) => setForm({ ...form, doiOrUrl: event.target.value })} /></label>
+        </div>
+        <label className={styles.suggestion}><input type="checkbox" checked={form.suggestedForReport} onChange={(event) => setForm({ ...form, suggestedForReport: event.target.checked })} />{copy.suggested}</label>
+        <p className={styles.suggestionNote}>{copy.suggestionOnly}</p>
+        <div className={styles.formActions}><button type="submit">{copy.save}</button>{editingId && <button type="button" onClick={() => { setEditingId(""); setForm(EMPTY_FORM); setMessage(""); }}>{copy.cancel}</button>}</div>
+        {message && <p role="status">{message}</p>}
+      </form>
+      <p className={styles.limitation}>{copy.limitation}</p>
+    </div>}
   </section>;
 }
