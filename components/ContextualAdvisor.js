@@ -6,7 +6,8 @@ const COPY = {
     pathLead: "اسأل عن هذا المسار وبياناته وتمثيلاته ومهامه الحاسوبية وحدوده.",
     projectLead: "اسأل عن آلية تنفيذ هذا المشروع وبياناته وتقييمه وحدود التنفيذ.",
     ask: "اسأل عن هذا السياق…", send: "اسأل المستشار", loading: "يحلل المستشار سياقك…",
-    streaming: "يكتب المستشار الإجابة…", error: "تعذر الحصول على إجابة موثوقة الآن. حاول مرة أخرى.",
+    streaming: "يكتب المستشار الإجابة…", you: "أنت", advisor: "المستشار",
+    error: "تعذر الحصول على إجابة موثوقة الآن. حاول مرة أخرى.",
     partialError: "انقطع توليد الإجابة. أبقينا الجزء الذي وصل، لكنه ليس إجابة نهائية مكتملة.",
     boundary: "الإرشاد سياقي ولا يعني تنفيذ التحليل أو اتخاذ القرار البحثي نيابةً عن الباحث.",
   },
@@ -15,7 +16,8 @@ const COPY = {
     pathLead: "Ask about this path, its data, representations, computational tasks, and boundaries.",
     projectLead: "Ask how to execute this project, prepare its data, evaluate it, and understand execution boundaries.",
     ask: "Ask about this context…", send: "Ask advisor", loading: "Advisor is analyzing the context…",
-    streaming: "Advisor is writing the answer…", error: "A reliable answer is unavailable right now. Please try again.",
+    streaming: "Advisor is writing the answer…", you: "You", advisor: "Advisor",
+    error: "A reliable answer is unavailable right now. Please try again.",
     partialError: "The answer stream was interrupted. The received text remains visible, but it is not a complete final answer.",
     boundary: "Contextual guidance does not run an analysis or make the research decision for the researcher.",
   },
@@ -44,7 +46,9 @@ export default function ContextualAdvisor({ language = "en", kind = "path", cont
   const locale = language === "ar" ? "ar" : "en";
   const copy = COPY[locale];
   const questions = kind === "project" ? PROJECT_ADVISOR_QUESTIONS[locale] : PATH_ADVISOR_QUESTIONS[locale];
+  const title = kind === "project" ? copy.projectTitle : copy.pathTitle;
   const [question, setQuestion] = useState("");
+  const [submittedQuestion, setSubmittedQuestion] = useState("");
   const [answer, setAnswer] = useState("");
   const [loading, setLoading] = useState(false);
   const [streaming, setStreaming] = useState(false);
@@ -53,7 +57,7 @@ export default function ContextualAdvisor({ language = "en", kind = "path", cont
   async function ask(value = question) {
     const clean = String(value || "").trim();
     if (!clean || loading) return;
-    setQuestion(clean); setLoading(true); setStreaming(false); setError(""); setAnswer("");
+    setQuestion(clean); setSubmittedQuestion(clean); setLoading(true); setStreaming(false); setError(""); setAnswer("");
     let received = "";
     try {
       const response = await fetch("/api/contextual-advisor", {
@@ -99,34 +103,57 @@ export default function ContextualAdvisor({ language = "en", kind = "path", cont
 
   const status = loading ? (streaming ? copy.streaming : copy.loading) : "";
   return (
-    <section className="contextualAdvisor" dir={locale === "ar" ? "rtl" : "ltr"} aria-label={kind === "project" ? copy.projectTitle : copy.pathTitle}>
-      <div className="contextualAdvisorHead"><strong>{kind === "project" ? copy.projectTitle : copy.pathTitle}</strong><p>{kind === "project" ? copy.projectLead : copy.pathLead}</p></div>
+    <section className="contextualAdvisor" dir={locale === "ar" ? "rtl" : "ltr"} aria-label={title}>
+      <div className="contextualAdvisorHead"><strong>{title}</strong><p>{kind === "project" ? copy.projectLead : copy.pathLead}</p></div>
       <div className="contextualAdvisorPrompts">{questions.map((item) => <button type="button" key={item} onClick={() => ask(item)} disabled={loading}>{item}</button>)}</div>
+
+      {submittedQuestion && <div className="liveConversation" aria-live="polite">
+        <article className="message questionMessage">
+          <header><span className="speakerIcon" aria-hidden="true">●</span><strong>{copy.you}</strong></header>
+          <p>{submittedQuestion}</p>
+        </article>
+        <article className={`message advisorMessage${streaming ? " isStreaming" : ""}`} aria-busy={loading}>
+          <header><span className="advisorMark" aria-hidden="true">✦</span><strong>{title}</strong></header>
+          {!answer && loading && <div className="typingState" role="status"><span className="typingDots" aria-hidden="true"><i /><i /><i /></span><span>{status}</span></div>}
+          {answer && <div className="answerFlow"><p>{answer}</p>{streaming && <span className="streamCursor" aria-hidden="true" />}</div>}
+          {answer && streaming && <div className="typingState subtle" role="status"><span className="typingDots" aria-hidden="true"><i /><i /><i /></span><span>{copy.streaming}</span></div>}
+          {error && <p className="contextualAdvisorError" role="alert">{error}</p>}
+        </article>
+      </div>}
+
       <div className="contextualAdvisorAsk"><textarea value={question} onChange={(event) => setQuestion(event.target.value)} placeholder={copy.ask} rows={2} maxLength={1200} /><button type="button" onClick={() => ask()} disabled={loading || !question.trim()}>{loading ? copy.loading : copy.send}</button></div>
-      {status && <div className="contextualAdvisorStatus" role="status"><span aria-hidden="true" className="streamPulse" />{status}</div>}
-      {answer && <div className={`contextualAdvisorAnswer${streaming ? " isStreaming" : ""}`} aria-live="polite" aria-busy={streaming}><p>{answer}</p><span className="streamCursor" aria-hidden="true" /></div>}
-      {error && <p className="contextualAdvisorError" role="alert">{error}</p>}
       <small className="contextualAdvisorBoundary">{copy.boundary}</small>
       <style jsx>{`
         .contextualAdvisor{margin:1rem 0;padding:1rem;border:1px solid var(--border-color,#d8dee8);border-radius:16px;background:var(--surface,#fff)}
         .contextualAdvisorHead p{margin:.35rem 0 .8rem;color:var(--muted,#5b6472)}
-        .contextualAdvisorPrompts{display:flex;flex-wrap:wrap;gap:.45rem;margin-bottom:.8rem}
+        .contextualAdvisorPrompts{display:flex;flex-wrap:wrap;gap:.45rem;margin-bottom:.9rem}
         .contextualAdvisorPrompts button{border:1px solid var(--border-color,#d8dee8);background:transparent;border-radius:999px;padding:.45rem .7rem;cursor:pointer;text-align:start}
-        .contextualAdvisorAsk{display:grid;grid-template-columns:1fr auto;gap:.6rem;align-items:stretch}
+        .liveConversation{display:grid;gap:.7rem;margin:.8rem 0 1rem}
+        .message{border:1px solid var(--border-color,#d8dee8);border-radius:14px;padding:.85rem .95rem;text-align:start;overflow:hidden}
+        .message header{display:flex;align-items:center;gap:.5rem;margin-bottom:.55rem;color:var(--muted,#5b6472);font-size:.9rem}
+        .message p{margin:0;line-height:1.85;white-space:pre-wrap;unicode-bidi:plaintext}
+        .questionMessage{background:var(--surface-subtle,#f6f8fb)}
+        .questionMessage .speakerIcon{font-size:.55rem;color:var(--accent,#2447d8)}
+        .advisorMessage{background:var(--surface,#fff);border-color:color-mix(in srgb,var(--accent,#2447d8) 25%,var(--border-color,#d8dee8));min-height:92px;transition:min-height .18s ease}
+        .advisorMark{display:grid;place-items:center;width:1.65rem;height:1.65rem;border-radius:50%;background:color-mix(in srgb,var(--accent,#2447d8) 9%,white);color:var(--accent,#2447d8);font-size:.9rem}
+        .answerFlow{display:block;white-space:pre-wrap;overflow-wrap:anywhere}
+        .answerFlow p{display:inline;margin:0;white-space:pre-wrap}
+        .streamCursor{display:inline-block;width:.12rem;height:1.05em;margin-inline-start:.22rem;background:var(--accent,#2447d8);vertical-align:-.13em;animation:blink .8s steps(2,end) infinite}
+        .typingState{display:flex;align-items:center;gap:.55rem;color:var(--muted,#5b6472);font-size:.9rem;min-height:1.6rem}
+        .typingState.subtle{margin-top:.7rem;font-size:.82rem}
+        .typingDots{display:inline-flex;align-items:center;gap:.22rem;direction:ltr}
+        .typingDots i{display:block;width:.38rem;height:.38rem;border-radius:50%;background:var(--accent,#2447d8);animation:typing 1.15s ease-in-out infinite}
+        .typingDots i:nth-child(2){animation-delay:.15s}.typingDots i:nth-child(3){animation-delay:.3s}
+        .contextualAdvisorAsk{display:grid;grid-template-columns:1fr auto;gap:.6rem;align-items:stretch;margin-top:.8rem}
         textarea{width:100%;resize:vertical;border:1px solid var(--border-color,#d8dee8);border-radius:10px;padding:.65rem;font:inherit;direction:inherit}
         .contextualAdvisorAsk button{border:0;border-radius:10px;padding:.65rem .9rem;cursor:pointer;background:var(--accent,#2447d8);color:white}
         button:disabled{opacity:.55;cursor:not-allowed}
-        .contextualAdvisorStatus{display:flex;align-items:center;gap:.45rem;margin-top:.75rem;color:var(--muted,#5b6472);font-size:.92rem}
-        .streamPulse{width:.55rem;height:.55rem;border-radius:50%;background:currentColor;animation:pulse 1.1s ease-in-out infinite}
-        .contextualAdvisorAnswer{margin-top:.8rem;padding:.8rem;border-radius:10px;background:var(--surface-subtle,#f6f8fb);white-space:pre-wrap;unicode-bidi:plaintext}
-        .contextualAdvisorAnswer p{display:inline;margin:0;white-space:pre-wrap}
-        .streamCursor{display:none;width:.12rem;height:1em;margin-inline-start:.2rem;background:currentColor;vertical-align:-.12em;animation:blink .8s steps(2,end) infinite}
-        .isStreaming .streamCursor{display:inline-block}
-        .contextualAdvisorError{margin:.7rem 0;color:#a22}
+        .contextualAdvisorError{margin:.7rem 0 0;color:#a22}
         .contextualAdvisorBoundary{display:block;margin-top:.65rem;color:var(--muted,#5b6472)}
-        @keyframes pulse{50%{opacity:.3;transform:scale(.8)}} @keyframes blink{50%{opacity:0}}
-        @media(prefers-reduced-motion:reduce){.streamPulse,.streamCursor{animation:none}.streamPulse{opacity:.7}.streamCursor{opacity:1}}
-        @media(max-width:640px){.contextualAdvisorAsk{grid-template-columns:1fr}}
+        @keyframes typing{0%,60%,100%{opacity:.28;transform:translateY(0)}30%{opacity:1;transform:translateY(-2px)}}
+        @keyframes blink{50%{opacity:0}}
+        @media(prefers-reduced-motion:reduce){.advisorMessage{transition:none}.typingDots i,.streamCursor{animation:none}.typingDots i{opacity:.7}}
+        @media(max-width:640px){.contextualAdvisor{padding:.8rem}.contextualAdvisorAsk{grid-template-columns:1fr}.message{padding:.75rem}.contextualAdvisorPrompts{flex-wrap:nowrap;overflow-x:auto;padding-bottom:.2rem}.contextualAdvisorPrompts button{white-space:nowrap}}
       `}</style>
     </section>
   );
