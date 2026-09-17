@@ -13,6 +13,10 @@ function safeContext(value) {
   return value;
 }
 
+function writeEvent(res, type, payload = {}) {
+  res.write(`${JSON.stringify({ type, ...payload })}\n`);
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -35,14 +39,32 @@ export default async function handler(req, res) {
 
   const prompt = `${outputLanguageInstruction}\n\nYou are LinguaLab's contextual ${role} inside an intelligent computational-linguistics research environment.\nYou are not a generic chatbot. Ground the answer in the supplied on-page context.\n${boundaries}\nPreserve these scientific distinctions: application != algorithm; research path != complete application; Python is an implementation language, not the algorithm; evaluation != execution; error analysis != metrics; linguistic validity != code correctness; representation depends on the task; annotation is not always required.\nIf the question reaches formal algorithm design, implementation, or actual data analysis, explain the boundary and point to NLP Builder, Code Builder, or Analyze only when appropriate. Research Advisor remains the place for broader study-design advice.\nBe concise but substantive. If context does not support a claim, say what must be decided or verified instead of inventing it.\n\nCurrent ${kind} context:\n${JSON.stringify(context, null, 2)}\n\nUser question:\n${question}\n\nReturn plain text only, with short readable paragraphs or bullets when useful.\n${outputLanguageInstruction}`;
 
+  res.statusCode = 200;
+  res.setHeader("Content-Type", "application/x-ndjson; charset=utf-8");
+  res.setHeader("Cache-Control", "no-cache, no-transform");
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.flushHeaders?.();
+
+  let sentText = false;
   try {
     const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    const response = await client.responses.create({ model: "gpt-4.1-mini", input: prompt });
-    const answer = clean(response.output_text);
-    if (!answer) throw new Error("empty contextual advisor response");
-    return res.status(200).json({ answer });
+    const stream = await client.responses.create({ model: "gpt-4.1-mini", input: prompt, stream: true });
+    writeEvent(res, "start");
+    for await (const event of stream) {
+      if (event.type === "response.output_text.delta" && event.delta) {
+        sentText = true;
+        writeEvent(res, "delta", { delta: event.delta });
+      }
+      if (event.type === "response.failed") {
+        throw new Error(event.response?.error?.message || "contextual advisor stream failed");
+      }
+    }
+    if (!sentText) throw new Error("empty contextual advisor response");
+    writeEvent(res, "done");
+    return res.end();
   } catch (error) {
     console.error("contextual-advisor failed", error);
-    return res.status(500).json({ error: "The contextual advisor could not generate a reliable answer." });
+    writeEvent(res, "error", { message: sentText ? "The stream ended before the answer was complete." : "The contextual advisor could not generate a reliable answer." });
+    return res.end();
   }
 }
