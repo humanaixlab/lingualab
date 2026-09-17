@@ -4,6 +4,7 @@ import { researchPathHref } from "../lib/research-path-context";
 import styles from "../styles/ResearchPaths.module.css";
 import WhyThisPath from "./WhyThisPath";
 import LinguisticPhenomenonBridge from "./LinguisticPhenomenonBridge";
+import ContextualAdvisor from "./ContextualAdvisor";
 
 const COPY = {
   en: {
@@ -83,6 +84,23 @@ export default function ResearchPaths({ language, mode = "all" }) {
             </dl>
             <WhyThisPath pathId={path.id} language={language} />
             <LinguisticPhenomenonBridge pathId={path.id} language={language} />
+            <ContextualAdvisor
+              language={language}
+              kind="path"
+              context={{
+                id: path.id,
+                name: path.name[locale],
+                overview: path.overview[locale],
+                researchQuestion: path.question[locale],
+                dataNeeded: path.data[locale],
+                availableTools: path.available.map((tool) => tool[locale]),
+                coming: path.coming[locale],
+                expectedOutput: path.output[locale],
+                expectedReport: path.report[locale],
+                beginnerGuidance: path.beginner[locale],
+                advancedGuidance: path.advanced[locale],
+              }}
+            />
 
             {(path.hubHref || path.ctaHref) && (
               <Link className={styles.primaryCta} href={path.hubHref || path.ctaHref}>
