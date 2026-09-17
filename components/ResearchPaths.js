@@ -4,132 +4,33 @@ import { researchPathHref } from "../lib/research-path-context";
 import styles from "../styles/ResearchPaths.module.css";
 import WhyThisPath from "./WhyThisPath";
 import LinguisticPhenomenonBridge from "./LinguisticPhenomenonBridge";
+import ContextualAdvisor from "./ContextualAdvisor";
 
 const COPY = {
-  en: {
-    eyebrow: "WHAT DO I ANALYZE IN LANGUAGE?",
-    title: "Linguistic Research Paths",
-    subtitle: "What do I analyze in language?",
-    allEyebrow: "COMPUTATIONAL LINGUISTICS",
-    allTitle: "Explore by Research Path",
-    allSubtitle: "Choose a research path",
-    positioning: "LinguaLab is an AI-supported research workspace for computational linguistics.",
-    support: "Deterministic tools perform the available analyses. AI supports guidance, study design, interpretation, reporting, and research assistance.",
-    overview: "What is this path?",
-    question: "Research question",
-    data: "Data needed",
-    available: "Available now",
-    unavailable: "No dedicated tool is available in this path yet.",
-    coming: "Coming next",
-    output: "Expected output",
-    report: "Report",
-    beginner: "Beginner guide",
-    advanced: "Advanced details",
-    contextual: "Contextual link · primary home: Research Writing Support",
-  },
-  ar: {
-    eyebrow: "ماذا أحلل في اللغة؟",
-    title: "المسارات اللغوية",
-    subtitle: "ماذا أحلل في اللغة؟",
-    allEyebrow: "اللسانيات الحاسوبية",
-    allTitle: "استكشف حسب المسار البحثي",
-    allSubtitle: "اختر مسارًا بحثيًا",
-    positioning: "LinguaLab مساحة بحث ذكية مدعومة بالذكاء الاصطناعي للباحثين في اللسانيات الحاسوبية.",
-    support: "تنفذ الأدوات الحتمية التحليلات المتاحة، بينما يدعم الذكاء الاصطناعي الإرشاد وتصميم الدراسة والتفسير وإعداد التقارير والمساعدة البحثية.",
-    overview: "ما هذا المسار؟",
-    question: "السؤال البحثي",
-    data: "البيانات المطلوبة",
-    available: "الأدوات المتاحة الآن",
-    unavailable: "لا تتوفر أداة متخصصة في هذا المسار حاليًا.",
-    coming: "قدرات قادمة",
-    output: "المخرجات المتوقعة",
-    report: "التقرير المتوقع",
-    beginner: "للمبتدئ",
-    advanced: "تفاصيل متقدمة",
-    contextual: "رابط سياقي · الموطن الأساسي: دعم الكتابة البحثية",
-  },
+  en: { eyebrow:"WHAT DO I ANALYZE IN LANGUAGE?", title:"Linguistic Research Paths", subtitle:"What do I analyze in language?", allEyebrow:"COMPUTATIONAL LINGUISTICS", allTitle:"Explore by Research Path", allSubtitle:"Choose a research path", positioning:"LinguaLab is an AI-supported research workspace for computational linguistics.", support:"Deterministic tools perform the available analyses. AI supports guidance, study design, interpretation, reporting, and research assistance.", overview:"What is this path?", question:"Research question", data:"Data needed", available:"Available now", unavailable:"No dedicated tool is available in this path yet.", coming:"Coming next", output:"Expected output", report:"Report", beginner:"Beginner guide", advanced:"Advanced details", contextual:"Contextual link · primary home: Research Writing Support" },
+  ar: { eyebrow:"ماذا أحلل في اللغة؟", title:"المسارات اللغوية", subtitle:"ماذا أحلل في اللغة؟", allEyebrow:"اللسانيات الحاسوبية", allTitle:"استكشف حسب المسار البحثي", allSubtitle:"اختر مسارًا بحثيًا", positioning:"LinguaLab مساحة بحث ذكية مدعومة بالذكاء الاصطناعي للباحثين في اللسانيات الحاسوبية.", support:"تنفذ الأدوات الحتمية التحليلات المتاحة، بينما يدعم الذكاء الاصطناعي الإرشاد وتصميم الدراسة والتفسير وإعداد التقارير والمساعدة البحثية.", overview:"ما هذا المسار؟", question:"السؤال البحثي", data:"البيانات المطلوبة", available:"الأدوات المتاحة الآن", unavailable:"لا تتوفر أداة متخصصة في هذا المسار حاليًا.", coming:"قدرات قادمة", output:"المخرجات المتوقعة", report:"التقرير المتوقع", beginner:"للمبتدئ", advanced:"تفاصيل متقدمة", contextual:"رابط سياقي · الموطن الأساسي: دعم الكتابة البحثية" },
 };
-
 const LINGUISTIC_PATH_IDS = new Set(["corpus-linguistics", "morphology-syntax", "semantics", "discourse-pragmatics"]);
 
 export default function ResearchPaths({ language, mode = "all" }) {
   const copy = COPY[language === "ar" ? "ar" : "en"];
   const locale = language === "ar" ? "ar" : "en";
   const paths = mode === "linguistic" ? RESEARCH_PATHS.filter((path) => LINGUISTIC_PATH_IDS.has(path.id)) : RESEARCH_PATHS;
-  const heading = mode === "linguistic"
-    ? { eyebrow: copy.eyebrow, title: copy.title, subtitle: copy.subtitle }
-    : { eyebrow: copy.allEyebrow, title: copy.allTitle, subtitle: copy.allSubtitle };
-
-  return (
-    <section className={styles.section} id="research-paths" aria-labelledby="research-paths-title">
-      <header className={styles.header}>
-        <p className={styles.eyebrow}>{heading.eyebrow}</p>
-        <h2 id="research-paths-title">{heading.title}</h2>
-        <p className={styles.subtitle}>{heading.subtitle}</p>
-        <p>{copy.positioning}</p>
-        <p className={styles.support}>{copy.support}</p>
-      </header>
-
-      <div className={styles.grid}>
-        {paths.map((path) => (
-          <article className={styles.card} id={path.id} key={path.id}>
-            <header className={styles.pathHeader}>
-              <h3>{path.name[locale]}</h3>
-            </header>
-            <dl className={`${styles.details} ${styles.introDetails}`}>
-              <div className={styles.overview}><dt>{copy.overview}</dt><dd>{path.overview[locale]}</dd></div>
-              <div className={styles.researchQuestion}><dt>{copy.question}</dt><dd>{path.question[locale]}</dd></div>
-              <div className={styles.dataNeeded}><dt>{copy.data}</dt><dd>{path.data[locale]}</dd></div>
-            </dl>
-            <WhyThisPath pathId={path.id} language={language} />
-            <LinguisticPhenomenonBridge pathId={path.id} language={language} />
-
-            {(path.hubHref || path.ctaHref) && (
-              <Link className={styles.primaryCta} href={path.hubHref || path.ctaHref}>
-                {path.cta[locale]} <span aria-hidden="true">→</span>
-              </Link>
-            )}
-            {path.analyzeHref && (
-              <Link className={styles.analysisCta} href={`${researchPathHref(path.analyzeHref, path.id)}#quick-analysis`}>
-                {path.analyzeCta[locale]} <span aria-hidden="true">→</span>
-              </Link>
-            )}
-
-            <div className={`${styles.toolBlock} ${path.available.length ? styles.availableBlock : styles.unavailableBlock}`}>
-              <h4>{copy.available}</h4>
-              {path.available.length ? (
-                <div className={styles.tools}>
-                  {path.available.map((tool) => (
-                    <Link className={tool.contextual ? styles.contextualTool : undefined} href={researchPathHref(tool.href, path.id)} key={tool.href}>
-                      {tool[locale]} <span aria-hidden="true">↗</span>
-                      {tool.contextual && <small>{copy.contextual}</small>}
-                    </Link>
-                  ))}
-                </div>
-              ) : <p className={styles.unavailable}>{copy.unavailable}</p>}
-            </div>
-
-            <div className={styles.coming}>
-              <h4>{copy.coming}</h4>
-              <ul>{path.coming[locale].map((item) => <li key={item}>{item}</li>)}</ul>
-            </div>
-
-            <dl className={`${styles.details} ${styles.outcomeDetails}`}>
-              <div><dt>{copy.output}</dt><dd>{path.output[locale]}</dd></div>
-              <div><dt>{copy.report}</dt><dd>{path.report[locale]}</dd></div>
-            </dl>
-
-            <details className={styles.guide}>
-              <summary>{copy.beginner}</summary>
-              <p>{path.beginner[locale]}</p>
-            </details>
-            <details className={styles.guide}>
-              <summary>{copy.advanced}</summary>
-              <p>{path.advanced[locale]}</p>
-            </details>
-          </article>
-        ))}
-      </div>
-    </section>
-  );
+  const heading = mode === "linguistic" ? { eyebrow:copy.eyebrow,title:copy.title,subtitle:copy.subtitle } : { eyebrow:copy.allEyebrow,title:copy.allTitle,subtitle:copy.allSubtitle };
+  return <section className={styles.section} id="research-paths" aria-labelledby="research-paths-title">
+    <header className={styles.header}><p className={styles.eyebrow}>{heading.eyebrow}</p><h2 id="research-paths-title">{heading.title}</h2><p className={styles.subtitle}>{heading.subtitle}</p><p>{copy.positioning}</p><p className={styles.support}>{copy.support}</p></header>
+    <div className={styles.grid}>{paths.map((path)=><article className={styles.card} id={path.id} key={path.id}>
+      <header className={styles.pathHeader}><h3>{path.name[locale]}</h3></header>
+      <dl className={`${styles.details} ${styles.introDetails}`}><div className={styles.overview}><dt>{copy.overview}</dt><dd>{path.overview[locale]}</dd></div><div className={styles.researchQuestion}><dt>{copy.question}</dt><dd>{path.question[locale]}</dd></div><div className={styles.dataNeeded}><dt>{copy.data}</dt><dd>{path.data[locale]}</dd></div></dl>
+      <WhyThisPath pathId={path.id} language={language}/>
+      <LinguisticPhenomenonBridge pathId={path.id} language={language}/>
+      <ContextualAdvisor language={language} kind="path" context={{ id:path.id, name:path.name[locale], overview:path.overview[locale], researchQuestion:path.question[locale], dataNeeded:path.data[locale], availableTools:path.available.map((tool)=>tool[locale]), coming:path.coming[locale], expectedOutput:path.output[locale], expectedReport:path.report[locale], beginnerGuidance:path.beginner[locale], advancedGuidance:path.advanced[locale] }}/>
+      {(path.hubHref||path.ctaHref)&&<Link className={styles.primaryCta} href={path.hubHref||path.ctaHref}>{path.cta[locale]} <span aria-hidden="true">→</span></Link>}
+      {path.analyzeHref&&<Link className={styles.analysisCta} href={`${researchPathHref(path.analyzeHref,path.id)}#quick-analysis`}>{path.analyzeCta[locale]} <span aria-hidden="true">→</span></Link>}
+      <div className={`${styles.toolBlock} ${path.available.length?styles.availableBlock:styles.unavailableBlock}`}><h4>{copy.available}</h4>{path.available.length?<div className={styles.tools}>{path.available.map((tool)=><Link className={tool.contextual?styles.contextualTool:undefined} href={researchPathHref(tool.href,path.id)} key={tool.href}>{tool[locale]} <span aria-hidden="true">↗</span>{tool.contextual&&<small>{copy.contextual}</small>}</Link>)}</div>:<p className={styles.unavailable}>{copy.unavailable}</p>}</div>
+      <div className={styles.coming}><h4>{copy.coming}</h4><ul>{path.coming[locale].map((item)=><li key={item}>{item}</li>)}</ul></div>
+      <dl className={`${styles.details} ${styles.outcomeDetails}`}><div><dt>{copy.output}</dt><dd>{path.output[locale]}</dd></div><div><dt>{copy.report}</dt><dd>{path.report[locale]}</dd></div></dl>
+      <details className={styles.guide}><summary>{copy.beginner}</summary><p>{path.beginner[locale]}</p></details><details className={styles.guide}><summary>{copy.advanced}</summary><p>{path.advanced[locale]}</p></details>
+    </article>)}</div>
+  </section>;
 }
