@@ -15,6 +15,7 @@ const TOOL_LABELS = {
   "information-extraction": { ar: "استخراج المعلومات", en: "Information Extraction" },
   semantics: { ar: "الدلالة", en: "Semantics" },
   "text-classification": { ar: "تصنيف النصوص", en: "Text Classification" },
+  "nlp-experiments": { ar: "مختبر تجارب معالجة اللغة الطبيعية", en: "NLP Experiments Lab" },
   excel: { ar: "بيانات Excel", en: "Excel Data" },
 };
 
@@ -68,7 +69,9 @@ export default function LabContextualAdvisor() {
     toolId,
     toolName: TOOL_LABELS[toolId]?.[locale] || toolId,
     route: router.asPath,
-    purpose: locale === "ar" ? "مساعدة الباحث أثناء العمل الفعلي في أداة المختبر الحالية" : "Support the researcher while working in the current lab tool",
+    purpose: toolId === "nlp-experiments"
+      ? (locale === "ar" ? "مساعدة الباحث أثناء تصميم التجربة اللغوية الحاسوبية وتنفيذها وقراءة نتائجها الفعلية" : "Support the researcher while designing, running, and interpreting an NLP experiment")
+      : (locale === "ar" ? "مساعدة الباحث أثناء العمل الفعلي في أداة المختبر الحالية" : "Support the researcher while working in the current lab tool"),
     availableSessionContext: sessionContext,
     evidenceBoundary: locale === "ar"
       ? "لا تفترض وجود بيانات أو نتائج غير ظاهرة في السياق المنقول. ميّز بين النتيجة المحسوبة والتفسير المنهجي."
