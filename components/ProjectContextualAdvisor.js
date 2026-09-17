@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/router";
 import { useLanguage } from "./LanguageProvider";
 import ContextualAdvisor from "./ContextualAdvisor";
@@ -12,10 +14,33 @@ export default function ProjectContextualAdvisor() {
   const router = useRouter();
   const { language } = useLanguage();
   const locale = language === "ar" ? "ar" : "en";
-  if (router.pathname !== "/projects") return null;
   const projectId = typeof router.query?.project === "string" ? router.query.project : "";
-  const project = PROJECT_CATALOG.find((item) => item.id === projectId);
-  if (!project) return null;
+  const project = router.pathname === "/projects" ? PROJECT_CATALOG.find((item) => item.id === projectId) : null;
+  const [mountNode, setMountNode] = useState(null);
+
+  useEffect(() => {
+    if (!project) {
+      setMountNode(null);
+      return undefined;
+    }
+
+    const detail = document.querySelector("main article");
+    if (!detail) return undefined;
+
+    const host = document.createElement("div");
+    host.setAttribute("data-project-advisor", project.id);
+    const guidance = detail.children[1];
+    if (guidance) guidance.insertAdjacentElement("afterend", host);
+    else detail.prepend(host);
+    setMountNode(host);
+
+    return () => {
+      setMountNode(null);
+      host.remove();
+    };
+  }, [project?.id]);
+
+  if (!project || !mountNode) return null;
 
   const path = PATH_GUIDANCE[project.path];
   const applied = APPLIED_PROJECT_BY_PROJECT_ID[project.id];
@@ -44,9 +69,10 @@ export default function ProjectContextualAdvisor() {
     } : null,
   };
 
-  return (
-    <aside style={{ maxWidth: "1180px", margin: "0 auto 2rem", padding: "0 1rem" }} aria-label={locale === "ar" ? "مستشار المشروع" : "Project Advisor"}>
+  return createPortal(
+    <aside aria-label={locale === "ar" ? "مستشار المشروع" : "Project Advisor"}>
       <ContextualAdvisor language={locale} kind="project" context={context} />
-    </aside>
+    </aside>,
+    mountNode,
   );
 }
