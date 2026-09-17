@@ -4,6 +4,7 @@ import { LanguageProvider, useLanguage } from "../components/LanguageProvider";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import SmartAssistant from "../components/SmartAssistant";
 import ToolDocumentationLink from "../components/ToolDocumentationLink";
+import ProjectContextualAdvisor from "../components/ProjectContextualAdvisor";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -32,6 +33,7 @@ function LocalizedApp({ Component, pageProps }) {
       <LanguageSwitcher />
       <ToolDocumentationLink />
       <Component {...pageProps} />
+      <ProjectContextualAdvisor />
       <SmartAssistant />
     </div>
   );
