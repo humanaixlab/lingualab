@@ -3,6 +3,7 @@ import { RESEARCH_PATHS } from "../lib/research-paths";
 import { researchPathHref } from "../lib/research-path-context";
 import styles from "../styles/ResearchPaths.module.css";
 import WhyThisPath from "./WhyThisPath";
+import LinguisticPhenomenonBridge from "./LinguisticPhenomenonBridge";
 
 const COPY = {
   en: {
@@ -81,6 +82,7 @@ export default function ResearchPaths({ language, mode = "all" }) {
               <div className={styles.dataNeeded}><dt>{copy.data}</dt><dd>{path.data[locale]}</dd></div>
             </dl>
             <WhyThisPath pathId={path.id} language={language} />
+            <LinguisticPhenomenonBridge pathId={path.id} language={language} />
 
             {(path.hubHref || path.ctaHref) && (
               <Link className={styles.primaryCta} href={path.hubHref || path.ctaHref}>
