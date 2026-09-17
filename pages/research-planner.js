@@ -5,6 +5,7 @@ import { readResearchContext, researchContextHref, RESEARCH_CONTEXT_TTL_MS } fro
 import { useLanguage } from "../components/LanguageProvider";
 import DataSourceIndicator from "../components/DataSourceIndicator";
 import ResearchPaths from "../components/ResearchPaths";
+import FromLanguageToApplication from "../components/FromLanguageToApplication";
 
 const computationalTools = [
   { key: "nlpBuilder", link: "/tools/nlp-builder", icon: "B" },
@@ -76,6 +77,8 @@ export default function ArabicToolsPage() {
 
         <DataSourceIndicator language={language} mode={context ? "projectContext" : "standalone"} />
         {context && <p role="status" dir="auto" style={{ margin: "0 0 20px", padding: "12px 16px", border: "1px solid rgba(112, 91, 255, 0.2)", borderRadius: "12px", background: "#efedff", color: "#4c43ce", fontSize: "13px" }}>{t("hub.currentDataset", { filename: context.fileName, count: context.rows.toLocaleString(language) })}</p>}
+
+        <FromLanguageToApplication language={language} />
 
         <div id="research-paths" style={{ scrollMarginTop: "24px" }}>
           <ResearchPaths language={language} mode="linguistic" />
